@@ -7,7 +7,7 @@ function build_project() {
     cd "${PROJECT_HOME}/build" || return;
     make;
     cd ..;
-    cppcheck --enable=all --project=build/compile_commands.json --check-config -iForeignModules/* --std=c++20 --suppress=missingIncludeSystem -ibuild/* .\;
+    cppcheck --enable=all --project=build/compile_commands.json --check-config -iForeignModules/* --std=c++11 --suppress=missingIncludeSystem -ibuild/* .;
 }
 
 function rebuild_project() {
