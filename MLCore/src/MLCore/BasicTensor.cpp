@@ -3,7 +3,6 @@
 #include "LoggingLib/LoggingLib.h"
 #include <algorithm>
 #include <exception>
-#include <numeric>
 
 namespace mlCore
 {
@@ -188,22 +187,23 @@ void BasicTensor<valueType>::checkShape_(const std::vector<size_t>& shape) const
 
 /**
  * @brief traverses list of indices and checks ranges correctness. Correct indices specify tensor slice that can be modified via value assignment.
- * Throws std::out_of_range if max[i] > shape[i] or 0 > indices.size() > shape_.size()
+ * Throws std::out_of_range if upper[i] > shape[i] or 0 > indices.size() > shape_.size()
  * 
  * @tparam valueType dtype of tensor
  * @param indices list of pairs of min-max indices from axis zero i.e for tensor([[1, 2], [3, 4]]) -> list{{0, 1}} -> [1, 2]
  */
 template <typename valueType>
 void BasicTensor<valueType>::checkIndicesList_(
-	const std::initializer_list<std::pair<size_t, size_t>>& indices) const
+	const std::initializer_list<std::pair<size_t, size_t>>::const_iterator _beg,
+	const std::initializer_list<std::pair<size_t, size_t>>::const_iterator _end) const
 {
-	if(!indices.size())
+	if(_beg == _end)
 		throw std::out_of_range("Indices list must have minimum length of 1.");
 
-	if(indices.size() > shape_.size())
+	if(std::distance(_beg, _end) > shape_.size())
 		throw std::out_of_range("Indices list cannot be longer than tensor's shape.");
 
-	for(auto [it, end, i] = std::tuple{indices.begin(), indices.end(), 0}; it < end; ++it, ++i)
+	for(auto [it, i] = std::tuple{_beg, 0}; it < _end; ++it, ++i)
 	{
 		const auto& [lower, upper] = *it;
 		if(upper <= lower)
@@ -211,7 +211,7 @@ void BasicTensor<valueType>::checkIndicesList_(
 				std::string("Upper index is not greater than lower for shape '") +
 				stringifyVector(shape_) + "' at index " + std::to_string(i) + ".");
 
-		if(upper >= shape_[i])
+		if(upper > shape_[i])
 			throw std::out_of_range(
 				std::string(
 					"Upper index cannot be greater than particular dimension size for shape '") +
@@ -244,6 +244,117 @@ BasicTensor<valueType> BasicTensor<valueType>::operator/(const BasicTensor& othe
 }
 
 template <typename valueType>
+BasicTensor<valueType> BasicTensor<valueType>::matmul(const BasicTensor& other) const
+{
+	// for clean error throwing with additional info about shapes
+	auto throwInformative = [this, &other](const std::string& m) {
+		throw std::invalid_argument(
+			"Can't perform matrix multipliaction for shapes: " + stringifyVector(shape_) + ", " +
+			stringifyVector(other.shape_) + " - " + m);
+	};
+
+	// checking if first tensor can be padded to nDims >= 2
+	if(other.shape_.size() < 2)
+		throwInformative("cannot obtain last but one dimension of the second tensor.");
+
+	// for padding tensors shapes
+	const size_t biggerSize = std::max(shape_.size(), other.shape_.size());
+
+	// padded shapes for easier operating
+	std::vector<size_t> paddedShapeFirst(biggerSize, 1), paddedShapeSecond(biggerSize, 1);
+	std::copy(
+		shape_.cbegin(), shape_.cend(), paddedShapeFirst.begin() + biggerSize - shape_.size());
+	std::copy(other.shape_.cbegin(),
+			  other.shape_.cend(),
+			  paddedShapeSecond.begin() + biggerSize - other.shape_.size());
+
+	// checking matmul conditions
+	if(paddedShapeFirst[biggerSize - 1] != paddedShapeSecond[biggerSize - 2])
+	{
+		throwInformative("last two dimensions are incompatibile.");
+	}
+
+	for(size_t i = 0; i < biggerSize - 2; i++)
+	{
+		if((paddedShapeFirst[i] != paddedShapeSecond[i]) && (paddedShapeFirst[i] != 1) &&
+		   (paddedShapeSecond[i] != 1))
+			throwInformative("shapes are incompatibile.");
+	}
+
+	std::vector<size_t> retShape(biggerSize);
+	retShape[biggerSize - 2] = paddedShapeFirst[biggerSize - 2];
+	retShape[biggerSize - 1] = paddedShapeSecond[biggerSize - 1];
+
+	for(size_t i = 0; i < biggerSize - 2; i++)
+	{
+		retShape[i] = paddedShapeFirst[i] == 1 ? paddedShapeSecond[i] : paddedShapeFirst[i];
+	}
+
+	BasicTensor<valueType> resultTensor(retShape, 0);
+
+	// tells the position of a single computed matrix relative to the array of values
+	auto computeFramePos = [](const std::vector<size_t>& treePath,
+							  const std::vector<size_t>& shape) -> size_t {
+		size_t offset = 0;
+		size_t factor = shape[shape.size() - 1] * shape[shape.size() - 2];
+		for(size_t i = shape.size() - 3; i < shape.size() - 2; i--)
+		{
+			offset += treePath[i] * factor;
+			factor *= shape[i];
+		}
+		return offset;
+	};
+
+	size_t resElementPos = 0;
+	const size_t adjacentDimension = paddedShapeFirst[biggerSize - 1];
+	std::vector<size_t> firstTreePath(biggerSize - 2, 0), secondTreePath(biggerSize - 2, 0);
+
+	while(resElementPos < resultTensor.length_)
+	{
+		// proper data pointers with offsets for obtaining frame elements
+		const valueType* firstDataPtr = data_ + computeFramePos(firstTreePath, shape_);
+		const valueType* secondDataPtr =
+			other.data_ + computeFramePos(secondTreePath, other.shape_);
+
+		// rows and cols of result frame
+		for(size_t rowIter = 0; rowIter < retShape[biggerSize - 2]; rowIter++)
+		{
+			for(size_t colIter = 0; colIter < retShape[biggerSize - 1]; colIter++)
+			{
+				// positon of a certain multiplication in sum of multiplications
+				for(size_t mulIter = 0; mulIter < adjacentDimension; mulIter++)
+				{
+					resultTensor.data_[resElementPos] +=
+						firstDataPtr[rowIter * adjacentDimension + mulIter] *
+						secondDataPtr[mulIter * paddedShapeSecond[biggerSize - 1] + colIter];
+				}
+				resElementPos++;
+			}
+		}
+
+		// tells which dimension of the tree path should be incremented
+		for(size_t i = biggerSize - 3; i < biggerSize - 2; i--)
+		{
+
+			if(paddedShapeFirst[i] > 1)
+				firstTreePath[i]++;
+
+			if(paddedShapeSecond[i] > 1)
+				secondTreePath[i]++;
+
+			if((firstTreePath[i] < paddedShapeFirst[i]) &&
+			   (secondTreePath[i] < paddedShapeSecond[i]))
+				break;
+
+			firstTreePath[i] = 0;
+			secondTreePath[i] = 0;
+		}
+	}
+
+	return resultTensor;
+}
+
+template <typename valueType>
 BasicTensor<valueType> BasicTensor<valueType>::performOperation_(
 	const BasicTensor<valueType>& other,
 	const std::function<valueType(const valueType*, const valueType*)>& op_) const
@@ -258,9 +369,12 @@ BasicTensor<valueType> BasicTensor<valueType>::performOperation_(
 	}
 
 	// checking if the rules of broadcasting are not breached
-	for(size_t i = 0; i < std::min(shape_.size(), other.shape_.size()); i++)
+	auto selfShapeIter = shape_.rbegin();
+	auto otherShapeIter = other.shape_.rbegin();
+	for(; (selfShapeIter > shape_.rend()) && (otherShapeIter > other.shape_.rend());
+		selfShapeIter--, otherShapeIter--)
 	{
-		if((shape_[i] != 1) && (other.shape_[i] != 1) && (shape_[i] != other.shape_[i]))
+		if((*selfShapeIter != 1) && (*otherShapeIter != 1) && (*selfShapeIter != *otherShapeIter))
 			throw std::invalid_argument(
 				"Can't perform broadcasting operation on tensors with invalid shapes: " +
 				stringifyVector(shape_) + " " + stringifyVector(other.shape_));
@@ -302,7 +416,7 @@ BasicTensor<valueType> BasicTensor<valueType>::performOperation_(
 		// specifies the offset added to total position while traversing respecitve dimensions
 		size_t offset = 1;
 		size_t position = 0;
-		for(size_t i = path.size() - 1; i >= 0; i--)
+		for(size_t i = path.size() - 1; i < path.size(); i--)
 		{
 			position += offset * path[i];
 			offset *= shape[i];
@@ -316,26 +430,27 @@ BasicTensor<valueType> BasicTensor<valueType>::performOperation_(
 					   const std::vector<size_t>&, 
 					   std::function<valueType(const valueType*, const valueType*)>)> appendTensor;
 
-	appendTensor = [&factorTreePath, &destTreePath, &retShape, &computeElementPosition](valueType* const destDataPtr,
+	appendTensor = [&factorTreePath, &destTreePath, &retShape, &computeElementPosition, &ret](valueType* const destDataPtr,
 															   const valueType* const factorDataPtr,
 															   const std::vector<size_t>& factorShape,
-															   std::function<valueType(const valueType*, const valueType*)> op)
+															   std::function<valueType(const valueType*, const valueType*)> op) mutable
 	{
 		size_t elementsProcessed = 0;
-		size_t destTensorLength = std::accumulate(retShape.cbegin(), retShape.cend(), 0, 
+		size_t destTensorLength = std::accumulate(retShape.cbegin(), retShape.cend(), 1, 
 													[](const auto curr, const auto dim){ return curr * dim; });
 
 		while(elementsProcessed < destTensorLength)
 		{
+			const auto destElemPos = computeElementPosition(destTreePath, retShape);
+			const auto factorElemPos = computeElementPosition(factorTreePath, factorShape);
 
-			for(size_t i = retShape.size() - 1; i >= 0; i--) {
+			destDataPtr[destElemPos] = op(destDataPtr + destElemPos, factorDataPtr + factorElemPos);
 
-				const auto destElemPos = computeElementPosition(destTreePath, retShape);
-				const auto factorElemPos = computeElementPosition(factorTreePath, factorShape);
+			elementsProcessed++;
 
-				destDataPtr[destElemPos] = op(destDataPtr + destElemPos, factorDataPtr + factorElemPos);
+			for(size_t i = retShape.size() - 1; i < retShape.size(); i--) {
 
-				elementsProcessed++;
+				
 				destTreePath[i]++;
 				if(factorShape[i] > 1)
 					factorTreePath[i]++;
@@ -356,7 +471,7 @@ BasicTensor<valueType> BasicTensor<valueType>::performOperation_(
 	else
 		firstOp = mulOperator_;
 
-	appendTensor(ret.data_, this->data_, this->shape_, firstOp);
+	appendTensor(ret.data_, this->data_, paddedLeftShape, firstOp);
 
 	for(size_t i = 0; i < biggerSize; i++)
 	{
@@ -364,7 +479,7 @@ BasicTensor<valueType> BasicTensor<valueType>::performOperation_(
 		factorTreePath[i] = 0;
 	}
 
-	appendTensor(ret.data_, other.data_, other.shape_, op_);
+	appendTensor(ret.data_, other.data_, paddedRightShape, op_);
 
 	return ret;
 }
@@ -374,16 +489,74 @@ void BasicTensor<valueType>::assign(std::initializer_list<std::pair<size_t, size
 									std::initializer_list<valueType> newData,
 									const bool wrapData)
 {
-	checkIndicesList_(indices);
+	checkIndicesList_(indices.begin(), indices.end());
+
+	size_t itemsToAssign = 1;
+	for(const auto& [lower, upper] : indices)
+	{
+		itemsToAssign *= (upper - lower);
+	}
+
+	if((itemsToAssign < newData.size()) && (!wrapData))
+		throw std::out_of_range("Too few values to assign to the tensor.");
+
+	std::vector<size_t> treePath, maxPath;
+	for(const auto& [lower, upper] : indices)
+	{
+		treePath.emplace_back(lower);
+		maxPath.emplace_back(upper);
+	}
+
+	// for quicker iterating over data array when last dimensions are left with unspecified indices
+	size_t wholeDimensionsOffset = 1;
+	for(size_t i = shape_.size() - 1; i > treePath.size() - 1; i--)
+		wholeDimensionsOffset *= shape_[i];
+
+	auto computeFramePos = [&wholeDimensionsOffset](const std::vector<size_t>& treePath,
+													const std::vector<size_t>& shape) {
+		size_t offset = 0;
+		size_t factor = wholeDimensionsOffset;
+		for(size_t i = treePath.size() - 1; i < treePath.size(); i--)
+		{
+			offset += treePath[i] * factor;
+			factor *= shape[i];
+		}
+		return offset;
+	};
+
+	auto dataIter = newData.begin();
+	size_t elementsProcessed = 0;
+	while(elementsProcessed < itemsToAssign)
+	{
+		auto dataPtr = data_ + computeFramePos(treePath, shape_);
+
+		for(size_t elemPos = 0; elemPos < wholeDimensionsOffset; elemPos++)
+		{
+			dataPtr[elemPos] = *dataIter;
+			elementsProcessed++;
+			dataIter++;
+			if(dataIter == newData.end())
+				dataIter = newData.begin();
+		}
+
+		for(size_t i = treePath.size() - 1; i < treePath.size(); i--)
+		{
+			treePath[i]++;
+			if(treePath[i] < maxPath[i])
+				break;
+
+			treePath[i] = (indices.begin() + i)->first;
+		}
+	}
 }
 
 template <typename valueType>
-void BasicTensor<valueType>::fill(std::shared_ptr<ITensorInitializer<valueType>> initializer)
+void BasicTensor<valueType>::fill(const ITensorInitializer<valueType>&& initializer)
 {
 	size_t elementPos = 0;
-	while((initializer->canYield()) && (elementPos < length_))
+	while((initializer.canYield()) && (elementPos < length_))
 	{
-		data_[elementPos] = initializer->yield();
+		data_[elementPos] = initializer.yield();
 		elementPos++;
 	}
 	if(elementPos < length_)

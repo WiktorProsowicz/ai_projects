@@ -6,6 +6,7 @@
 #include <iostream>
 #include <iterator>
 #include <memory>
+#include <numeric>
 #include <vector>
 
 namespace mlCore
@@ -167,7 +168,7 @@ public:
 		fill(newData.begin(), newData.end(), wrapData);
 	}
 
-	void fill(std::shared_ptr<ITensorInitializer<valueType>> initializer);
+	void fill(const ITensorInitializer<valueType>&& initializer);
 
 	// operators
 	BasicTensor operator+(const BasicTensor&) const;
@@ -182,7 +183,9 @@ public:
 	friend std::ostream& operator<<(std::ostream&, const BasicTensor<TT>&);
 
 private:
-	void checkIndicesList_(const std::initializer_list<std::pair<size_t, size_t>>&) const;
+	void checkIndicesList_(
+		const std::initializer_list<std::pair<size_t, size_t>>::const_iterator beg,
+		const std::initializer_list<std::pair<size_t, size_t>>::const_iterator end) const;
 	void checkShape_(const std::vector<size_t>&) const;
 
 	BasicTensor
@@ -214,17 +217,19 @@ std::ostream& operator<<(std::ostream& out, const BasicTensor<valueType>& tensor
 		<< " shape=" << stringifyVector(tensor.shape_) << ">";
 
 	std::function<void(
-		typename std::vector<size_t>::const_iterator, const valueType*, const std::string&)>
+		typename std::vector<size_t>::const_iterator, const valueType*, const std::string&, size_t)>
 		recursePrint;
 	recursePrint = [&recursePrint, &out, &tensor](std::vector<size_t>::const_iterator shapeIter,
 												  const valueType* dataPtr,
-												  const std::string& preamble) {
+												  const std::string& preamble,
+												  size_t offset) {
+		offset /= *shapeIter;
 		if(shapeIter == std::prev(tensor.shape_.end()))
 		{
 			out << "\n" << preamble << "[";
 
 			size_t i;
-			for(i = 0; i < (*shapeIter - 1); i++)
+			for(i = 0; i < (*shapeIter) - 1; i++)
 				out << dataPtr[i] << ", ";
 			out << dataPtr[i];
 
@@ -237,7 +242,7 @@ std::ostream& operator<<(std::ostream& out, const BasicTensor<valueType>& tensor
 			size_t i;
 			for(i = 0; i < (*shapeIter); i++)
 			{
-				recursePrint(shapeIter + 1, dataPtr + i * (*shapeIter), preamble + " ");
+				recursePrint(shapeIter + 1, dataPtr + i * offset, preamble + " ", offset);
 				// out << ",";
 			}
 			// recursePrint(shapeIter + 1, dataPtr + i * (*shapeIter), preamble + " ");
@@ -246,7 +251,13 @@ std::ostream& operator<<(std::ostream& out, const BasicTensor<valueType>& tensor
 		}
 	};
 
-	recursePrint(tensor.shape_.cbegin(), tensor.data_, "");
+	// for traversing data
+	const size_t offset = std::accumulate(
+		tensor.shape_.begin(), tensor.shape_.end(), 1, [](const size_t curr, const size_t dim) {
+			return curr * dim;
+		});
+
+	recursePrint(tensor.shape_.cbegin(), tensor.data_, "", offset);
 
 	return out;
 }

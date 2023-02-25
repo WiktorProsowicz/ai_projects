@@ -23,8 +23,8 @@ std::string stringifyVector(const std::vector<T>& vect,
 template <typename T>
 struct ITensorInitializer
 {
-	virtual const T yield() = 0;
-	virtual bool canYield()
+	virtual const T yield() const = 0;
+	virtual bool canYield() const
 	{
 		return true;
 	}
@@ -39,7 +39,7 @@ struct RangeTensorInitializer : public ITensorInitializer<T>
 		, step(_step)
 		, maxValue(_maxValue)
 	{ }
-	virtual const T yield() override
+	virtual const T yield() const override
 	{
 		if(!canYield())
 			throw std::out_of_range("Cannot obtain value from RangeTensorYielder.");
@@ -48,13 +48,13 @@ struct RangeTensorInitializer : public ITensorInitializer<T>
 		currentValue += step;
 		return out;
 	}
-	virtual bool canYield() override
+	virtual bool canYield() const override
 	{
 		return currentValue < maxValue;
 	}
 
 private:
-	T currentValue;
+	mutable T currentValue;
 	T maxValue;
 	T step;
 };
