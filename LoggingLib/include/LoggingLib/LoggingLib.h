@@ -7,21 +7,28 @@
  * @brief log message having some informative content
  * 
  */
-void LOG_INFO(const std::string& preamble, const std::string& content);
-void LOG_INFO(const std::string& content);
+#define LOG_INFO(preamble, content)                                                                \
+	std::cout << "\033[34m"                                                                        \
+			  << "[---INFO---]"                                                                    \
+			  << "[" << preamble << "]: " << content << "\033[0m\n";
 
 /**
  * @brief log message that warns about something
  * 
  */
-void LOG_WARN(const std::string& preamble, const std::string& content);
-void LOG_WARN(const std::string& content);
+#define LOG_WARN(preamble, content)                                                                \
+	std::cout << "\033[1;33m"                                                                      \
+			  << "[---WARN---]"                                                                    \
+			  << "[" << preamble << "]: " << content << "\033[0m\n";
 
 /**
  * @brief log message and stop program with runtime exception
  * 
  */
-void LOG_ERROR(const std::string& preamble, const std::string& content);
-void LOG_ERROR(const std::string& content);
+#define LOG_ERROR(preamble, content)                                                               \
+	std::cout << "\033[1;31m"                                                                      \
+			  << "[---ERROR--]"                                                                    \
+			  << "[" << preamble << "]: " << content << "\033[0m\n";                               \
+	throw std::runtime_error(content);
 
 #endif
