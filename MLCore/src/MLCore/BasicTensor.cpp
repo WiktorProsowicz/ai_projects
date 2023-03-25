@@ -1,8 +1,5 @@
 
 #include "MLCore/BasicTensor.h"
-#include "LoggingLib/LoggingLib.h"
-#include <algorithm>
-#include <exception>
 
 namespace mlCore
 {

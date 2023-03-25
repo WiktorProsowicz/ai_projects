@@ -316,7 +316,7 @@ TEST_F(TestBasicTensor, testOperatorsWithBroadcasting)
 	checkTensorValues(resTensor, resValues);
 }
 
-TEST_F(TestBasicTensor, testMatrixMultiplication)
+TEST_F(TestBasicTensor, testMatrixMultiplicationClassicMatrices)
 {
 	mlCore::Tensor firstTensor(std::vector<size_t>{3, 2});
 	mlCore::Tensor secondTensor(std::vector<size_t>{2, 4});
@@ -329,6 +329,24 @@ TEST_F(TestBasicTensor, testMatrixMultiplication)
 	const std::vector<double> expectedValues{11, 14, 17, 20, 23, 30, 37, 44, 35, 46, 57, 68};
 
 	checkTensorValues(resultTensor, expectedValues);
+}
+
+TEST_F(TestBasicTensor, testMatrixMultiplicationExtended)
+{
+	mlCore::Tensor firstTensor({2, 4, 2});
+	mlCore::Tensor secondTensor({2, 5});
+
+	firstTensor.fill(mlCore::RangeTensorInitializer<double>(1));
+	secondTensor.fill(mlCore::RangeTensorInitializer<double>(1));
+
+	auto result = firstTensor.matmul(secondTensor);
+
+	const std::vector<double> expectedValues{13, 16,  19,  22,	25,	 27,  34,  41,	48,	 55,
+											 41, 52,  63,  74,	85,	 55,  70,  85,	100, 115,
+											 69, 88,  107, 126, 145, 83,  106, 129, 152, 175,
+											 97, 124, 151, 178, 205, 111, 142, 173, 204, 235};
+
+	checkTensorValues(result, expectedValues);
 }
 
 } // namespace

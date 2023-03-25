@@ -1,7 +1,10 @@
 #ifndef MLCORE_BASICTENSOR_H
 #define MLCORE_BASICTENSOR_H
 
+#include "LoggingLib/LoggingLib.h"
 #include "MLCore/Utilities.h"
+#include <algorithm>
+#include <exception>
 #include <functional>
 #include <iostream>
 #include <iterator>
@@ -29,8 +32,10 @@ public:
 	/**
 	 * @brief constructs tensor from shape and fills it with initial value
 	 * 
+	 * @param _shape tensor's initial shape
+	 * @param _initVal initital value
 	 */
-	BasicTensor(const std::vector<size_t>&, const valueType);
+	BasicTensor(const std::vector<size_t>& _shape, const valueType _initVal);
 	~BasicTensor();
 
 private:
