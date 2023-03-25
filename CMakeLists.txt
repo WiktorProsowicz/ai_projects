@@ -12,6 +12,7 @@ option(CMAKE_CXX_COMPILER "version of c++ compiler" gcc-11.3)
 
 set(COMMON_COMPILE_OPTIONS
     -Wall
+    -std=c++23
 )
 
 add_subdirectory(LoggingLib)

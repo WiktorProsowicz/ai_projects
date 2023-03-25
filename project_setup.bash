@@ -8,6 +8,8 @@ function build_project() {
     make;
     cd ..;
     cppcheck --enable=all --project=build/compile_commands.json --check-config -iForeignModules/* --std=c++11 --suppress=missingIncludeSystem -ibuild/* .;
+
+    # find . \( -name "*.h" -o -name "*.cpp" -o -name "*.hpp" \) -exec clang-tidy -checks="*,-clang-diagnostic-error"  {} \;
 }
 
 function rebuild_project() {
