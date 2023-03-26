@@ -251,7 +251,7 @@ BasicTensor<valueType> BasicTensor<valueType>::operator+(const BasicTensor& othe
 	{
 		BasicTensor<valueType> ret(shape_);
 		for(size_t i = 0; i < length_; i++)
-			ret.data_[i] = data_[i] - other.data_[i];
+			ret.data_[i] = data_[i] + other.data_[i];
 
 		return ret;
 	}

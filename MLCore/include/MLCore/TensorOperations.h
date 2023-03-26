@@ -26,5 +26,23 @@ struct TensorOperations
 
 		return lhs.performOperation_(rhs, powOperator_);
 	}
+
+	template <typename valueType>
+	static BasicTensor<valueType> relu(const BasicTensor<valueType>& arg)
+	{
+		auto ret = arg;
+		for(auto& val : ret)
+			val = val > 0 ? val : 0;
+		return ret;
+	}
+
+	template <typename valueType>
+	static BasicTensor<valueType> sigmoid(const BasicTensor<valueType>& arg)
+	{
+		auto ret = arg;
+		for(auto& val : ret)
+			val = 1.0 / (1.0 + pow(M_E, -val));
+		return ret;
+	}
 };
 } // namespace mlCore
