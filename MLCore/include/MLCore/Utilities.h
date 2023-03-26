@@ -8,17 +8,6 @@
 
 namespace mlCore
 {
-template <typename T>
-std::string stringifyVector(const std::vector<T>& vect,
-							const char* const openSign = "(",
-							const char* const closeSign = ")")
-{
-	std::ostringstream ss;
-	ss << openSign;
-	std::copy(vect.cbegin(), vect.cend(), std::ostream_iterator<T>(ss, ", "));
-	ss << closeSign;
-	return ss.str();
-}
 
 template <typename T>
 struct ITensorInitializer
@@ -59,5 +48,18 @@ private:
 	T step;
 };
 
+template <typename T>
+std::string stringifyVector(const std::vector<T>& vect,
+							const char* const openSign = "(",
+							const char* const closeSign = ")")
+{
+	std::ostringstream ss;
+	ss << openSign;
+	std::copy(vect.cbegin(), vect.cend(), std::ostream_iterator<T>(ss, ", "));
+	ss << closeSign;
+	return ss.str();
+}
+
 } // namespace mlCore
+
 #endif

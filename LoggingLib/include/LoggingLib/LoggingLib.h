@@ -29,6 +29,6 @@
 	std::cout << "\033[1;31m"                                                                      \
 			  << "[---ERROR--]"                                                                    \
 			  << "[" << preamble << "]: " << content << "\033[0m\n";                               \
-	throw std::runtime_error(content);
+	throw std::runtime_error((std::stringstream{} << content).str());
 
 #endif

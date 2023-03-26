@@ -219,24 +219,56 @@ void BasicTensor<valueType>::checkIndicesList_(
 template <typename valueType>
 BasicTensor<valueType> BasicTensor<valueType>::operator*(const BasicTensor& other) const
 {
+	if(shape_ == other.shape_)
+	{
+		BasicTensor<valueType> ret(shape_);
+		for(size_t i = 0; i < length_; i++)
+			ret.data_[i] = data_[i] * other.data_[i];
+
+		return ret;
+	}
 	return performOperation_(other, mulOperator_);
 }
 
 template <typename valueType>
 BasicTensor<valueType> BasicTensor<valueType>::operator-(const BasicTensor& other) const
 {
+	if(shape_ == other.shape_)
+	{
+		BasicTensor<valueType> ret(shape_);
+		for(size_t i = 0; i < length_; i++)
+			ret.data_[i] = data_[i] - other.data_[i];
+
+		return ret;
+	}
 	return performOperation_(other, minusOperator_);
 }
 
 template <typename valueType>
 BasicTensor<valueType> BasicTensor<valueType>::operator+(const BasicTensor& other) const
 {
+	if(shape_ == other.shape_)
+	{
+		BasicTensor<valueType> ret(shape_);
+		for(size_t i = 0; i < length_; i++)
+			ret.data_[i] = data_[i] - other.data_[i];
+
+		return ret;
+	}
 	return performOperation_(other, plusOperator_);
 }
 
 template <typename valueType>
 BasicTensor<valueType> BasicTensor<valueType>::operator/(const BasicTensor& other) const
 {
+	if(shape_ == other.shape_)
+	{
+		BasicTensor<valueType> ret(shape_);
+		for(size_t i = 0; i < length_; i++)
+			ret.data_[i] = data_[i] / other.data_[i];
+
+		return ret;
+	}
 	return performOperation_(other, divOperator_);
 }
 
@@ -354,17 +386,8 @@ BasicTensor<valueType> BasicTensor<valueType>::matmul(const BasicTensor& other) 
 template <typename valueType>
 BasicTensor<valueType> BasicTensor<valueType>::performOperation_(
 	const BasicTensor<valueType>& other,
-	const std::function<valueType(const valueType*, const valueType*)>& op_) const
+	const std::function<valueType(const valueType, const valueType)>& op_) const
 {
-	if(shape_ == other.shape_)
-	{
-		BasicTensor<valueType> ret(shape_);
-		for(size_t i = 0; i < length_; i++)
-			ret.data_[i] = op_(data_ + i, other.data_ + i);
-
-		return ret;
-	}
-
 	// checking if the rules of broadcasting are not breached
 	auto selfShapeIter = shape_.rbegin();
 	auto otherShapeIter = other.shape_.rbegin();
@@ -394,11 +417,7 @@ BasicTensor<valueType> BasicTensor<valueType>::performOperation_(
 		retShape[i] = paddedLeftShape[i] == 1 ? paddedRightShape[i] : paddedLeftShape[i];
 	}
 
-	uint8_t initVal = 0;
-	if((&op_ == &mulOperator_) || (&op_ == &divOperator_))
-		initVal = 1;
-
-	BasicTensor<valueType> ret(retShape, initVal);
+	BasicTensor<valueType> ret(retShape, 0);
 
 	// handles stretching smaller tensor into returned one's payload
 	// clang-format off
@@ -425,12 +444,12 @@ BasicTensor<valueType> BasicTensor<valueType>::performOperation_(
 	// updates tree paths untill all elements are processed and constantly assigns proper elements to proper places
 	std::function<void(valueType* const, const valueType* const, 
 					   const std::vector<size_t>&, 
-					   std::function<valueType(const valueType*, const valueType*)>)> appendTensor;
+					   const std::function<valueType(const valueType, const valueType)>&)> appendTensor;
 
 	appendTensor = [&factorTreePath, &destTreePath, &retShape, &computeElementPosition, &ret](valueType* const destDataPtr,
 															   const valueType* const factorDataPtr,
 															   const std::vector<size_t>& factorShape,
-															   std::function<valueType(const valueType*, const valueType*)> op) mutable
+															   const std::function<valueType(const valueType, const valueType)>& op) mutable
 	{
 		size_t elementsProcessed = 0;
 		size_t destTensorLength = std::accumulate(retShape.cbegin(), retShape.cend(), 1, 
@@ -441,7 +460,7 @@ BasicTensor<valueType> BasicTensor<valueType>::performOperation_(
 			const auto destElemPos = computeElementPosition(destTreePath, retShape);
 			const auto factorElemPos = computeElementPosition(factorTreePath, factorShape);
 
-			destDataPtr[destElemPos] = op(destDataPtr + destElemPos, factorDataPtr + factorElemPos);
+			destDataPtr[destElemPos] = op(destDataPtr[destElemPos], factorDataPtr[factorElemPos]);
 
 			elementsProcessed++;
 
@@ -462,13 +481,7 @@ BasicTensor<valueType> BasicTensor<valueType>::performOperation_(
 	};
 	// clang-format on
 
-	std::function<valueType(const valueType*, const valueType*)> firstOp;
-	if((&op_ == &plusOperator_) || (&op_ == &minusOperator_))
-		firstOp = plusOperator_;
-	else
-		firstOp = mulOperator_;
-
-	appendTensor(ret.data_, this->data_, paddedLeftShape, firstOp);
+	appendTensor(ret.data_, this->data_, paddedLeftShape, plusOperator_);
 
 	for(size_t i = 0; i < biggerSize; i++)
 	{

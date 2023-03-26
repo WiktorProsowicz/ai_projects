@@ -14,13 +14,12 @@
 
 namespace mlCore
 {
-template <typename T>
+template <typename valueType>
 class BasicTensor
 {
+	friend class TensorOperations;
 
 public:
-	using valueType = T;
-
 	BasicTensor() = delete;
 	BasicTensor(const BasicTensor&); // copy constructor
 	BasicTensor(BasicTensor&&); // move constructor
@@ -51,7 +50,7 @@ private:
 			: curr_ptr(ptr)
 		{ }
 
-		const reference operator*()
+		reference operator*()
 		{
 			return *curr_ptr;
 		}
@@ -195,20 +194,21 @@ private:
 
 	BasicTensor
 	performOperation_(const BasicTensor&,
-					  const std::function<valueType(const valueType*, const valueType*)>&) const;
+					  const std::function<valueType(const valueType, const valueType)>&) const;
 
-	static const inline std::function<valueType(const valueType* l, const valueType* r)>
-		plusOperator_ = [](const valueType* l, const valueType* r) { return *l + *r; };
+	static const inline std::function<valueType(const valueType l, const valueType r)>
+		plusOperator_ = [](const valueType l, const valueType r) { return l + r; };
 
-	static const inline std::function<valueType(const valueType* l, const valueType* r)>
-		minusOperator_ = [](const valueType* l, const valueType* r) { return *l - *r; };
+	static const inline std::function<valueType(const valueType l, const valueType r)>
+		minusOperator_ = [](const valueType l, const valueType r) { return l - r; };
 
-	static const inline std::function<valueType(const valueType* l, const valueType* r)>
-		mulOperator_ = [](const valueType* l, const valueType* r) { return *l * *r; };
+	static const inline std::function<valueType(const valueType l, const valueType r)>
+		mulOperator_ = [](const valueType l, const valueType r) { return l * r; };
 
-	static const inline std::function<valueType(const valueType* l, const valueType* r)>
-		divOperator_ = [](const valueType* l, const valueType* r) { return *l / *r; };
+	static const inline std::function<valueType(const valueType l, const valueType r)>
+		divOperator_ = [](const valueType l, const valueType r) { return l / r; };
 
+private:
 	size_t length_;
 	std::vector<size_t> shape_;
 	valueType* data_;
