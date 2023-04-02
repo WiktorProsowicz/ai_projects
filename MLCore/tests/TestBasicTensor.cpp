@@ -124,11 +124,11 @@ TEST_F(TestBasicTensor, testDisplayingTensor)
 R"(<BasicTensor dtype=d shape=(2, 2, 3, )>
 [
  [
-  [1, 2, 3]
-  [4, 5, 6]
+  [ 1,  2,  3]
+  [ 4,  5,  6]
  ]
  [
-  [7, 8, 9]
+  [ 7,  8,  9]
   [10, 11, 12]
  ]
 ])",
@@ -137,24 +137,24 @@ R"(<BasicTensor dtype=d shape=(3, 3, 3, 1, )>
 [
  [
   [
-   [0.1]
-   [0.2]
-   [0.3]
+   [ 0.1]
+   [ 0.2]
+   [ 0.3]
   ]
   [
-   [0.4]
-   [0.5]
-   [0.6]
+   [ 0.4]
+   [ 0.5]
+   [ 0.6]
   ]
   [
-   [0.7]
-   [0.8]
-   [0.9]
+   [ 0.7]
+   [ 0.8]
+   [ 0.9]
   ]
  ]
  [
   [
-   [0.1]
+   [ 0.1]
    [0.11]
    [0.12]
   ]
@@ -172,7 +172,7 @@ R"(<BasicTensor dtype=d shape=(3, 3, 3, 1, )>
  [
   [
    [0.19]
-   [0.2]
+   [ 0.2]
    [0.21]
   ]
   [
@@ -347,6 +347,27 @@ TEST_F(TestBasicTensor, testMatrixMultiplicationExtended)
 											 97, 124, 151, 178, 205, 111, 142, 173, 204, 235};
 
 	checkTensorValues(result, expectedValues);
+}
+
+TEST_F(TestBasicTensor, testTransposition)
+{
+	// 0  1  2  3  4
+	// 5  6  7  8  9
+	// 10 11 12 13 14
+	// 15 16 17 18 19
+	mlCore::Tensor tensor({4, 5});
+
+	tensor.fill(mlCore::RangeTensorInitializer<double>(0));
+
+	// 0  5  10  15
+	// 1  6  11  16
+	// 2  7  12  17
+	// 3  8  13  18
+	// 4  9  14  19
+	const std::vector<double> expectedValues{0,	 5,	 10, 15, 1,	 6,	 11, 16, 2,	 7,
+											 12, 17, 3,	 8,	 13, 18, 4,	 9,	 14, 19};
+
+	checkTensorValues(tensor.transposed(), expectedValues);
 }
 
 } // namespace

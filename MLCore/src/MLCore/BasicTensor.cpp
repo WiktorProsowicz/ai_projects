@@ -273,6 +273,17 @@ BasicTensor<valueType> BasicTensor<valueType>::operator/(const BasicTensor& othe
 }
 
 template <typename valueType>
+BasicTensor<valueType> BasicTensor<valueType>::operator-() const
+{
+	BasicTensor<valueType> ret(shape_);
+
+	for(size_t i = 0; i < length_; i++)
+		ret.data_[i] = -data_[i];
+
+	return ret;
+}
+
+template <typename valueType>
 BasicTensor<valueType> BasicTensor<valueType>::matmul(const BasicTensor& other) const
 {
 	// for clean error throwing with additional info about shapes
@@ -381,6 +392,36 @@ BasicTensor<valueType> BasicTensor<valueType>::matmul(const BasicTensor& other) 
 	}
 
 	return resultTensor;
+}
+
+template <typename valueType>
+BasicTensor<valueType> BasicTensor<valueType>::transposed() const
+{
+
+	std::vector<size_t> retShape;
+	for(size_t i = 0; i < shape_.size() - 2; i++)
+		retShape.push_back(shape_[i]);
+
+	// size of a single 2-dimensional part that takes part in single matrix multiplication
+	const size_t frameShapeFirst = *(++shape_.rbegin()), frameShapeSecond = *shape_.rbegin();
+	const size_t frameLength = frameShapeFirst * frameShapeSecond;
+
+	retShape.push_back(frameShapeSecond);
+	retShape.push_back(frameShapeFirst);
+
+	BasicTensor<valueType> ret(retShape);
+
+	for(size_t frameOffset = 0; frameOffset < length_; frameOffset += frameLength)
+	{
+		for(size_t posInFrame = 0; posInFrame < frameLength; posInFrame++)
+		{
+			ret.data_[frameOffset + posInFrame] =
+				data_[frameOffset + (posInFrame % frameShapeFirst) * frameShapeSecond +
+					  (posInFrame / frameShapeFirst)];
+		}
+	}
+
+	return ret;
 }
 
 template <typename valueType>

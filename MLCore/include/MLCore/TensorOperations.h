@@ -28,6 +28,15 @@ struct TensorOperations
 	}
 
 	template <typename valueType>
+	static BasicTensor<valueType> ln(const BasicTensor<valueType>& arg)
+	{
+		auto ret = arg;
+		for(auto& val : ret)
+			val = log(val);
+		return ret;
+	}
+
+	template <typename valueType>
 	static BasicTensor<valueType> relu(const BasicTensor<valueType>& arg)
 	{
 		auto ret = arg;
