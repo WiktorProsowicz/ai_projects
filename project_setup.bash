@@ -9,7 +9,6 @@ function build_project() {
     cd ..;
     cppcheck --enable=all --project=build/compile_commands.json --check-config -iForeignModules/* --std=c++11 --suppress=missingIncludeSystem -ibuild/* .;
 
-    # find . \( -name "*.h" -o -name "*.cpp" -o -name "*.hpp" \) -exec clang-tidy -checks="*,-clang-diagnostic-error"  {} \;
 }
 
 function rebuild_project() {
@@ -17,4 +16,10 @@ function rebuild_project() {
     rm -rf "${PROJECT_HOME}/build";
     mkdir -p "${PROJECT_HOME}/build";
     build_project "$@";
+}
+
+function run_clang_tidy() {
+    find . -not -path "./ForeignModules/*" \( -name "*.h" -o -name "*.cpp" -o -name "*.hpp" \) \
+        -exec clang-tidy -p "${PROJECT_HOME}/build" -checks="-abseil*,-altera*,-android*,bugprone*,cert*,-fuchsia*,-google*,-linuxkernel*,-llvm*,-llvmlibc*,modernize*,readability*"  {} \;
+
 }

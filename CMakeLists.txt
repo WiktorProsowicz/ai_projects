@@ -13,6 +13,26 @@ option(CMAKE_CXX_COMPILER "version of c++ compiler" gcc-11.3)
 set(COMMON_COMPILE_OPTIONS
     -Wall
     -std=c++23
+    -Wextra 
+    -Weffc++ 
+    -Wunused 
+    -Wnarrowing 
+    -Wlogical-op 
+    -Wcast-align 
+    -Wconversion 
+    -Winvalid-pch 
+    -Wuseless-cast
+    -Wold-style-cast 
+    -Wredundant-decls 
+    -Wsign-conversion 
+    -Wduplicated-cond 
+    -Wnull-dereference 
+    -Wnon-virtual-dtor 
+    -Woverloaded-virtual 
+    -Wmissing-declarations 
+    -Wmissing-include-dirs 
+    -Wmisleading-indentation 
+    -Wmissing-format-attribute 
 )
 
 add_subdirectory(LoggingLib)
