@@ -37,10 +37,18 @@ public:
 	/**
 	 * @brief constructs tensor from shape and fills it with initial value
 	 * 
-	 * @param _shape tensor's initial shape
-	 * @param _initVal initital value
+	 * @param shape tensor's initial shape
+	 * @param initVal initital value
 	 */
-	BasicTensor(const std::vector<size_t>& _shape, const valueType _initVal);
+	BasicTensor(const std::vector<size_t>& shape, const valueType initVal);
+	/**
+	 * @brief Constructs a new tensor from shape and gives it initial values
+	 * 
+	 * @param shape Tensor's initial shape
+	 * @param initValues Values to assign, there is no check of the init list length
+	 */
+	BasicTensor(const std::vector<size_t>& shape,
+				const std::initializer_list<valueType> initValues);
 	~BasicTensor();
 
 private:

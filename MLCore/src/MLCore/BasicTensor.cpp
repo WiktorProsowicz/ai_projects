@@ -69,6 +69,20 @@ BasicTensor<valueType>::BasicTensor(const std::vector<size_t>& shape, const valu
 }
 
 template <typename valueType>
+BasicTensor<valueType>::BasicTensor(const std::vector<size_t>& shape,
+									const std::initializer_list<valueType> initValues)
+	: BasicTensor(shape)
+{
+
+	size_t i = 0;
+	for(auto valsIter = initValues.begin(); valsIter < initValues.end() && i < length_;
+		i++, valsIter++)
+	{
+		data_[i] = *valsIter;
+	}
+}
+
+template <typename valueType>
 BasicTensor<valueType>::BasicTensor(const BasicTensor& other)
 {
 	shape_ = other.shape_;
