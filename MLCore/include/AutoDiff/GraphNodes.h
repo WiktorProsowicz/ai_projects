@@ -4,8 +4,23 @@
 #include <MLCore/BasicTensor.h>
 #include <memory>
 
+/**
+ * @brief Classes representing nodes in ComputationGraphs. Nodes hold tensors and can be linked to each other.
+ * 
+ */
 namespace mlCore
 {
+
+class Node;
+class PlaceHolder;
+class Variable;
+class Constant;
+
+using NodePtr = std::shared_ptr<Node>;
+using PlaceholderPtr = std::shared_ptr<Placeholder>;
+using VariablePtr = std::shared_ptr<Variable>;
+using ConstantPtr = std::shared_ptr<Constant>;
+
 /**
  * @brief Mother class of computation graph nodes.
  * 
@@ -43,7 +58,7 @@ public:
 
 protected:
 	uint64_t index_;
-	static uint64_t nodesCount_;
+	static inline uint64_t nodesCount_ = 0;
 	Tensor value_;
 	const std::string name_;
 };
@@ -72,7 +87,7 @@ public:
 	Constant(const Tensor& tensor, const std::string& name = "")
 		: Node(tensor, name){};
 
-	void setValue(const Tensor& tensor) override
+	void setValue(const Tensor&) override
 	{
 		LOG_WARN("GraphNodes", "Attempt to assign value to constant");
 	}
@@ -88,87 +103,6 @@ public:
 	Placeholder()
 		: Node(std::vector<size_t>{}){};
 };
-
-/**
- * @brief Specifies how the Operator nodes are constructed, useful to compute derivative.
- * 
- */
-enum class UnaryOperatorType : uint8_t
-{
-
-	/// activation functions
-	RELU = 0,
-	SIGMOID
-};
-
-class UnaryOperator : public Node
-{
-public:
-	UnaryOperator(const NodePtr input, const UnaryOperatorType type)
-		: Node(std::vector<size_t>{})
-		, type_(type)
-		, input_(input){};
-
-	// tells the operator to compute its value based om its inputs
-	void updateValue();
-
-	const UnaryOperatorType getType() const
-	{
-		return type_;
-	}
-
-	NodePtr getInputs() const
-	{
-		return input_;
-	}
-
-private:
-	UnaryOperatorType type_;
-	NodePtr input_;
-};
-
-enum class BinaryOperatorType : uint8_t
-{
-	/// basic operations
-	ADD = 0,
-	SUBTRACT,
-	MULTIPLY,
-	DIVIDE,
-	MATMUL,
-	POWER,
-};
-
-class BinaryOperator : public Node
-{
-public:
-	BinaryOperator(const NodePtr lhsInput, const NodePtr rhsInput, const BinaryOperatorType type)
-		: Node(std::vector<size_t>{})
-		, lhsInput_(lhsInput)
-		, rhsInput_(rhsInput){};
-
-	// tells the operator to compute its value based on its inputs
-	void updateValue();
-
-	const BinaryOperatorType getType() const
-	{
-		return type_;
-	}
-
-	std::pair<NodePtr, NodePtr> getInputs() const
-	{
-		return {lhsInput_, rhsInput_};
-	}
-
-private:
-	BinaryOperatorType type_;
-	const NodePtr lhsInput_;
-	const NodePtr rhsInput_;
-};
-
-using NodePtr = std::shared_ptr<Node>;
-using UnaryOperPtr = std::shared_ptr<UnaryOperator>;
-using BinaryOperPtr = std::shared_ptr<BinaryOperator>;
-using PlaceholderPtr = std::shared_ptr<Placeholder>;
 
 } // namespace mlCore
 #endif
