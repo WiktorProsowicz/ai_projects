@@ -135,7 +135,7 @@ public:
 		fill(newData.begin(), newData.end(), wrapData);
 	}
 
-	void fill(const ITensorInitializer<valueType>&& initializer);
+	void fill(const ITensorInitializer<valueType>& initializer);
 
 	// operators
 	BasicTensor operator+(const BasicTensor&) const;
@@ -239,60 +239,72 @@ private:
 template <typename TensorValueType>
 std::ostream& operator<<(std::ostream& out, const BasicTensor<TensorValueType>& tensor)
 {
+	std::vector<std::string> stringifiedNumbers;
+	std::transform(tensor.begin(),
+				   tensor.end(),
+				   std::back_inserter(stringifiedNumbers),
+				   [](const auto& element) { return (std::ostringstream() << element).str(); });
 
-	const auto blockSize = std::accumulate(
-		tensor.begin(), tensor.end(), size_t(0), [](const auto currMax, const auto& element) {
-			return std::max(currMax, (std::ostringstream() << element).str().length());
-		});
+	const auto blockSize =
+		std::max_element(stringifiedNumbers.begin(),
+						 stringifiedNumbers.end(),
+						 [](const auto& s1, const auto& s2) { return s1.compare(s2); })
+			->length();
 
 	out << "<BasicTensor dtype=" << typeid(TensorValueType).name()
 		<< " shape=" << stringifyVector(tensor.shape_) << ">";
 
 	std::function<void(typename std::vector<size_t>::const_iterator,
-					   const TensorValueType*,
+					   std::vector<std::string>::const_iterator,
 					   const std::string&,
 					   size_t)>
 		recursePrint;
-	recursePrint =
-		[&blockSize, &recursePrint, &out, &tensor](std::vector<size_t>::const_iterator shapeIter,
-												   const TensorValueType* dataPtr,
-												   const std::string& preamble,
-												   size_t offset) {
-			offset /= *shapeIter;
-			if(shapeIter == std::prev(tensor.shape_.end()))
+
+	recursePrint = [&blockSize, &recursePrint, &out, &tensor](
+					   std::vector<size_t>::const_iterator shapeIter,
+					   std::vector<std::string>::const_iterator stringifiedDataIter,
+					   const std::string& preamble,
+					   size_t offset) {
+		offset /= *shapeIter;
+		if(shapeIter == std::prev(tensor.shape_.end()))
+		{
+			out << "\n" << preamble << "[";
+
+			size_t i;
+
+			for(i = 0; i < (*shapeIter) - 1; i++)
+				out << std::setw(blockSize) << *std::next(stringifiedDataIter, i) << ", ";
+			out << std::setw(blockSize) << *std::next(stringifiedDataIter, i);
+
+			out << "]";
+		}
+		else
+		{
+			out << "\n" << preamble << "[";
+
+			size_t i;
+			for(i = 0; i < (*shapeIter); i++)
 			{
-				out << "\n" << preamble << "[";
-
-				size_t i;
-				for(i = 0; i < (*shapeIter) - 1; i++)
-					out << std::setw(blockSize) << dataPtr[i] << ", ";
-				out << std::setw(blockSize) << dataPtr[i];
-
-				out << "]";
+				recursePrint(shapeIter + 1,
+							 std::next(stringifiedDataIter, i * offset),
+							 preamble + " ",
+							 offset);
+				// out << ",";
 			}
-			else
-			{
-				out << "\n" << preamble << "[";
+			// recursePrint(shapeIter + 1, dataPtr + i * (*shapeIter), preamble + " ");
 
-				size_t i;
-				for(i = 0; i < (*shapeIter); i++)
-				{
-					recursePrint(shapeIter + 1, dataPtr + i * offset, preamble + " ", offset);
-					// out << ",";
-				}
-				// recursePrint(shapeIter + 1, dataPtr + i * (*shapeIter), preamble + " ");
-
-				out << "\n" << preamble << "]";
-			}
-		};
+			out << "\n" << preamble << "]";
+		}
+	};
 
 	// for traversing data
-	const size_t offset = std::accumulate(
-		tensor.shape_.begin(), tensor.shape_.end(), 1, [](const size_t curr, const size_t dim) {
-			return curr * dim;
-		});
+	const auto offset =
+		std::accumulate(tensor.shape_.begin(),
+						tensor.shape_.end(),
+						size_t(1),
+						[](const size_t& curr, const size_t& dim) { return curr * dim; });
 
-	recursePrint(tensor.shape_.cbegin(), tensor.data_, "", offset);
+	recursePrint(tensor.shape_.cbegin(), stringifiedNumbers.begin(), "", offset);
 
 	return out;
 }
