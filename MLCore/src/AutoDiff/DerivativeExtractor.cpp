@@ -60,14 +60,15 @@ Tensor DerivativeExtractor::extract(const SigmoidOperatorPtr oper,
 	return inputCopy * outerDerivative;
 }
 
-std::pair<Tensor, Tensor> DerivativeExtractor::extract(const AddOperatorPtr oper,
+std::pair<Tensor, Tensor> DerivativeExtractor::extract([[maybe_unused]] const AddOperatorPtr oper,
 													   const Tensor& outerDerivative) const
 {
 	return {outerDerivative, outerDerivative};
 }
 
-std::pair<Tensor, Tensor> DerivativeExtractor::extract(const SubtractOperatorPtr oper,
-													   const Tensor& outerDerivative) const
+std::pair<Tensor, Tensor>
+DerivativeExtractor::extract([[maybe_unused]] const SubtractOperatorPtr oper,
+							 const Tensor& outerDerivative) const
 {
 	return {outerDerivative, -outerDerivative};
 }

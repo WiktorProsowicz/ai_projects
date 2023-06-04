@@ -24,6 +24,7 @@ template <typename valueType>
 class BasicTensor
 {
 	friend class TensorOperations;
+	class Iterator;
 
 public:
 	BasicTensor() = delete;
@@ -51,58 +52,6 @@ public:
 				const std::initializer_list<valueType> initValues);
 	~BasicTensor();
 
-private:
-	struct Iterator
-	{
-		using iterator_category = std::input_iterator_tag;
-		using difference_type = std::ptrdiff_t;
-		using value_type = valueType;
-		using pointer = valueType*;
-		using reference = valueType&;
-
-		Iterator(pointer ptr)
-			: curr_ptr(ptr)
-		{ }
-
-		reference operator*()
-		{
-			return *curr_ptr;
-		}
-		pointer operator->()
-		{
-			return curr_ptr;
-		}
-		Iterator& operator++()
-		{
-			curr_ptr++;
-			return *this;
-		}
-		Iterator operator++(int)
-		{
-			auto tmp = *this;
-			++(*this);
-			return tmp;
-		}
-
-		friend bool operator==(const Iterator& iter1, const Iterator& iter2)
-		{
-			return iter1.curr_ptr == iter2.curr_ptr;
-		}
-
-		friend bool operator!=(const Iterator& iter1, const Iterator& iter2)
-		{
-			return iter1.curr_ptr != iter2.curr_ptr;
-		}
-		friend bool operator<(const Iterator& iter1, const Iterator& iter2)
-		{
-			return iter1.curr_ptr < iter2.curr_ptr;
-		}
-
-	private:
-		pointer curr_ptr;
-	};
-
-public:
 	// assign
 	BasicTensor& operator=(const BasicTensor&); // copy assignment
 	BasicTensor& operator=(BasicTensor&&); // move assignment
@@ -118,7 +67,7 @@ public:
 	{
 		return shape_;
 	}
-	uint8_t nDimensions() const noexcept
+	size_t nDimensions() const noexcept
 	{
 		return shape_.size();
 	}
@@ -205,8 +154,59 @@ public:
 	BasicTensor transposed() const;
 
 	// displaying
-	template <typename TT>
-	friend std::ostream& operator<<(std::ostream&, const BasicTensor<TT>&);
+	template <typename TensorValueType>
+	friend std::ostream& operator<<(std::ostream&, const BasicTensor<TensorValueType>&);
+
+private:
+	struct Iterator
+	{
+		using iterator_category = std::input_iterator_tag;
+		using difference_type = std::ptrdiff_t;
+		using value_type = valueType;
+		using pointer = valueType*;
+		using reference = valueType&;
+
+		Iterator(pointer ptr)
+			: curr_ptr(ptr)
+		{ }
+
+		reference operator*()
+		{
+			return *curr_ptr;
+		}
+		pointer operator->()
+		{
+			return curr_ptr;
+		}
+		Iterator& operator++()
+		{
+			curr_ptr++;
+			return *this;
+		}
+		Iterator operator++(int)
+		{
+			auto tmp = *this;
+			++(*this);
+			return tmp;
+		}
+
+		friend bool operator==(const Iterator& iter1, const Iterator& iter2)
+		{
+			return iter1.curr_ptr == iter2.curr_ptr;
+		}
+
+		friend bool operator!=(const Iterator& iter1, const Iterator& iter2)
+		{
+			return iter1.curr_ptr != iter2.curr_ptr;
+		}
+		friend bool operator<(const Iterator& iter1, const Iterator& iter2)
+		{
+			return iter1.curr_ptr < iter2.curr_ptr;
+		}
+
+	private:
+		pointer curr_ptr;
+	};
 
 private:
 	void checkIndicesList_(
@@ -236,8 +236,8 @@ private:
 	valueType* data_;
 };
 
-template <typename valueType>
-std::ostream& operator<<(std::ostream& out, const BasicTensor<valueType>& tensor)
+template <typename TensorValueType>
+std::ostream& operator<<(std::ostream& out, const BasicTensor<TensorValueType>& tensor)
 {
 
 	const auto blockSize = std::accumulate(
@@ -245,15 +245,17 @@ std::ostream& operator<<(std::ostream& out, const BasicTensor<valueType>& tensor
 			return std::max(currMax, (std::ostringstream() << element).str().length());
 		});
 
-	out << "<BasicTensor dtype=" << typeid(valueType).name()
+	out << "<BasicTensor dtype=" << typeid(TensorValueType).name()
 		<< " shape=" << stringifyVector(tensor.shape_) << ">";
 
-	std::function<void(
-		typename std::vector<size_t>::const_iterator, const valueType*, const std::string&, size_t)>
+	std::function<void(typename std::vector<size_t>::const_iterator,
+					   const TensorValueType*,
+					   const std::string&,
+					   size_t)>
 		recursePrint;
 	recursePrint =
 		[&blockSize, &recursePrint, &out, &tensor](std::vector<size_t>::const_iterator shapeIter,
-												   const valueType* dataPtr,
+												   const TensorValueType* dataPtr,
 												   const std::string& preamble,
 												   size_t offset) {
 			offset /= *shapeIter;

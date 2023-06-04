@@ -1,9 +1,14 @@
+#include <AutoDiff/BinaryOperators/IBinaryOperator.h>
 #include <AutoDiff/ComputationGraph.h>
+#include <AutoDiff/DerivativeExtractor.h>
+#include <AutoDiff/UnaryOperators/IUnaryOperator.h>
 
 namespace mlCore
 {
 ComputationGraph::ComputationGraph()
 	: isActive_(false)
+	, nodes_()
+	, gradients_()
 	, areNodesSorted_(true)
 { }
 
@@ -58,15 +63,15 @@ void ComputationGraph::sortNodes()
 	// recursively goes down the tree in a DFS manner and adds nodes to newNodes so that all inputs can be assigned before the operators
 	std::function<void(const NodePtr)> traverseTree;
 	traverseTree = [&traverseTree, &newNodes](const NodePtr node) {
-		if(const auto castedBinaryOp = std::dynamic_pointer_cast<BinaryOperator>(node))
+		if(const auto castedBinaryOp = std::dynamic_pointer_cast<IBinaryOperator>(node))
 		{
 			const auto& [lhs, rhs] = castedBinaryOp->getInputs();
 			traverseTree(lhs);
 			traverseTree(rhs);
 		}
-		else if(const auto castedUnaryOp = std::dynamic_pointer_cast<UnaryOperator>(node))
+		else if(const auto castedUnaryOp = std::dynamic_pointer_cast<IUnaryOperator>(node))
 		{
-			traverseTree(castedUnaryOp->getInputs());
+			traverseTree(castedUnaryOp->getInput());
 		}
 
 		if(std::find(newNodes.begin(), newNodes.end(), node) == newNodes.end())
@@ -93,11 +98,11 @@ void ComputationGraph::forwardPass(const std::map<PlaceholderPtr, Tensor>& feedD
 		{
 			placeholder->setValue(feedDict.at(placeholder));
 		}
-		else if(const auto binaryOper = std::dynamic_pointer_cast<BinaryOperator>(node))
+		else if(const auto binaryOper = std::dynamic_pointer_cast<IBinaryOperator>(node))
 		{
 			binaryOper->updateValue();
 		}
-		else if(const auto unaryOper = std::dynamic_pointer_cast<UnaryOperator>(node))
+		else if(const auto unaryOper = std::dynamic_pointer_cast<IUnaryOperator>(node))
 		{
 			unaryOper->updateValue();
 		}
@@ -110,6 +115,8 @@ void ComputationGraph::computeGradients(const NodePtr root)
 		sortNodes();
 
 	std::function<void(const NodePtr, const Tensor&)> backPropagate;
+
+	// traverses the nodes tree and computes gradient in regard of every node
 	backPropagate = [&backPropagate, this](const NodePtr node, const Tensor& cumulatedGradient) {
 		if(this->gradients_.find(node) == this->gradients_.end())
 		{
@@ -121,21 +128,23 @@ void ComputationGraph::computeGradients(const NodePtr root)
 			grad = grad + cumulatedGradient;
 		}
 
-		if(const auto castedUnary = std::dynamic_pointer_cast<UnaryOperator>(node))
+		if(const auto castedUnary = std::dynamic_pointer_cast<IUnaryOperator>(node))
 		{
-			const auto input = castedUnary->getInputs();
-			const auto derivative = DerivativeExtractor{}(castedUnary);
-			backPropagate(input, cumulatedGradient * derivative);
+			const auto input = castedUnary->getInput();
+			const auto derivative = DerivativeExtractor{}(castedUnary, cumulatedGradient);
+			backPropagate(input, cumulatedGradient);
 		}
-		else if(const auto castedBinary = std::dynamic_pointer_cast<BinaryOperator>(node))
+		else if(const auto castedBinary = std::dynamic_pointer_cast<IBinaryOperator>(node))
 		{
 			const auto [lInput, rInput] = castedBinary->getInputs();
-			const auto [lDerivative, rDerivative] = DerivativeExtractor{}(castedBinary);
-			backPropagate(lInput, cumulatedGradient * lDerivative);
-			backPropagate(rInput, cumulatedGradient * rDerivative);
+			const auto [lDerivative, rDerivative] =
+				DerivativeExtractor{}(castedBinary, cumulatedGradient);
+
+			backPropagate(lInput, lDerivative);
+			backPropagate(rInput, rDerivative);
 		}
 	};
 
-	backPropagate(root, Tensor(std::vector<size_t>{}, 1));
+	backPropagate(root, Tensor(root->getValue().shape(), 1.0));
 }
 } // namespace mlCore

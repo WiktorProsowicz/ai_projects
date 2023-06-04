@@ -8,14 +8,14 @@ template class BasicTensor<double>;
 
 template <typename valueType>
 BasicTensor<valueType>::BasicTensor(const std::vector<size_t>& shape)
+	: length_()
+	, shape_(shape)
+	, data_()
 {
-	// if shape checking chain succeeds, this value will stay unchanged
-	shape_ = shape;
-
 	try
 	{
 		// shape checking chain
-		checkShape_(shape);
+		checkShape_(shape_);
 	}
 	catch(const std::invalid_argument&)
 	{
@@ -33,27 +33,28 @@ BasicTensor<valueType>::BasicTensor(const std::vector<size_t>& shape)
 	catch(const std::length_error&)
 	{
 		size_t nElements = 1;
-		std::string newShapeRepr = "(";
+		std::vector<size_t> newShape;
 
-		for_each(shape.begin(), shape.end(), [&nElements, &newShapeRepr](const auto dim) {
+		for_each(shape.begin(), shape.end(), [&nElements, &newShape](const auto dim) {
 			if(nElements <= (ULLONG_MAX / dim))
 			{
-				newShapeRepr += std::to_string(dim) + ",";
 				nElements *= dim;
+				newShape.push_back(dim);
 			}
 		});
 
-		newShapeRepr += ")";
 		LOG_WARN("BasicTensor",
 				 "Cummulative number of elements can't exceed the limit of ULL_MAX. Will preserve "
-				 "shape: " +
-					 newShapeRepr);
+				 "shape: "
+					 << stringifyVector(newShape));
+
+		shape_ = std::move(newShape);
 	}
 
-	length_ =
-		std::accumulate(shape.begin(), shape.end(), 1, [](const auto current, const auto dim) {
-			return current * dim;
-		});
+	length_ = std::accumulate(shape_.begin(),
+							  shape_.end(),
+							  size_t(1),
+							  [](const auto current, const auto dim) { return current * dim; });
 
 	data_ = new valueType[length_];
 }
@@ -84,11 +85,10 @@ BasicTensor<valueType>::BasicTensor(const std::vector<size_t>& shape,
 
 template <typename valueType>
 BasicTensor<valueType>::BasicTensor(const BasicTensor& other)
+	: length_(other.length_)
+	, shape_(other.shape_)
+	, data_(new valueType[length_])
 {
-	shape_ = other.shape_;
-	length_ = other.length_;
-	data_ = new valueType[length_];
-
 	for(size_t i = 0; i < length_; i++)
 	{
 		data_[i] = other.data_[i];
@@ -97,13 +97,11 @@ BasicTensor<valueType>::BasicTensor(const BasicTensor& other)
 
 template <typename valueType>
 BasicTensor<valueType>::BasicTensor(BasicTensor&& other)
+	: length_(other.length_)
+	, shape_(std::move(other.shape_))
+	, data_(other.data_)
 {
-	shape_ = std::move(other.shape_);
-
-	length_ = other.length_;
 	other.length_ = 0;
-
-	data_ = other.data_;
 	other.data_ = nullptr;
 }
 
@@ -211,10 +209,10 @@ void BasicTensor<valueType>::checkIndicesList_(
 	if(_beg == _end)
 		throw std::out_of_range("Indices list must have minimum length of 1.");
 
-	if(std::distance(_beg, _end) > shape_.size())
+	if(static_cast<size_t>(std::distance(_beg, _end)) > shape_.size())
 		throw std::out_of_range("Indices list cannot be longer than tensor's shape.");
 
-	for(auto [it, i] = std::tuple{_beg, 0}; it < _end; ++it, ++i)
+	for(auto [it, i] = std::tuple{_beg, size_t(0)}; it < _end; ++it, ++i)
 	{
 		const auto& [lower, upper] = *it;
 		if(upper <= lower)
@@ -316,11 +314,16 @@ BasicTensor<valueType> BasicTensor<valueType>::matmul(const BasicTensor& other) 
 
 	// padded shapes for easier operating
 	std::vector<size_t> paddedShapeFirst(biggerSize, 1), paddedShapeSecond(biggerSize, 1);
+
 	std::copy(
-		shape_.cbegin(), shape_.cend(), paddedShapeFirst.begin() + biggerSize - shape_.size());
+		shape_.cbegin(),
+		shape_.cend(),
+		std::next(paddedShapeFirst.begin(), static_cast<ptrdiff_t>(biggerSize - shape_.size())));
+
 	std::copy(other.shape_.cbegin(),
 			  other.shape_.cend(),
-			  paddedShapeSecond.begin() + biggerSize - other.shape_.size());
+			  std::next(paddedShapeSecond.begin(),
+						static_cast<ptrdiff_t>(biggerSize - other.shape_.size())));
 
 	// checking matmul conditions
 	if(paddedShapeFirst[biggerSize - 1] != paddedShapeSecond[biggerSize - 2])
@@ -460,10 +463,15 @@ BasicTensor<valueType> BasicTensor<valueType>::performOperation_(
 	// shapes after padding with ones
 	std::vector<size_t> paddedLeftShape(biggerSize, 1), paddedRightShape(biggerSize, 1);
 
-	std::copy(shape_.cbegin(), shape_.cend(), paddedLeftShape.begin() + biggerSize - shape_.size());
+	std::copy(
+		shape_.cbegin(),
+		shape_.cend(),
+		std::next(paddedLeftShape.begin(), static_cast<ptrdiff_t>(biggerSize - shape_.size())));
+
 	std::copy(other.shape_.cbegin(),
 			  other.shape_.cend(),
-			  paddedRightShape.begin() + biggerSize - other.shape_.size());
+			  std::next(paddedRightShape.begin(),
+						static_cast<ptrdiff_t>(biggerSize - other.shape_.size())));
 
 	std::vector<size_t> retShape(biggerSize);
 	for(size_t i = 0; i < biggerSize; i++)
@@ -507,7 +515,7 @@ BasicTensor<valueType> BasicTensor<valueType>::performOperation_(
 															   const std::function<valueType(const valueType, const valueType)>& op) mutable
 	{
 		size_t elementsProcessed = 0;
-		size_t destTensorLength = std::accumulate(retShape.cbegin(), retShape.cend(), 1, 
+		const auto destTensorLength = std::accumulate(retShape.cbegin(), retShape.cend(), size_t(1), 
 													[](const auto curr, const auto dim){ return curr * dim; });
 
 		while(elementsProcessed < destTensorLength)
