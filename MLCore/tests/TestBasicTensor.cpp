@@ -1,3 +1,11 @@
+/**********************
+ * Test suite for 'ai_projects'
+ * 
+ * Copyright (c) 2023
+ * 
+ * by Wiktor Prosowicz
+ **********************/
+
 #include <LoggingLib/LoggingLib.h>
 #include <MLCore/BasicTensor.h>
 #include <gtest/gtest.h>
@@ -6,9 +14,21 @@
 namespace
 {
 
+/*****************************
+ * 
+ * Test Fixture
+ * 
+ *****************************/
+
 class TestBasicTensor : public testing::Test
 {
 protected:
+	/**
+	 * @brief Checks if tensor objects have equal contents
+	 * 
+	 * @param tensor1 
+	 * @param tensor2 
+	 */
 	void checkTensorEquality(const mlCore::Tensor& tensor1, const mlCore::Tensor& tensor2)
 	{
 		ASSERT_EQ(tensor1.nDimensions(), tensor2.nDimensions());
@@ -23,6 +43,11 @@ protected:
 		}
 	}
 
+	/**
+	 * @brief Checks if given tensor is a dead empty object
+	 * 
+	 * @param tensor Checked object that is expected to behave as if its content has been moved 
+	 */
 	void isTensorEmpty(const mlCore::Tensor& tensor)
 	{
 		ASSERT_EQ(tensor.shape(), std::vector<size_t>{});
@@ -30,17 +55,19 @@ protected:
 		ASSERT_EQ(tensor.nDimensions(), 0);
 	}
 
-	void checkTensorValues(const mlCore::Tensor& tensor,
-						   const std::vector<double>& values,
-						   const std::string message = "")
+	/**
+	 * @brief Checks whether the given tensor has expected values.
+	 * 
+	 * @param tensor Tensor object whose values are checked
+	 * @param values Expected values that the tensor should contain
+	 */
+	void checkTensorValues(const mlCore::Tensor& tensor, const std::vector<double>& values)
 	{
 		ASSERT_EQ(tensor.size(), values.size());
 
 		auto valuesIter = values.begin();
 		for(const auto value : tensor)
 		{
-			// std::cout << value << " " << *valuesIter << " ";
-			// EXPECT_DOUBLE_EQ(value, *valuesIter) << message;
 			if(value != *valuesIter)
 			{
 				ADD_FAILURE() << "Tensor value: " << value << ", expected one: " << *valuesIter
@@ -50,6 +77,12 @@ protected:
 		}
 	}
 };
+
+/*****************************
+ * 
+ * Particular test calls
+ * 
+ *****************************/
 
 TEST_F(TestBasicTensor, testConstructorWithShape)
 {
