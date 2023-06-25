@@ -52,6 +52,12 @@ const Tensor& ComputationGraph::getGradientByNodeName(const std::string& nodeNam
 
 void ComputationGraph::addNode(const NodePtr node)
 {
+	if(!isActive_)
+	{
+		LOG_WARN("ComputationGraph", "Cannot add node to the graph which is not active.");
+		return;
+	}
+
 	areNodesSorted_ = false;
 	nodes_.push_back(node);
 }
