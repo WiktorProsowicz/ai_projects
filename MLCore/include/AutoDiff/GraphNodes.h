@@ -12,7 +12,7 @@ namespace mlCore
 {
 
 class Node;
-class PlaceHolder;
+class Placeholder;
 class Variable;
 class Constant;
 
