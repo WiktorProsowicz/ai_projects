@@ -1,5 +1,6 @@
 #include <AutoDiff/BinaryOperators/AddOperator.h>
 #include <AutoDiff/BinaryOperators/DivideOperator.h>
+#include <AutoDiff/BinaryOperators/MatmulOperator.h>
 #include <AutoDiff/BinaryOperators/MultiplyOperator.h>
 #include <AutoDiff/BinaryOperators/PowerOperator.h>
 #include <AutoDiff/BinaryOperators/SubtractOperator.h>
@@ -29,6 +30,8 @@ std::shared_ptr<ResultNodeType> BinaryOperations::operationImpl(const NodePtr lN
 																const NodePtr rNode)
 {
 	auto resultNode = std::make_shared<ResultNodeType>(lNode, rNode);
+
+	resultNode->updateValue();
 
 	if(graph_ && graph_->isActive())
 		graph_->addNode(resultNode);
@@ -61,6 +64,11 @@ NodePtr BinaryOperations::power(const NodePtr lNode, const NodePtr rNode)
 	return BinaryOperations{}.operationImpl<PowerOperator>(lNode, rNode);
 }
 
+NodePtr BinaryOperations::matmul(const NodePtr lNode, const NodePtr rNode)
+{
+	return BinaryOperations{}.operationImpl<MatmulOperator>(lNode, rNode);
+}
+
 /****************
  * 
  * Unary operators
@@ -86,8 +94,12 @@ std::shared_ptr<ResultNodeType> NodesActivations::operationImpl(const NodePtr no
 {
 	auto resultNode = std::make_shared<ResultNodeType>(node);
 
+	resultNode->updateValue();
+
 	if(graph_ && graph_->isActive())
+	{
 		graph_->addNode(resultNode);
+	}
 
 	return resultNode;
 }

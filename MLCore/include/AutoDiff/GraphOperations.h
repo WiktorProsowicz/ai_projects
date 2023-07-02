@@ -20,16 +20,16 @@ public:
 	BinaryOperations& operator=(const BinaryOperations&) = delete; // Copy assignment
 	BinaryOperations& operator=(BinaryOperations&&) = delete; // Move assignment
 
-	NodePtr multiply(const NodePtr lNode, const NodePtr rNode);
-	NodePtr add(const NodePtr lNode, const NodePtr rNode);
-	NodePtr subtract(const NodePtr lNode, const NodePtr rNode);
-	NodePtr divide(const NodePtr lNode, const NodePtr rNode);
-	NodePtr matmul(const NodePtr lNode, const NodePtr rNode);
-	NodePtr power(const NodePtr baseNode, const NodePtr factorNode);
+	NodePtr multiply(NodePtr lNode, NodePtr rNode);
+	NodePtr add(NodePtr lNode, NodePtr rNode);
+	NodePtr subtract(NodePtr lNode, NodePtr rNode);
+	NodePtr divide(NodePtr lNode, NodePtr rNode);
+	NodePtr matmul(NodePtr lNode, NodePtr rNode);
+	NodePtr power(NodePtr baseNode, NodePtr factorNode);
 
 private:
 	template <typename ResultNodeType>
-	std::shared_ptr<ResultNodeType> operationImpl(const NodePtr lNode, const NodePtr rNode);
+	std::shared_ptr<ResultNodeType> operationImpl(NodePtr lNode, NodePtr rNode);
 
 private:
 	std::shared_ptr<ComputationGraph> graph_;
@@ -42,19 +42,19 @@ class NodesActivations
 {
 public:
 	NodesActivations();
-	NodesActivations(const std::shared_ptr<ComputationGraph> graph);
+	NodesActivations(std::shared_ptr<ComputationGraph> graph);
 
 	NodesActivations(const NodesActivations&) = delete; // Copy ctor
 	NodesActivations(NodesActivations&&) = delete; // Move ctor
 	NodesActivations& operator=(const NodesActivations&) = delete; // Copy assignment
 	NodesActivations& operator=(NodesActivations&&) = delete; // Move assignment
 
-	NodePtr relu(const NodePtr node);
-	NodePtr sigmoid(const NodePtr node);
+	NodePtr relu(NodePtr node);
+	NodePtr sigmoid(NodePtr node);
 
 private:
 	template <typename ResultNodeType>
-	std::shared_ptr<ResultNodeType> operationImpl(const NodePtr lNode);
+	std::shared_ptr<ResultNodeType> operationImpl(NodePtr lNode);
 
 private:
 	std::shared_ptr<ComputationGraph> graph_;

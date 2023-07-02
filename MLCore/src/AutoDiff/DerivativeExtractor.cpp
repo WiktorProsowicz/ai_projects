@@ -43,7 +43,7 @@ std::pair<Tensor, Tensor> DerivativeExtractor::operator()(const IBinaryOperatorP
 
 Tensor DerivativeExtractor::extract(const ReluOperatorPtr oper, const Tensor& outerDerivative) const
 {
-	Tensor inputCopy = oper->getInput()->getValue();
+	Tensor inputCopy = oper->getValue();
 	for(auto& val : inputCopy)
 		val = val > 0 ? 1 : 0;
 
@@ -53,22 +53,24 @@ Tensor DerivativeExtractor::extract(const ReluOperatorPtr oper, const Tensor& ou
 Tensor DerivativeExtractor::extract(const SigmoidOperatorPtr oper,
 									const Tensor& outerDerivative) const
 {
-	Tensor inputCopy = oper->getInput()->getValue();
+	Tensor inputCopy = oper->getValue();
+
 	for(auto& val : inputCopy)
-		val = pow(M_E, val) * (1 - pow(M_E, val));
+	{
+		val = val * (1 - val);
+	}
 
 	return inputCopy * outerDerivative;
 }
 
-std::pair<Tensor, Tensor> DerivativeExtractor::extract([[maybe_unused]] const AddOperatorPtr oper,
+std::pair<Tensor, Tensor> DerivativeExtractor::extract(const AddOperatorPtr,
 													   const Tensor& outerDerivative) const
 {
 	return {outerDerivative, outerDerivative};
 }
 
-std::pair<Tensor, Tensor>
-DerivativeExtractor::extract([[maybe_unused]] const SubtractOperatorPtr oper,
-							 const Tensor& outerDerivative) const
+std::pair<Tensor, Tensor> DerivativeExtractor::extract(const SubtractOperatorPtr,
+													   const Tensor& outerDerivative) const
 {
 	return {outerDerivative, -outerDerivative};
 }

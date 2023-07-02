@@ -20,8 +20,16 @@ namespace mlCore
  * DerivativeExtractor::operator(f(x, y)) -> {df/dx, df/dy} 
  * 
  */
-struct DerivativeExtractor
+class DerivativeExtractor
 {
+public:
+	DerivativeExtractor() = default;
+
+	DerivativeExtractor(const DerivativeExtractor&) = delete; /// Copy constructor
+	DerivativeExtractor(DerivativeExtractor&&) = delete; /// Move constructor
+	DerivativeExtractor& operator=(const DerivativeExtractor&) = delete; /// Copy assignment
+	DerivativeExtractor& operator=(DerivativeExtractor&&) = delete; /// Move assignment
+
 	/**
      * @brief Computes derivative of an unary operator in respect of its input
      * 
