@@ -5,6 +5,7 @@ namespace mlCore
 {
 // explicit instantiation
 template class BasicTensor<double>;
+template std::ostream& operator<<(std::ostream& out, const BasicTensor<double>& tensor);
 
 template <typename valueType>
 BasicTensor<valueType>::BasicTensor(const std::vector<size_t>& shape)
@@ -27,9 +28,6 @@ BasicTensor<valueType>::BasicTensor(const std::vector<size_t>& shape)
 				dim = 1;
 		});
 	}
-	// last link in chain, will always be thrown
-	catch(const std::out_of_range&)
-	{ }
 	catch(const std::length_error&)
 	{
 		size_t nElements = 1;
@@ -44,7 +42,7 @@ BasicTensor<valueType>::BasicTensor(const std::vector<size_t>& shape)
 		});
 
 		LOG_WARN("BasicTensor",
-				 "Cummulative number of elements can't exceed the limit of ULL_MAX. Will preserve "
+				 "Cumulative number of elements can't exceed the limit of ULL_MAX. Will preserve "
 				 "shape: "
 					 << stringifyVector(newShape));
 
@@ -177,7 +175,7 @@ void BasicTensor<valueType>::checkShape_(const std::vector<size_t>& shape) const
 		}
 		else
 		{
-			throw std::length_error("Cummulative number of elements in shape exceeds ULLONG_MAX");
+			throw std::length_error("Cumulative number of elements in shape exceeds ULLONG_MAX");
 		}
 	});
 
@@ -301,7 +299,7 @@ BasicTensor<valueType> BasicTensor<valueType>::matmul(const BasicTensor& other) 
 	// for clean error throwing with additional info about shapes
 	auto throwInformative = [this, &other](const std::string& m) {
 		throw std::invalid_argument(
-			"Can't perform matrix multipliaction for shapes: " + stringifyVector(shape_) + ", " +
+			"Can't perform matrix multiplication for shapes: " + stringifyVector(shape_) + ", " +
 			stringifyVector(other.shape_) + " - " + m);
 	};
 
@@ -328,14 +326,14 @@ BasicTensor<valueType> BasicTensor<valueType>::matmul(const BasicTensor& other) 
 	// checking matmul conditions
 	if(paddedShapeFirst[biggerSize - 1] != paddedShapeSecond[biggerSize - 2])
 	{
-		throwInformative("last two dimensions are incompatibile.");
+		throwInformative("last two dimensions are incompatible.");
 	}
 
 	for(size_t i = 0; i < biggerSize - 2; i++)
 	{
 		if((paddedShapeFirst[i] != paddedShapeSecond[i]) && (paddedShapeFirst[i] != 1) &&
 		   (paddedShapeSecond[i] != 1))
-			throwInformative("shapes are incompatibile.");
+			throwInformative("shapes are incompatible.");
 	}
 
 	std::vector<size_t> retShape(biggerSize);
@@ -378,7 +376,7 @@ BasicTensor<valueType> BasicTensor<valueType>::matmul(const BasicTensor& other) 
 		{
 			for(size_t colIter = 0; colIter < retShape[biggerSize - 1]; colIter++)
 			{
-				// positon of a certain multiplication in sum of multiplications
+				// position of a certain multiplication in sum of multiplications
 				for(size_t mulIter = 0; mulIter < adjacentDimension; mulIter++)
 				{
 					resultTensor.data_[resElementPos] +=
@@ -492,7 +490,7 @@ BasicTensor<valueType> BasicTensor<valueType>::performOperation_(
 
 	auto computeElementPosition = [](const std::vector<size_t>& path, const std::vector<size_t>& shape) -> size_t
 	{
-		// specifies the offset added to total position while traversing respecitve dimensions
+		// specifies the offset added to total position while traversing respective dimensions
 		size_t offset = 1;
 		size_t position = 0;
 		for(size_t i = path.size() - 1; i < path.size(); i--)
@@ -504,7 +502,7 @@ BasicTensor<valueType> BasicTensor<valueType>::performOperation_(
 		return position;
 	};
 
-	// updates tree paths untill all elements are processed and constantly assigns proper elements to proper places
+	// updates tree paths until all elements are processed and constantly assigns proper elements to proper places
 	std::function<void(valueType* const, const valueType* const, 
 					   const std::vector<size_t>&, 
 					   const std::function<valueType(const valueType, const valueType)>&)> appendTensor;
@@ -627,13 +625,97 @@ template <typename valueType>
 void BasicTensor<valueType>::fill(const ITensorInitializer<valueType>& initializer)
 {
 	size_t elementPos = 0;
-	while((initializer.canYield()) && (elementPos < length_))
+	while(initializer.canYield() && (elementPos < length_))
 	{
 		data_[elementPos] = initializer.yield();
 		elementPos++;
 	}
 	if(elementPos < length_)
 		throw std::out_of_range("Too few values to assign to the tensor.");
+}
+
+template <typename TensorValueType>
+std::ostream& operator<<(std::ostream& out, const BasicTensor<TensorValueType>& tensor)
+{
+
+	out << "<BasicTensor dtype=" << typeid(TensorValueType).name()
+		<< " shape=" << stringifyVector(tensor.shape_) << ">";
+
+	if(tensor.nDimensions() == 0)
+	{
+		out << "[\n " << *tensor.begin() << "\n]";
+		return out;
+	}
+
+	std::vector<std::string> stringifiedNumbers;
+	std::transform(tensor.begin(),
+				   tensor.end(),
+				   std::back_inserter(stringifiedNumbers),
+				   [](const auto& element) { return (std::ostringstream() << element).str(); });
+
+	const auto longestElement =
+		std::max_element(stringifiedNumbers.begin(),
+						 stringifiedNumbers.end(),
+						 [](const auto& s1, const auto& s2) { return s1.compare(s2); });
+
+	const auto blockSize = static_cast<int>(longestElement->length());
+
+	std::function<void(typename std::vector<size_t>::const_iterator,
+					   std::vector<std::string>::const_iterator,
+					   const std::string&,
+					   size_t)>
+		recursePrint;
+
+	recursePrint = [&blockSize, &recursePrint, &out, &tensor](
+					   std::vector<size_t>::const_iterator shapeIter,
+					   std::vector<std::string>::const_iterator stringifiedDataIter,
+					   const std::string& preamble,
+					   size_t offset) {
+		offset /= *shapeIter;
+		if(shapeIter == std::prev(tensor.shape_.end()))
+		{
+			out << "\n" << preamble << "[";
+
+			size_t i;
+
+			for(i = 0; i < (*shapeIter) - 1; i++)
+			{
+				out << std::setw(blockSize)
+					<< *std::next(stringifiedDataIter, static_cast<ptrdiff_t>(i)) << ", ";
+			}
+
+			out << std::setw(blockSize)
+				<< *std::next(stringifiedDataIter, static_cast<ptrdiff_t>(i));
+
+			out << "]";
+		}
+		else
+		{
+			out << "\n" << preamble << "[";
+
+			size_t i;
+			for(i = 0; i < (*shapeIter); i++)
+			{
+				recursePrint(shapeIter + 1,
+							 std::next(stringifiedDataIter, static_cast<ptrdiff_t>(i * offset)),
+							 preamble + " ",
+							 offset);
+			}
+
+			out << "\n" << preamble << "]";
+		}
+	};
+
+	// for traversing data
+	const auto offset =
+		std::accumulate(tensor.shape_.begin(),
+						tensor.shape_.end(),
+						size_t(1),
+						[](const size_t& curr, const size_t& dim) { return curr * dim; });
+
+	recursePrint(tensor.shape_.cbegin(), stringifiedNumbers.begin(), "", offset);
+
+	return out;
 }
 
 } // namespace mlCore

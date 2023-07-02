@@ -110,24 +110,32 @@ public:
 	template <typename InputIter>
 	void fill(InputIter first, InputIter last, const bool wrapData = false)
 	{
+		const auto nElementsToAssign = static_cast<size_t>(std::distance(first, last));
+
+		if(!wrapData)
+		{
+			if(size() < nElementsToAssign)
+			{
+				throw std::out_of_range("Too many values to assign to the tensor.");
+			}
+			else if(size() > nElementsToAssign)
+			{
+				throw std::out_of_range("Too few values to assign to the tensor.");
+			}
+		}
+
 		InputIter collectionIter = first;
 		for(size_t i = 0; i < length_; i++)
 		{
 
 			if(collectionIter >= last)
 			{
-				if(!wrapData)
-					throw std::out_of_range("Too few values to assign to the tensor.");
-
 				collectionIter = first;
 			}
 
 			data_[i] = *collectionIter;
 			collectionIter++;
 		}
-
-		if((collectionIter < last) && (!wrapData))
-			throw std::out_of_range("Too many values to assign to the tensor.");
 	}
 
 	inline void fill(std::initializer_list<valueType> newData, const bool wrapData = false)
@@ -237,77 +245,7 @@ private:
 };
 
 template <typename TensorValueType>
-std::ostream& operator<<(std::ostream& out, const BasicTensor<TensorValueType>& tensor)
-{
-	std::vector<std::string> stringifiedNumbers;
-	std::transform(tensor.begin(),
-				   tensor.end(),
-				   std::back_inserter(stringifiedNumbers),
-				   [](const auto& element) { return (std::ostringstream() << element).str(); });
-
-	const auto blockSize =
-		std::max_element(stringifiedNumbers.begin(),
-						 stringifiedNumbers.end(),
-						 [](const auto& s1, const auto& s2) { return s1.compare(s2); })
-			->length();
-
-	out << "<BasicTensor dtype=" << typeid(TensorValueType).name()
-		<< " shape=" << stringifyVector(tensor.shape_) << ">";
-
-	std::function<void(typename std::vector<size_t>::const_iterator,
-					   std::vector<std::string>::const_iterator,
-					   const std::string&,
-					   size_t)>
-		recursePrint;
-
-	recursePrint = [&blockSize, &recursePrint, &out, &tensor](
-					   std::vector<size_t>::const_iterator shapeIter,
-					   std::vector<std::string>::const_iterator stringifiedDataIter,
-					   const std::string& preamble,
-					   size_t offset) {
-		offset /= *shapeIter;
-		if(shapeIter == std::prev(tensor.shape_.end()))
-		{
-			out << "\n" << preamble << "[";
-
-			size_t i;
-
-			for(i = 0; i < (*shapeIter) - 1; i++)
-				out << std::setw(blockSize) << *std::next(stringifiedDataIter, i) << ", ";
-			out << std::setw(blockSize) << *std::next(stringifiedDataIter, i);
-
-			out << "]";
-		}
-		else
-		{
-			out << "\n" << preamble << "[";
-
-			size_t i;
-			for(i = 0; i < (*shapeIter); i++)
-			{
-				recursePrint(shapeIter + 1,
-							 std::next(stringifiedDataIter, i * offset),
-							 preamble + " ",
-							 offset);
-				// out << ",";
-			}
-			// recursePrint(shapeIter + 1, dataPtr + i * (*shapeIter), preamble + " ");
-
-			out << "\n" << preamble << "]";
-		}
-	};
-
-	// for traversing data
-	const auto offset =
-		std::accumulate(tensor.shape_.begin(),
-						tensor.shape_.end(),
-						size_t(1),
-						[](const size_t& curr, const size_t& dim) { return curr * dim; });
-
-	recursePrint(tensor.shape_.cbegin(), stringifiedNumbers.begin(), "", offset);
-
-	return out;
-}
+std::ostream& operator<<(std::ostream& out, const BasicTensor<TensorValueType>& tensor);
 
 using Tensor = BasicTensor<double>;
 using TensorPtr = std::shared_ptr<Tensor>;
