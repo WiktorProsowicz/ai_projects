@@ -37,6 +37,11 @@ macro(install_library)
         target_link_libraries("${FILE_NAME}" PUBLIC ${PROJECT_NAME} gtest gtest_main)
 
         set_target_properties(${FILE_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/test/${PROJECT_NAME}/)
+
+        # add_test(NAME "${FILE_NAME}" COMMAND $<TARGET_FILE:${FILE_NAME}>)
+
+        gtest_add_tests(TARGET "${FILE_NAME}" TEST_LIST "${FILE_NAME}")
+
     endforeach()
 
     target_compile_options(${PROJECT_NAME} PRIVATE ${COMMON_COMPILE_OPTIONS})

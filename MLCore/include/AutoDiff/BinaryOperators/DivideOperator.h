@@ -11,7 +11,7 @@ public:
 	DivideOperator(const NodePtr lhsInput, const NodePtr rhsInput)
 		: IBinaryOperator(lhsInput, rhsInput){};
 
-	virtual void updateValue() override;
+	void updateValue() override;
 };
 
 using DivideOperatorPtr = std::shared_ptr<DivideOperator>;

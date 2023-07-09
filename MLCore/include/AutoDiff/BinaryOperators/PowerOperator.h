@@ -11,7 +11,7 @@ public:
 	PowerOperator(const NodePtr lhsInput, const NodePtr rhsInput)
 		: IBinaryOperator(lhsInput, rhsInput){};
 
-	virtual void updateValue() override;
+	void updateValue() override;
 };
 
 using PowerOperatorPtr = std::shared_ptr<PowerOperator>;

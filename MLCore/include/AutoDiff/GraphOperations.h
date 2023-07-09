@@ -2,7 +2,7 @@
 #define AUTODIFF_GRAPHOPERATIONS_H
 
 #include <AutoDiff/ComputationGraph.h>
-#include <AutoDiff/GraphNodes.h>
+#include <AutoDiff/GraphNodes.hpp>
 
 /**
  * @brief Algorithms operating on GraphNodes, cooperating with ComputationGraph
@@ -12,8 +12,8 @@ namespace mlCore
 class BinaryOperations
 {
 public:
-	BinaryOperations();
-	BinaryOperations(const std::shared_ptr<ComputationGraph> graph);
+	BinaryOperations() = default;
+	BinaryOperations(std::shared_ptr<ComputationGraph> graph);
 
 	BinaryOperations(const BinaryOperations&) = delete; // Copy ctor
 	BinaryOperations(BinaryOperations&&) = delete; // Move ctor
@@ -32,7 +32,7 @@ private:
 	std::shared_ptr<ResultNodeType> operationImpl(NodePtr lNode, NodePtr rNode);
 
 private:
-	std::shared_ptr<ComputationGraph> graph_;
+	std::shared_ptr<ComputationGraph> graph_ = nullptr;
 };
 
 class UnaryOperations
@@ -41,7 +41,7 @@ class UnaryOperations
 class NodesActivations
 {
 public:
-	NodesActivations();
+	NodesActivations() = default;
 	NodesActivations(std::shared_ptr<ComputationGraph> graph);
 
 	NodesActivations(const NodesActivations&) = delete; // Copy ctor
@@ -57,7 +57,7 @@ private:
 	std::shared_ptr<ResultNodeType> operationImpl(NodePtr lNode);
 
 private:
-	std::shared_ptr<ComputationGraph> graph_;
+	std::shared_ptr<ComputationGraph> graph_ = nullptr;
 };
 
 } // namespace mlCore

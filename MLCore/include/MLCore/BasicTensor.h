@@ -23,7 +23,7 @@ namespace mlCore
 template <typename valueType>
 class BasicTensor
 {
-	friend class TensorOperations;
+	friend struct TensorOperations;
 	class Iterator;
 
 public:
@@ -41,15 +41,14 @@ public:
 	 * @param shape tensor's initial shape
 	 * @param initVal initital value
 	 */
-	BasicTensor(const std::vector<size_t>& shape, const valueType initVal);
+	BasicTensor(const std::vector<size_t>& shape, valueType initVal);
 	/**
 	 * @brief Constructs a new tensor from shape and gives it initial values
 	 * 
 	 * @param shape Tensor's initial shape
 	 * @param initValues Values to assign, there is no check of the init list length
 	 */
-	BasicTensor(const std::vector<size_t>& shape,
-				const std::initializer_list<valueType> initValues);
+	BasicTensor(const std::vector<size_t>& shape, std::initializer_list<valueType> initValues);
 	~BasicTensor();
 
 	// assign
@@ -60,7 +59,7 @@ public:
 	 * 
 	 * @return
 	 */
-	BasicTensor& operator=(const valueType);
+	BasicTensor& operator=(valueType);
 
 	// getters
 	const std::vector<size_t>& shape() const noexcept
@@ -97,7 +96,7 @@ public:
 	 */
 	void assign(std::initializer_list<std::pair<size_t, size_t>> indices,
 				std::initializer_list<valueType> newData,
-				const bool wrapData = false);
+				bool wrapData = false);
 
 	/**
 	 * @brief assigns values to the tensor
@@ -118,7 +117,8 @@ public:
 			{
 				throw std::out_of_range("Too many values to assign to the tensor.");
 			}
-			else if(size() > nElementsToAssign)
+
+			if(size() > nElementsToAssign)
 			{
 				throw std::out_of_range("Too few values to assign to the tensor.");
 			}
@@ -166,8 +166,9 @@ public:
 	friend std::ostream& operator<<(std::ostream&, const BasicTensor<TensorValueType>&);
 
 private:
-	struct Iterator
+	class Iterator
 	{
+	public:
 		using iterator_category = std::input_iterator_tag;
 		using difference_type = std::ptrdiff_t;
 		using value_type = valueType;
@@ -175,68 +176,71 @@ private:
 		using reference = valueType&;
 
 		Iterator(pointer ptr)
-			: curr_ptr(ptr)
+			: currPtr_(ptr)
 		{ }
 
 		reference operator*()
 		{
-			return *curr_ptr;
+			return *currPtr_;
 		}
 		pointer operator->()
 		{
-			return curr_ptr;
+			return currPtr_;
 		}
 		Iterator& operator++()
 		{
-			curr_ptr++;
+			currPtr_++;
 			return *this;
 		}
-		Iterator operator++(int)
+
+		// NOLINTBEGIN(readability-const-return-type)
+		const Iterator operator++(int)
 		{
 			auto tmp = *this;
 			++(*this);
 			return tmp;
 		}
+		// NOLINTEND(readability-const-return-type)
 
 		friend bool operator==(const Iterator& iter1, const Iterator& iter2)
 		{
-			return iter1.curr_ptr == iter2.curr_ptr;
+			return iter1.currPtr_ == iter2.currPtr_;
 		}
 
 		friend bool operator!=(const Iterator& iter1, const Iterator& iter2)
 		{
-			return iter1.curr_ptr != iter2.curr_ptr;
+			return iter1.currPtr_ != iter2.currPtr_;
 		}
 		friend bool operator<(const Iterator& iter1, const Iterator& iter2)
 		{
-			return iter1.curr_ptr < iter2.curr_ptr;
+			return iter1.currPtr_ < iter2.currPtr_;
 		}
 
 	private:
-		pointer curr_ptr;
+		pointer currPtr_;
 	};
 
 private:
-	void checkIndicesList_(
-		const std::initializer_list<std::pair<size_t, size_t>>::const_iterator beg,
-		const std::initializer_list<std::pair<size_t, size_t>>::const_iterator end) const;
+	void
+	checkIndicesList_(std::initializer_list<std::pair<size_t, size_t>>::const_iterator beg,
+					  std::initializer_list<std::pair<size_t, size_t>>::const_iterator end) const;
 	void checkShape_(const std::vector<size_t>&) const;
 
 	BasicTensor
 	performOperation_(const BasicTensor&,
 					  const std::function<valueType(const valueType, const valueType)>&) const;
 
-	static const inline std::function<valueType(const valueType l, const valueType r)>
-		plusOperator_ = [](const valueType l, const valueType r) { return l + r; };
+	static const inline std::function<valueType(const valueType, const valueType)> plusOperator_ =
+		[](const valueType left, const valueType right) { return left + right; };
 
-	static const inline std::function<valueType(const valueType l, const valueType r)>
-		minusOperator_ = [](const valueType l, const valueType r) { return l - r; };
+	static const inline std::function<valueType(const valueType, const valueType)> minusOperator_ =
+		[](const valueType left, const valueType right) { return left - right; };
 
-	static const inline std::function<valueType(const valueType l, const valueType r)>
-		mulOperator_ = [](const valueType l, const valueType r) { return l * r; };
+	static const inline std::function<valueType(const valueType, const valueType)> mulOperator_ =
+		[](const valueType left, const valueType right) { return left * right; };
 
-	static const inline std::function<valueType(const valueType l, const valueType r)>
-		divOperator_ = [](const valueType l, const valueType r) { return l / r; };
+	static const inline std::function<valueType(const valueType, const valueType)> divOperator_ =
+		[](const valueType left, const valueType right) { return left / right; };
 
 private:
 	size_t length_;

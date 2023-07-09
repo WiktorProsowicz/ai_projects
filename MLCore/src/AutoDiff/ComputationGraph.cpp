@@ -5,12 +5,6 @@
 
 namespace mlCore
 {
-ComputationGraph::ComputationGraph()
-	: isActive_(false)
-	, nodes_()
-	, gradients_()
-	, areNodesSorted_(true)
-{ }
 
 bool ComputationGraph::hasGradient(const size_t& nodeId) const
 {
@@ -81,7 +75,9 @@ void ComputationGraph::sortNodes()
 		}
 
 		if(std::find(newNodes.begin(), newNodes.end(), node) == newNodes.end())
+		{
 			newNodes.push_back(node);
+		}
 	};
 
 	for(auto nodesIter = nodes_.crbegin(); nodesIter < nodes_.crend(); nodesIter++)
@@ -95,7 +91,9 @@ void ComputationGraph::sortNodes()
 void ComputationGraph::forwardPass(const std::map<PlaceholderPtr, Tensor>& feedDict)
 {
 	if(!areNodesSorted_)
+	{
 		sortNodes();
+	}
 
 	for(const auto& node : nodes_)
 	{
@@ -118,7 +116,9 @@ void ComputationGraph::forwardPass(const std::map<PlaceholderPtr, Tensor>& feedD
 void ComputationGraph::computeGradients(const NodePtr root)
 {
 	if(!areNodesSorted_)
+	{
 		sortNodes();
+	}
 
 	std::function<void(const NodePtr, const Tensor&)> backPropagate;
 

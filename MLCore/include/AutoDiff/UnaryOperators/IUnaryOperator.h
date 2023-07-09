@@ -1,7 +1,7 @@
 #ifndef UNARYOPERATORS_IUNARYOPERATOR_H
 #define UNARYOPERATORS_IUNARYOPERATOR_H
 
-#include <AutoDiff/GraphNodes.h>
+#include <AutoDiff/GraphNodes.hpp>
 
 namespace mlCore
 {

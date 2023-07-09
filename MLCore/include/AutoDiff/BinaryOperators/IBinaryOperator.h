@@ -1,7 +1,7 @@
 #ifndef MLCORE_IBINARYOPERATOR_H
 #define MLCORE_IBINARYOPERATOR_H
 
-#include <AutoDiff/GraphNodes.h>
+#include <AutoDiff/GraphNodes.hpp>
 
 namespace mlCore
 {

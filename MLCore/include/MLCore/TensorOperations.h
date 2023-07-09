@@ -16,13 +16,15 @@ struct TensorOperations
 		if(lhs.shape_ == rhs.shape_)
 		{
 			BasicTensor<valueType> ret(lhs.shape_);
-			for(size_t i = 0; i < lhs.length_; i++)
-				ret.data_[i] = pow(lhs.data_[i], rhs.data_[i]);
+			for(size_t dataPos = 0; dataPos < lhs.length_; dataPos++)
+			{
+				ret.data_[dataPos] = pow(lhs.data_[dataPos], rhs.data_[dataPos]);
+			}
 			return ret;
 		}
 
-		static const std::function<valueType(const valueType l, const valueType r)> powOperator_ =
-			[](const valueType l, const valueType r) { return pow(l, r); };
+		static const std::function<valueType(const valueType, const valueType)> powOperator_ =
+			[](const valueType left, const valueType right) { return pow(left, right); };
 
 		return lhs.performOperation_(rhs, powOperator_);
 	}
@@ -32,7 +34,9 @@ struct TensorOperations
 	{
 		auto ret = arg;
 		for(auto& val : ret)
+		{
 			val = log(val);
+		}
 		return ret;
 	}
 
@@ -41,7 +45,9 @@ struct TensorOperations
 	{
 		auto ret = arg;
 		for(auto& val : ret)
+		{
 			val = val > 0 ? val : 0;
+		}
 		return ret;
 	}
 
@@ -50,7 +56,9 @@ struct TensorOperations
 	{
 		auto ret = arg;
 		for(auto& val : ret)
+		{
 			val = 1.0 / (1.0 + pow(M_E, -val));
+		}
 		return ret;
 	}
 };

@@ -1,7 +1,10 @@
 #ifndef MLCORE_COMPUTATIONGRAPH_H
 #define MLCORE_COMPUTATIONGRAPH_H
 
+#include <AutoDiff/GraphNodes.hpp>
 #include <map>
+#include <string>
+#include <vector>
 
 namespace mlCore
 {
@@ -21,7 +24,7 @@ class ComputationGraph
 	friend class NodesActivations;
 
 public:
-	ComputationGraph();
+	ComputationGraph() = default;
 
 	ComputationGraph& operator=(const ComputationGraph&) = delete; // Copy assign
 	ComputationGraph& operator=(ComputationGraph&&) = delete; // Move assign
@@ -107,18 +110,18 @@ public:
 	 * 
 	 * @param root Starting node - the back-propagation will occur relatively to it
 	 */
-	void computeGradients(const NodePtr root);
+	void computeGradients(NodePtr root);
 
 private:
-	void addNode(const NodePtr node);
+	void addNode(NodePtr node);
 
 	void sortNodes();
 
 private:
-	bool isActive_;
-	std::vector<NodePtr> nodes_;
-	std::map<NodePtr, Tensor> gradients_;
-	bool areNodesSorted_;
+	bool isActive_ = false;
+	std::vector<NodePtr> nodes_ = {};
+	std::map<NodePtr, Tensor> gradients_ = {};
+	bool areNodesSorted_ = true;
 };
 } // namespace mlCore
 

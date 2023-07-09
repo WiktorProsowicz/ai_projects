@@ -59,7 +59,7 @@ class TestTensorOperations : public testing::Test
 protected:
 	const static inline std::vector<size_t> testedTensorShape{3, 3, 3};
 
-	void compareTensors(const mlCore::Tensor& checked, const mlCore::Tensor& expected) const
+	static void compareTensors(const mlCore::Tensor& checked, const mlCore::Tensor& expected)
 	{
 		ASSERT_EQ(checked.shape(), expected.shape());
 

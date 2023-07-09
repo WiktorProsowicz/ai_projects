@@ -29,7 +29,7 @@ protected:
 	 * @param tensor1 
 	 * @param tensor2 
 	 */
-	void checkTensorEquality(const mlCore::Tensor& tensor1, const mlCore::Tensor& tensor2)
+	static void checkTensorEquality(const mlCore::Tensor& tensor1, const mlCore::Tensor& tensor2)
 	{
 		ASSERT_EQ(tensor1.nDimensions(), tensor2.nDimensions());
 		ASSERT_EQ(tensor1.size(), tensor2.size());
@@ -48,11 +48,13 @@ protected:
 	 * 
 	 * @param tensor Checked object that is expected to behave as if its content has been moved 
 	 */
-	void isTensorEmpty(const mlCore::Tensor& tensor)
+	static void isTensorEmpty(const mlCore::Tensor& tensor)
 	{
+		// NOLINTBEGIN(clang-analyzer-cplusplus.Move)
 		ASSERT_EQ(tensor.shape(), std::vector<size_t>{});
 		ASSERT_EQ(tensor.size(), 0);
 		ASSERT_EQ(tensor.nDimensions(), 0);
+		// NOLINTEND(clang-analyzer-cplusplus.Move)
 	}
 
 	/**
@@ -61,7 +63,7 @@ protected:
 	 * @param tensor Tensor object whose values are checked
 	 * @param values Expected values that the tensor should contain
 	 */
-	void checkTensorValues(const mlCore::Tensor& tensor, const std::vector<double>& values)
+	static void checkTensorValues(const mlCore::Tensor& tensor, const std::vector<double>& values)
 	{
 		ASSERT_EQ(tensor.size(), values.size());
 
@@ -114,7 +116,9 @@ TEST_F(TestBasicTensor, testConstructorWithInitialValue)
 		const mlCore::Tensor tensor(shapes[i], values[i]);
 
 		for(const auto value : tensor)
+		{
 			EXPECT_DOUBLE_EQ(value, values[i]);
+		}
 	}
 }
 
@@ -256,10 +260,12 @@ TEST_F(TestBasicTensor, testCopy)
 
 TEST_F(TestBasicTensor, testMove)
 {
+	// NOLINTBEGIN(bugprone-use-after-move)
 	mlCore::Tensor tensorBase(std::vector<size_t>{2, 3, 4});
 
 	tensorBase.fill(mlCore::RangeTensorInitializer<double>(0));
-	mlCore::Tensor tensorBase_1 = tensorBase, tensorBase_2 = tensorBase;
+	mlCore::Tensor tensorBase_1 = tensorBase;
+	mlCore::Tensor tensorBase_2 = tensorBase;
 
 	mlCore::Tensor tensorMovedByConstructor = std::move(tensorBase_1);
 
@@ -271,6 +277,7 @@ TEST_F(TestBasicTensor, testMove)
 
 	checkTensorEquality(tensorMovedByAssignment, tensorBase);
 	isTensorEmpty(tensorBase_2);
+	// NOLINTEND(bugprone-use-after-move)
 }
 
 TEST_F(TestBasicTensor, testAssignFunction)

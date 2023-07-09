@@ -11,7 +11,7 @@ public:
 	AddOperator(const NodePtr lhsInput, const NodePtr rhsInput)
 		: IBinaryOperator(lhsInput, rhsInput){};
 
-	virtual void updateValue() override;
+	void updateValue() override;
 };
 
 using AddOperatorPtr = std::shared_ptr<AddOperator>;

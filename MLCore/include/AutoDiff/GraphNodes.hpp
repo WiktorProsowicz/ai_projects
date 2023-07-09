@@ -87,7 +87,7 @@ public:
 	Constant(const Tensor& tensor, const std::string& name = "")
 		: Node(tensor, name){};
 
-	void setValue(const Tensor&) override
+	void setValue(const Tensor& /*tensor*/) override
 	{
 		LOG_WARN("GraphNodes", "Attempt to assign value to constant");
 	}

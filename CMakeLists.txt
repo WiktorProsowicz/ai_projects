@@ -10,6 +10,11 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 option(CMAKE_C_COMPILER "verision of c compiler" gcc-8.1)
 option(CMAKE_CXX_COMPILER "version of c++ compiler" gcc-11.3)
 
+enable_testing()
+
+include(GoogleTest)
+
+
 set(COMMON_COMPILE_OPTIONS
     -Wall
     -std=c++23

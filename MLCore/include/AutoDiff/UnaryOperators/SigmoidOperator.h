@@ -15,7 +15,7 @@ public:
 	SigmoidOperator(const NodePtr input)
 		: IUnaryOperator(input){};
 
-	virtual void updateValue() override;
+	void updateValue() override;
 };
 
 using SigmoidOperatorPtr = std::shared_ptr<SigmoidOperator>;

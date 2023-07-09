@@ -15,7 +15,7 @@ public:
 	ReluOperator(const NodePtr input)
 		: IUnaryOperator(input){};
 
-	virtual void updateValue() override;
+	void updateValue() override;
 };
 
 using ReluOperatorPtr = std::shared_ptr<ReluOperator>;

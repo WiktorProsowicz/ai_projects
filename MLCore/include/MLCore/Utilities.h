@@ -47,17 +47,19 @@ struct RangeTensorInitializer : public ITensorInitializer<ValueType>
 		, maxValue_(maxValue)
 	{ }
 
-	virtual ValueType yield() const override
+	ValueType yield() const override
 	{
 		if(!canYield())
+		{
 			throw std::out_of_range("Cannot obtain value from RangeTensorYielder.");
+		}
 
 		ValueType out = currentValue_;
 		currentValue_ += step_;
 		return out;
 	}
 
-	virtual bool canYield() const override
+	bool canYield() const override
 	{
 		return currentValue_ <= maxValue_;
 	}
@@ -73,11 +75,11 @@ std::string stringifyVector(const std::vector<T>& vect,
 							const char* const openSign = "(",
 							const char* const closeSign = ")")
 {
-	std::ostringstream ss;
-	ss << openSign;
-	std::copy(vect.cbegin(), vect.cend(), std::ostream_iterator<T>(ss, ", "));
-	ss << closeSign;
-	return ss.str();
+	std::ostringstream serializingStream;
+	serializingStream << openSign;
+	std::copy(vect.cbegin(), vect.cend(), std::ostream_iterator<T>(serializingStream, ", "));
+	serializingStream << closeSign;
+	return serializingStream.str();
 }
 
 } // namespace mlCore

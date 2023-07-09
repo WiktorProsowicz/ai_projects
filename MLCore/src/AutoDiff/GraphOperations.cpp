@@ -21,10 +21,6 @@ BinaryOperations::BinaryOperations(const std::shared_ptr<ComputationGraph> graph
 	: graph_(graph)
 { }
 
-BinaryOperations::BinaryOperations()
-	: graph_(nullptr)
-{ }
-
 template <typename ResultNodeType>
 std::shared_ptr<ResultNodeType> BinaryOperations::operationImpl(const NodePtr lNode,
 																const NodePtr rNode)
@@ -34,39 +30,41 @@ std::shared_ptr<ResultNodeType> BinaryOperations::operationImpl(const NodePtr lN
 	resultNode->updateValue();
 
 	if(graph_ && graph_->isActive())
+	{
 		graph_->addNode(resultNode);
+	}
 
 	return resultNode;
 }
 
 NodePtr BinaryOperations::multiply(const NodePtr lNode, const NodePtr rNode)
 {
-	return BinaryOperations{}.operationImpl<MultiplyOperator>(lNode, rNode);
+	return operationImpl<MultiplyOperator>(lNode, rNode);
 }
 
 NodePtr BinaryOperations::add(const NodePtr lNode, const NodePtr rNode)
 {
-	return BinaryOperations{}.operationImpl<AddOperator>(lNode, rNode);
+	return operationImpl<AddOperator>(lNode, rNode);
 }
 
 NodePtr BinaryOperations::subtract(const NodePtr lNode, const NodePtr rNode)
 {
-	return BinaryOperations{}.operationImpl<SubtractOperator>(lNode, rNode);
+	return operationImpl<SubtractOperator>(lNode, rNode);
 }
 
 NodePtr BinaryOperations::divide(const NodePtr lNode, const NodePtr rNode)
 {
-	return BinaryOperations{}.operationImpl<DivideOperator>(lNode, rNode);
+	return operationImpl<DivideOperator>(lNode, rNode);
 }
 
-NodePtr BinaryOperations::power(const NodePtr lNode, const NodePtr rNode)
+NodePtr BinaryOperations::power(const NodePtr baseNode, const NodePtr factorNode)
 {
-	return BinaryOperations{}.operationImpl<PowerOperator>(lNode, rNode);
+	return operationImpl<PowerOperator>(baseNode, factorNode);
 }
 
 NodePtr BinaryOperations::matmul(const NodePtr lNode, const NodePtr rNode)
 {
-	return BinaryOperations{}.operationImpl<MatmulOperator>(lNode, rNode);
+	return operationImpl<MatmulOperator>(lNode, rNode);
 }
 
 /****************
@@ -83,10 +81,6 @@ NodePtr BinaryOperations::matmul(const NodePtr lNode, const NodePtr rNode)
 
 NodesActivations::NodesActivations(const std::shared_ptr<ComputationGraph> graph)
 	: graph_(graph)
-{ }
-
-NodesActivations::NodesActivations()
-	: graph_(nullptr)
 { }
 
 template <typename ResultNodeType>

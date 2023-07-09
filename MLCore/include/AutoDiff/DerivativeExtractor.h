@@ -37,7 +37,7 @@ public:
      * @param outerDerivative derivative to perform chain rule computation
      * @return derivative of oper updated with outerDerivative
      */
-	Tensor operator()(const IUnaryOperatorPtr oper, const Tensor& outerDerivative) const;
+	Tensor operator()(IUnaryOperatorPtr oper, const Tensor& outerDerivative) const;
 
 	/**
      * @brief Computes derivatives of a binary operator in respect of its inputs
@@ -46,27 +46,23 @@ public:
      * @param outerDerivative derivative to perform chain rule computation
      * @return derivatives of oper updated with outerDerivative
      */
-	std::pair<Tensor, Tensor> operator()(const IBinaryOperatorPtr oper,
+	std::pair<Tensor, Tensor> operator()(IBinaryOperatorPtr oper,
 										 const Tensor& outerDerivative) const;
 
 private:
 	/// Extraction functions for concrete unary operators' subclasses
-	Tensor extract(const ReluOperatorPtr oper, const Tensor& outerDerivative) const;
-	Tensor extract(const SigmoidOperatorPtr oper, const Tensor& outerDerivative) const;
+	static Tensor extract(ReluOperatorPtr oper, const Tensor& outerDerivative);
+	static Tensor extract(SigmoidOperatorPtr oper, const Tensor& outerDerivative);
 
 	/// Extraction functions for concrete binary operators' subclasses
-	std::pair<Tensor, Tensor> extract(const AddOperatorPtr oper,
-									  const Tensor& outerDerivative) const;
-	std::pair<Tensor, Tensor> extract(const DivideOperatorPtr oper,
-									  const Tensor& outerDerivative) const;
-	std::pair<Tensor, Tensor> extract(const MatmulOperatorPtr oper,
-									  const Tensor& outerDerivative) const;
-	std::pair<Tensor, Tensor> extract(const MultiplyOperatorPtr oper,
-									  const Tensor& outerDerivative) const;
-	std::pair<Tensor, Tensor> extract(const PowerOperatorPtr oper,
-									  const Tensor& outerDerivative) const;
-	std::pair<Tensor, Tensor> extract(const SubtractOperatorPtr oper,
-									  const Tensor& outerDerivative) const;
+	static std::pair<Tensor, Tensor> extract(AddOperatorPtr oper, const Tensor& outerDerivative);
+	static std::pair<Tensor, Tensor> extract(DivideOperatorPtr oper, const Tensor& outerDerivative);
+	static std::pair<Tensor, Tensor> extract(MatmulOperatorPtr oper, const Tensor& outerDerivative);
+	static std::pair<Tensor, Tensor> extract(MultiplyOperatorPtr oper,
+											 const Tensor& outerDerivative);
+	static std::pair<Tensor, Tensor> extract(PowerOperatorPtr oper, const Tensor& outerDerivative);
+	static std::pair<Tensor, Tensor> extract(SubtractOperatorPtr oper,
+											 const Tensor& outerDerivative);
 };
 } // namespace mlCore
 

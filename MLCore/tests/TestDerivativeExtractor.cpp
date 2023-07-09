@@ -46,9 +46,9 @@ struct BinaryParams
 
 std::string stringifyTensor(const mlCore::Tensor& tensor)
 {
-	std::stringstream ss;
-	ss << tensor;
-	return ss.str();
+	std::stringstream serializeStream;
+	serializeStream << tensor;
+	return serializeStream.str();
 }
 
 /*****************************
@@ -60,8 +60,8 @@ class TestDerivativeExtractor : public testing::Test
 {
 protected:
 	template <UnaryNodeOperation Operation>
-	mlCore::Tensor computeDefinitionDerivative(Operation oper,
-											   const mlCore::Tensor& inputTensor) const
+	static mlCore::Tensor computeDefinitionDerivative(Operation oper,
+													  const mlCore::Tensor& inputTensor)
 	{
 		constexpr double kEpsilon = 1e-6;
 
@@ -77,9 +77,9 @@ protected:
 			   mlCore::Tensor({}, 2 * kEpsilon);
 	}
 
-	void compareTwoDerivatives(const mlCore::Tensor& computedDerivative,
-							   const mlCore::Tensor& expDerivative,
-							   const std::string& message) const
+	static void compareTwoDerivatives(const mlCore::Tensor& computedDerivative,
+									  const mlCore::Tensor& expDerivative,
+									  const std::string& message)
 	{
 		for(auto gotTensorIt = computedDerivative.begin(), expectedTensorIt = expDerivative.begin();
 			(gotTensorIt < computedDerivative.end()) && (expectedTensorIt < expDerivative.end());
@@ -93,7 +93,7 @@ protected:
 	}
 
 	template <BinaryNodeOperation Operation>
-	void testBinaryOperationDerivative(Operation oper, const BinaryParams& params) const
+	static void testBinaryOperationDerivative(Operation oper, const BinaryParams& params)
 	{
 		// input tensors
 		mlCore::Tensor leftNodeValue(params.leftTensorShape);
@@ -150,7 +150,7 @@ protected:
 	}
 
 	template <UnaryNodeOperation Operation>
-	void testUnaryOperationDerivative(Operation oper, const UnaryParams& params) const
+	static void testUnaryOperationDerivative(Operation oper, const UnaryParams& params)
 	{
 		// input tensor
 		mlCore::Tensor nodeValue(params.tensorShape);
@@ -182,11 +182,11 @@ protected:
 				stringifyTensor(nodeValue));
 	}
 
-	void
+	static void
 	testMatmulDerivativeExtracting(const mlCore::Tensor& leftTensor,
 								   const mlCore::Tensor& rightTensor,
 								   const mlCore::Tensor& outer,
-								   const std::pair<mlCore::Tensor, mlCore::Tensor>& expected) const
+								   const std::pair<mlCore::Tensor, mlCore::Tensor>& expected)
 	{
 		const auto leftNode = std::make_shared<mlCore::Constant>(leftTensor);
 		const auto rightNode = std::make_shared<mlCore::Constant>(rightTensor);
