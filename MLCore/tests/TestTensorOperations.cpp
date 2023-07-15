@@ -120,7 +120,7 @@ TEST_F(TestTensorOperations, testNaturalLogarithm)
 						   2.303, 2.398, 2.485, 2.565, 2.639, 2.708, 2.773, 2.833, 2.890,
 						   2.944, 2.996, 3.045, 3.091, 3.135, 3.178, 3.219, 3.258, 3.296}};
 
-	performUnaryOperationAndCompare(params, mlCore::TensorOperations::ln<double>);
+	performUnaryOperationAndCompare(params, mlCore::TensorOperations::ln);
 }
 
 TEST_F(TestTensorOperations, testRelu)
@@ -130,7 +130,7 @@ TEST_F(TestTensorOperations, testRelu)
 		.expectedValues = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,	 0.0,  0.0,	 0.0,  0.0, 1.0,
 						   2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0}};
 
-	performUnaryOperationAndCompare(params, mlCore::TensorOperations::relu<double>);
+	performUnaryOperationAndCompare(params, mlCore::TensorOperations::relu);
 }
 
 TEST_F(TestTensorOperations, testSigmoid)
@@ -142,7 +142,7 @@ TEST_F(TestTensorOperations, testSigmoid)
 						   0.73106, 0.81757, 0.88080, 0.92414, 0.95257, 0.97069, 0.98201,
 						   0.98901, 0.99331, 0.99593, 0.99753, 0.99850, 0.99909}};
 
-	performUnaryOperationAndCompare(params, mlCore::TensorOperations::sigmoid<double>);
+	performUnaryOperationAndCompare(params, mlCore::TensorOperations::sigmoid);
 }
 
 TEST_F(TestTensorOperations, testPower)
@@ -156,7 +156,7 @@ TEST_F(TestTensorOperations, testPower)
 			7.500,	   22.627,	   72.250,	   243.000,		857.375,	  3162.278,	   12155.062,
 			48558.704, 201135.719, 861979.333, 3814697.266, 17403307.346, 81721509.398}};
 
-	performBinaryOperationAndCompare(params, mlCore::TensorOperations::power<double>);
+	performBinaryOperationAndCompare(params, mlCore::TensorOperations::power);
 }
 
 } // namespace

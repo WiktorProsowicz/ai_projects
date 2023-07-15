@@ -1,5 +1,6 @@
 
 #include "MLCore/BasicTensor.h"
+#include <MLCore/TensorOperationsImpl.h>
 
 namespace mlCore
 {
@@ -240,69 +241,61 @@ void BasicTensor<valueType>::checkIndicesList_(
 template <typename valueType>
 BasicTensor<valueType> BasicTensor<valueType>::operator*(const BasicTensor& other) const
 {
-	if(shape_ == other.shape_)
-	{
-		BasicTensor<valueType> ret(shape_);
-
-		for(size_t dataIt = 0; dataIt < length_; dataIt++)
-		{
-			ret.data_[dataIt] = data_[dataIt] * other.data_[dataIt];
-		}
-
-		return ret;
-	}
-	return performOperation_(other, mulOperator_);
+	auto ret = *this;
+	TensorOperationsImpl<double>::multiplyTensorsInPlace(ret, other);
+	return ret;
 }
 
 template <typename valueType>
 BasicTensor<valueType> BasicTensor<valueType>::operator-(const BasicTensor& other) const
 {
-	if(shape_ == other.shape_)
-	{
-		BasicTensor<valueType> ret(shape_);
-
-		for(size_t dataIt = 0; dataIt < length_; dataIt++)
-		{
-			ret.data_[dataIt] = data_[dataIt] - other.data_[dataIt];
-		}
-
-		return ret;
-	}
-	return performOperation_(other, minusOperator_);
+	auto ret = *this;
+	TensorOperationsImpl<double>::subtractTensorsInPlace(ret, other);
+	return ret;
 }
 
 template <typename valueType>
 BasicTensor<valueType> BasicTensor<valueType>::operator+(const BasicTensor& other) const
 {
-	if(shape_ == other.shape_)
-	{
-		BasicTensor<valueType> ret(shape_);
-
-		for(size_t dataIt = 0; dataIt < length_; dataIt++)
-		{
-			ret.data_[dataIt] = data_[dataIt] + other.data_[dataIt];
-		}
-
-		return ret;
-	}
-	return performOperation_(other, plusOperator_);
+	auto ret = *this;
+	TensorOperationsImpl<double>::addTensorsInPlace(ret, other);
+	return ret;
 }
 
 template <typename valueType>
 BasicTensor<valueType> BasicTensor<valueType>::operator/(const BasicTensor& other) const
 {
-	if(shape_ == other.shape_)
-	{
-		BasicTensor<valueType> ret(shape_);
+	auto ret = *this;
+	TensorOperationsImpl<double>::divideTensorsInPlace(ret, other);
+	return ret;
+}
 
-		for(size_t dataIt = 0; dataIt < length_; dataIt++)
-		{
-			ret.data_[dataIt] = data_[dataIt] / other.data_[dataIt];
-		}
+template <typename valueType>
+BasicTensor<valueType>& BasicTensor<valueType>::operator+=(const BasicTensor& other)
+{
+	TensorOperationsImpl<double>::addTensorsInPlace(*this, other);
+	return *this;
+}
 
-		return ret;
-	}
-	return performOperation_(other, divOperator_);
+template <typename valueType>
+BasicTensor<valueType>& BasicTensor<valueType>::operator-=(const BasicTensor& other)
+{
+	TensorOperationsImpl<double>::subtractTensorsInPlace(*this, other);
+	return *this;
+}
+
+template <typename valueType>
+BasicTensor<valueType>& BasicTensor<valueType>::operator*=(const BasicTensor& other)
+{
+	TensorOperationsImpl<double>::multiplyTensorsInPlace(*this, other);
+	return *this;
+}
+
+template <typename valueType>
+BasicTensor<valueType>& BasicTensor<valueType>::operator/=(const BasicTensor& other)
+{
+	TensorOperationsImpl<double>::divideTensorsInPlace(*this, other);
+	return *this;
 }
 
 template <typename valueType>
@@ -475,129 +468,6 @@ BasicTensor<valueType> BasicTensor<valueType>::transposed() const
 					  (posInFrame / frameShapeFirst)];
 		}
 	}
-
-	return ret;
-}
-
-template <typename valueType>
-BasicTensor<valueType> BasicTensor<valueType>::performOperation_(
-	const BasicTensor<valueType>& other,
-	const std::function<valueType(const valueType, const valueType)>& op_) const
-{
-	// checking if the rules of broadcasting are not breached
-	auto selfShapeIter = shape_.rbegin();
-	auto otherShapeIter = other.shape_.rbegin();
-	for(; (selfShapeIter > shape_.rend()) && (otherShapeIter > other.shape_.rend());
-		selfShapeIter--, otherShapeIter--)
-	{
-		if((*selfShapeIter != 1) && (*otherShapeIter != 1) && (*selfShapeIter != *otherShapeIter))
-		{
-			throw std::invalid_argument(
-				"Can't perform broadcasting operation on tensors with invalid shapes: " +
-				stringifyVector(shape_) + " " + stringifyVector(other.shape_));
-		}
-	}
-
-	const auto biggerSize = std::max(shape_.size(), other.shape_.size());
-
-	// shapes after padding with ones
-	std::vector<size_t> paddedLeftShape(biggerSize, 1);
-	std::vector<size_t> paddedRightShape(biggerSize, 1);
-
-	std::copy(
-		shape_.cbegin(),
-		shape_.cend(),
-		std::next(paddedLeftShape.begin(), static_cast<ptrdiff_t>(biggerSize - shape_.size())));
-
-	std::copy(other.shape_.cbegin(),
-			  other.shape_.cend(),
-			  std::next(paddedRightShape.begin(),
-						static_cast<ptrdiff_t>(biggerSize - other.shape_.size())));
-
-	std::vector<size_t> retShape(biggerSize);
-	for(size_t i = 0; i < biggerSize; i++)
-	{
-		// filling new shape according to dimension that can be stretched
-		retShape[i] = paddedLeftShape[i] == 1 ? paddedRightShape[i] : paddedLeftShape[i];
-	}
-
-	BasicTensor<valueType> ret(retShape, 0);
-
-	// handles stretching smaller tensor into returned one's payload
-	// clang-format off
-
-	// determines the being-stretched tensor's current copied element
-	std::vector<size_t> factorTreePath(biggerSize, 0);
-	// determines the place for added element in returned tensor
-	std::vector<size_t> destTreePath(biggerSize, 0);
-
-	auto computeElementPosition = [](const std::vector<size_t>& path, const std::vector<size_t>& shape) -> size_t
-	{
-		// specifies the offset added to total position while traversing respective dimensions
-		size_t offset = 1;
-		size_t position = 0;
-		for(size_t i = path.size() - 1; i < path.size(); i--)
-		{
-			position += offset * path[i];
-			offset *= shape[i];
-		}
-
-		return position;
-	};
-
-	// updates tree paths until all elements are processed and constantly assigns proper elements to proper places
-	std::function<void(valueType* const, const valueType* const, 
-					   const std::vector<size_t>&, 
-					   const std::function<valueType(const valueType, const valueType)>&)> appendTensor;
-
-	appendTensor = [&factorTreePath, &destTreePath, &retShape, &computeElementPosition, &ret](valueType* const destDataPtr,
-															   const valueType* const factorDataPtr,
-															   const std::vector<size_t>& factorShape,
-															   const std::function<valueType(const valueType, const valueType)>& oper) mutable
-	{
-		size_t elementsProcessed = 0;
-		const auto destTensorLength = std::accumulate(retShape.cbegin(), retShape.cend(), size_t(1), 
-													[](const auto curr, const auto dim){ return curr * dim; });
-
-		while(elementsProcessed < destTensorLength)
-		{
-			const auto destElemPos = computeElementPosition(destTreePath, retShape);
-			const auto factorElemPos = computeElementPosition(factorTreePath, factorShape);
-
-			destDataPtr[destElemPos] = oper(destDataPtr[destElemPos], factorDataPtr[factorElemPos]);
-
-			elementsProcessed++;
-
-			for(size_t i = retShape.size() - 1; i < retShape.size(); i--) {
-
-				
-				destTreePath[i]++;
-				if(factorShape[i] > 1)
-				{
-					factorTreePath[i]++;
-				}
-
-				if(destTreePath[i] < retShape[i])
-				{
-					break;
-				}
-
-				destTreePath[i] = 0;
-				factorTreePath[i] = 0;
-			}
-		}
-	};
-	// clang-format on
-
-	appendTensor(ret.data_, this->data_, paddedLeftShape, plusOperator_);
-
-	for(size_t i = 0; i < biggerSize; i++)
-	{
-		destTreePath[i] = 0;
-		factorTreePath[i] = 0;
-	}
-
-	appendTensor(ret.data_, other.data_, paddedRightShape, op_);
 
 	return ret;
 }

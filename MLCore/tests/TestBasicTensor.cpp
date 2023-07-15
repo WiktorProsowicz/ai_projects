@@ -333,6 +333,34 @@ TEST_F(TestBasicTensor, testOperatorsWithoutBroadcasting)
 	checkTensorValues(modifiedTensor, values5);
 }
 
+TEST_F(TestBasicTensor, testOperatorsWithoutBroadcastingInPlace)
+{
+
+	const std::vector<size_t> shape{2, 5};
+
+	const std::vector<double> values1{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+	const std::vector<double> values2{3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
+	const std::vector<double> values3{1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6};
+	const std::vector<double> values4{-0.5, 0, .5, 1, 1.5, 2, 2.5, 3, 3.5, 4};
+	const std::vector<double> values5{-1, 0, 1, 2, 3, 4, 5, 6, 7, 8};
+
+	mlCore::Tensor modifiedTensor(shape);
+	modifiedTensor.fill(values1.begin(), values1.end());
+	const mlCore::Tensor factorTensor(shape, 2);
+
+	modifiedTensor += factorTensor;
+	checkTensorValues(modifiedTensor, values2);
+
+	modifiedTensor /= factorTensor;
+	checkTensorValues(modifiedTensor, values3);
+
+	modifiedTensor -= factorTensor;
+	checkTensorValues(modifiedTensor, values4);
+
+	modifiedTensor *= factorTensor;
+	checkTensorValues(modifiedTensor, values5);
+}
+
 TEST_F(TestBasicTensor, testOperatorsWithBroadcasting)
 {
 	const std::vector<size_t> shape1{2, 1, 7};
@@ -354,6 +382,33 @@ TEST_F(TestBasicTensor, testOperatorsWithBroadcasting)
 										10, 11, 12, 13, 14, 15, 16, 11, 12, 13, 14, 15, 16, 17};
 
 	checkTensorValues(resTensor, resValues);
+}
+
+TEST_F(TestBasicTensor, testOperatorsWithBroadcastingInPlace)
+{
+	const std::vector<size_t> shape1{2, 1, 7};
+	const std::vector<size_t> shape2{3, 1};
+
+	const std::vector<size_t> resShape{2, 3, 7};
+
+	mlCore::Tensor tensor1(shape1);
+	tensor1.fill({1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14});
+
+	mlCore::Tensor tensor2(shape2);
+	tensor2.fill({1, 2, 3});
+
+	std::cout << tensor1 << "\n\n" << tensor2 << "\n\n";
+
+	tensor1 += tensor2;
+
+	std::cout << tensor1;
+
+	ASSERT_EQ(tensor1.shape(), resShape);
+	const std::vector<double> resValues{2,	3,	4,	5,	6,	7,	8,	3,	4,	5,	6,	7,	8,	9,
+										4,	5,	6,	7,	8,	9,	10, 9,	10, 11, 12, 13, 14, 15,
+										10, 11, 12, 13, 14, 15, 16, 11, 12, 13, 14, 15, 16, 17};
+
+	checkTensorValues(tensor1, resValues);
 }
 
 TEST_F(TestBasicTensor, testMatrixMultiplicationClassicMatrices)

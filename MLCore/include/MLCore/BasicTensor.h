@@ -23,7 +23,12 @@ namespace mlCore
 template <typename valueType>
 class BasicTensor
 {
-	friend struct TensorOperations;
+	template <typename OperationsType>
+	friend class BasicTensorOperations;
+
+	template <typename OperationsImplType>
+	friend class TensorOperationsImpl;
+
 	class Iterator;
 
 public:
@@ -61,32 +66,43 @@ public:
 	 */
 	BasicTensor& operator=(valueType);
 
-	// getters
+	/// Gets tensor's shape
 	const std::vector<size_t>& shape() const noexcept
 	{
 		return shape_;
 	}
+
+	/// Gets number of tensor's dimensions
 	size_t nDimensions() const noexcept
 	{
 		return shape_.size();
 	}
+
+	/// Gets number of tensor's elements
 	size_t size() const noexcept
 	{
 		return length_;
 	}
 
+	/// Gets beginning tensor's iterator
 	Iterator begin() const
 	{
 		return Iterator(data_);
 	}
 
+	/// Gets ending tensor's iterator
 	Iterator end() const
 	{
 		return Iterator(data_ + length_);
 	}
 
-	// setters
-	void reshape(const std::vector<size_t>&);
+	/**
+	 * @brief Changes shape of the tensor. Basic checks over the given shape are performed
+	 * 
+	 * @param newShape The new shape to assign
+	 */
+	void reshape(const std::vector<size_t>& newShape);
+
 	/**
 	 * @brief assigns new values to tensor in places specified by axes ranges
 	 * 
@@ -97,6 +113,30 @@ public:
 	void assign(std::initializer_list<std::pair<size_t, size_t>> indices,
 				std::initializer_list<valueType> newData,
 				bool wrapData = false);
+
+	BasicTensor operator+(const BasicTensor& other) const;
+	BasicTensor operator-(const BasicTensor& other) const;
+	BasicTensor operator*(const BasicTensor& other) const;
+	BasicTensor operator/(const BasicTensor& other) const;
+	BasicTensor operator-() const;
+
+	BasicTensor& operator+=(const BasicTensor& other);
+	BasicTensor& operator-=(const BasicTensor& other);
+	BasicTensor& operator*=(const BasicTensor& other);
+	BasicTensor& operator/=(const BasicTensor& other);
+
+	BasicTensor matmul(const BasicTensor&) const;
+
+	/**
+	 * @brief Create copy of the tensor and return its transposed version
+	 * 
+	 * @return Transposed tensor
+	 */
+	BasicTensor transposed() const;
+
+	// displaying
+	template <typename TensorValueType>
+	friend std::ostream& operator<<(std::ostream&, const BasicTensor<TensorValueType>&);
 
 	/**
 	 * @brief assigns values to the tensor
@@ -144,26 +184,6 @@ public:
 	}
 
 	void fill(const ITensorInitializer<valueType>& initializer);
-
-	// operators
-	BasicTensor operator+(const BasicTensor&) const;
-	BasicTensor operator-(const BasicTensor&) const;
-	BasicTensor operator*(const BasicTensor&) const;
-	BasicTensor operator/(const BasicTensor&) const;
-	BasicTensor operator-() const;
-
-	BasicTensor matmul(const BasicTensor&) const;
-
-	/**
-	 * @brief Create copy of the tensor and return its transposed version
-	 * 
-	 * @return Transposed tensor
-	 */
-	BasicTensor transposed() const;
-
-	// displaying
-	template <typename TensorValueType>
-	friend std::ostream& operator<<(std::ostream&, const BasicTensor<TensorValueType>&);
 
 private:
 	class Iterator
@@ -225,22 +245,6 @@ private:
 	checkIndicesList_(std::initializer_list<std::pair<size_t, size_t>>::const_iterator beg,
 					  std::initializer_list<std::pair<size_t, size_t>>::const_iterator end) const;
 	void checkShape_(const std::vector<size_t>&) const;
-
-	BasicTensor
-	performOperation_(const BasicTensor&,
-					  const std::function<valueType(const valueType, const valueType)>&) const;
-
-	static const inline std::function<valueType(const valueType, const valueType)> plusOperator_ =
-		[](const valueType left, const valueType right) { return left + right; };
-
-	static const inline std::function<valueType(const valueType, const valueType)> minusOperator_ =
-		[](const valueType left, const valueType right) { return left - right; };
-
-	static const inline std::function<valueType(const valueType, const valueType)> mulOperator_ =
-		[](const valueType left, const valueType right) { return left * right; };
-
-	static const inline std::function<valueType(const valueType, const valueType)> divOperator_ =
-		[](const valueType left, const valueType right) { return left / right; };
 
 private:
 	size_t length_;
