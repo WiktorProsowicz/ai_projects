@@ -8,8 +8,8 @@ namespace mlCore
 template class BasicTensor<double>;
 template std::ostream& operator<<(std::ostream& out, const BasicTensor<double>& tensor);
 
-template <typename valueType>
-BasicTensor<valueType>::BasicTensor(const std::vector<size_t>& shape)
+template <typename ValueType>
+BasicTensor<ValueType>::BasicTensor(const std::vector<size_t>& shape)
 	: length_()
 	, shape_(shape)
 	, data_()
@@ -57,11 +57,11 @@ BasicTensor<valueType>::BasicTensor(const std::vector<size_t>& shape)
 							  size_t(1),
 							  [](const auto current, const auto dim) { return current * dim; });
 
-	data_ = new valueType[length_];
+	data_ = new ValueType[length_];
 }
 
-template <typename valueType>
-BasicTensor<valueType>::BasicTensor(const std::vector<size_t>& shape, const valueType initVal)
+template <typename ValueType>
+BasicTensor<ValueType>::BasicTensor(const std::vector<size_t>& shape, const ValueType initVal)
 	: BasicTensor(shape)
 {
 	for(size_t i = 0; i < length_; i++)
@@ -70,9 +70,9 @@ BasicTensor<valueType>::BasicTensor(const std::vector<size_t>& shape, const valu
 	}
 }
 
-template <typename valueType>
-BasicTensor<valueType>::BasicTensor(const std::vector<size_t>& shape,
-									const std::initializer_list<valueType> initValues)
+template <typename ValueType>
+BasicTensor<ValueType>::BasicTensor(const std::vector<size_t>& shape,
+									const std::initializer_list<ValueType> initValues)
 	: BasicTensor(shape)
 {
 
@@ -84,11 +84,11 @@ BasicTensor<valueType>::BasicTensor(const std::vector<size_t>& shape,
 	}
 }
 
-template <typename valueType>
-BasicTensor<valueType>::BasicTensor(const BasicTensor& other)
+template <typename ValueType>
+BasicTensor<ValueType>::BasicTensor(const BasicTensor& other)
 	: length_(other.length_)
 	, shape_(other.shape_)
-	, data_(new valueType[length_])
+	, data_(new ValueType[length_])
 {
 	for(size_t pos = 0; pos < length_; pos++)
 	{
@@ -96,8 +96,8 @@ BasicTensor<valueType>::BasicTensor(const BasicTensor& other)
 	}
 }
 
-template <typename valueType>
-BasicTensor<valueType>::BasicTensor(BasicTensor&& other)
+template <typename ValueType>
+BasicTensor<ValueType>::BasicTensor(BasicTensor&& other)
 	: length_(other.length_)
 	, shape_(std::move(other.shape_))
 	, data_(other.data_)
@@ -106,14 +106,14 @@ BasicTensor<valueType>::BasicTensor(BasicTensor&& other)
 	other.data_ = nullptr;
 }
 
-template <typename valueType>
-BasicTensor<valueType>::~BasicTensor()
+template <typename ValueType>
+BasicTensor<ValueType>::~BasicTensor()
 {
 	delete[] data_;
 }
 
-template <typename valueType>
-BasicTensor<valueType>& BasicTensor<valueType>::operator=(const BasicTensor& other)
+template <typename ValueType>
+BasicTensor<ValueType>& BasicTensor<ValueType>::operator=(const BasicTensor& other)
 {
 	if(&other != this)
 	{
@@ -121,7 +121,7 @@ BasicTensor<valueType>& BasicTensor<valueType>::operator=(const BasicTensor& oth
 		{
 			delete[] data_;
 			length_ = other.length_;
-			data_ = new valueType[length_];
+			data_ = new ValueType[length_];
 		}
 
 		shape_ = other.shape_;
@@ -135,8 +135,8 @@ BasicTensor<valueType>& BasicTensor<valueType>::operator=(const BasicTensor& oth
 	return *this;
 }
 
-template <typename valueType>
-BasicTensor<valueType>& BasicTensor<valueType>::operator=(BasicTensor&& other)
+template <typename ValueType>
+BasicTensor<ValueType>& BasicTensor<ValueType>::operator=(BasicTensor&& other)
 {
 	if(&other != this)
 	{
@@ -153,15 +153,15 @@ BasicTensor<valueType>& BasicTensor<valueType>::operator=(BasicTensor&& other)
 	return *this;
 }
 
-template <typename valueType>
-void BasicTensor<valueType>::reshape(const std::vector<size_t>& newShape)
+template <typename ValueType>
+void BasicTensor<ValueType>::reshape(const std::vector<size_t>& newShape)
 {
 	checkShape_(newShape);
 	shape_ = newShape;
 }
 
-template <typename valueType>
-void BasicTensor<valueType>::checkShape_(const std::vector<size_t>& shape) const
+template <typename ValueType>
+void BasicTensor<ValueType>::checkShape_(const std::vector<size_t>& shape) const
 {
 	if(std::any_of(shape.begin(), shape.end(), [](const auto axis) { return axis <= 0; }))
 	{
@@ -198,11 +198,11 @@ void BasicTensor<valueType>::checkShape_(const std::vector<size_t>& shape) const
  * @brief traverses list of indices and checks ranges correctness. Correct indices specify tensor slice that can be modified via value assignment.
  * Throws std::out_of_range if upper[i] > shape[i] or 0 > indices.size() > shape_.size()
  * 
- * @tparam valueType dtype of tensor
+ * @tparam ValueType dtype of tensor
  * @param indices list of pairs of min-max indices from axis zero i.e for tensor([[1, 2], [3, 4]]) -> list{{0, 1}} -> [1, 2]
  */
-template <typename valueType>
-void BasicTensor<valueType>::checkIndicesList_(
+template <typename ValueType>
+void BasicTensor<ValueType>::checkIndicesList_(
 	const std::initializer_list<std::pair<size_t, size_t>>::const_iterator _beg,
 	const std::initializer_list<std::pair<size_t, size_t>>::const_iterator _end) const
 {
@@ -238,70 +238,70 @@ void BasicTensor<valueType>::checkIndicesList_(
 	}
 }
 
-template <typename valueType>
-BasicTensor<valueType> BasicTensor<valueType>::operator*(const BasicTensor& other) const
+template <typename ValueType>
+BasicTensor<ValueType> BasicTensor<ValueType>::operator*(const BasicTensor& other) const
 {
 	auto ret = *this;
 	TensorOperationsImpl<double>::multiplyTensorsInPlace(ret, other);
 	return ret;
 }
 
-template <typename valueType>
-BasicTensor<valueType> BasicTensor<valueType>::operator-(const BasicTensor& other) const
+template <typename ValueType>
+BasicTensor<ValueType> BasicTensor<ValueType>::operator-(const BasicTensor& other) const
 {
 	auto ret = *this;
 	TensorOperationsImpl<double>::subtractTensorsInPlace(ret, other);
 	return ret;
 }
 
-template <typename valueType>
-BasicTensor<valueType> BasicTensor<valueType>::operator+(const BasicTensor& other) const
+template <typename ValueType>
+BasicTensor<ValueType> BasicTensor<ValueType>::operator+(const BasicTensor& other) const
 {
 	auto ret = *this;
 	TensorOperationsImpl<double>::addTensorsInPlace(ret, other);
 	return ret;
 }
 
-template <typename valueType>
-BasicTensor<valueType> BasicTensor<valueType>::operator/(const BasicTensor& other) const
+template <typename ValueType>
+BasicTensor<ValueType> BasicTensor<ValueType>::operator/(const BasicTensor& other) const
 {
 	auto ret = *this;
 	TensorOperationsImpl<double>::divideTensorsInPlace(ret, other);
 	return ret;
 }
 
-template <typename valueType>
-BasicTensor<valueType>& BasicTensor<valueType>::operator+=(const BasicTensor& other)
+template <typename ValueType>
+BasicTensor<ValueType>& BasicTensor<ValueType>::operator+=(const BasicTensor& other)
 {
 	TensorOperationsImpl<double>::addTensorsInPlace(*this, other);
 	return *this;
 }
 
-template <typename valueType>
-BasicTensor<valueType>& BasicTensor<valueType>::operator-=(const BasicTensor& other)
+template <typename ValueType>
+BasicTensor<ValueType>& BasicTensor<ValueType>::operator-=(const BasicTensor& other)
 {
 	TensorOperationsImpl<double>::subtractTensorsInPlace(*this, other);
 	return *this;
 }
 
-template <typename valueType>
-BasicTensor<valueType>& BasicTensor<valueType>::operator*=(const BasicTensor& other)
+template <typename ValueType>
+BasicTensor<ValueType>& BasicTensor<ValueType>::operator*=(const BasicTensor& other)
 {
 	TensorOperationsImpl<double>::multiplyTensorsInPlace(*this, other);
 	return *this;
 }
 
-template <typename valueType>
-BasicTensor<valueType>& BasicTensor<valueType>::operator/=(const BasicTensor& other)
+template <typename ValueType>
+BasicTensor<ValueType>& BasicTensor<ValueType>::operator/=(const BasicTensor& other)
 {
 	TensorOperationsImpl<double>::divideTensorsInPlace(*this, other);
 	return *this;
 }
 
-template <typename valueType>
-BasicTensor<valueType> BasicTensor<valueType>::operator-() const
+template <typename ValueType>
+BasicTensor<ValueType> BasicTensor<ValueType>::operator-() const
 {
-	BasicTensor<valueType> ret(shape_);
+	BasicTensor<ValueType> ret(shape_);
 
 	for(size_t i = 0; i < length_; i++)
 	{
@@ -311,8 +311,8 @@ BasicTensor<valueType> BasicTensor<valueType>::operator-() const
 	return ret;
 }
 
-template <typename valueType>
-BasicTensor<valueType> BasicTensor<valueType>::matmul(const BasicTensor& other) const
+template <typename ValueType>
+BasicTensor<ValueType> BasicTensor<ValueType>::matmul(const BasicTensor& other) const
 {
 	// for clean error throwing with additional info about shapes
 	auto throwInformative = [this, &other](const std::string& message) {
@@ -368,7 +368,7 @@ BasicTensor<valueType> BasicTensor<valueType>::matmul(const BasicTensor& other) 
 		retShape[i] = paddedShapeFirst[i] == 1 ? paddedShapeSecond[i] : paddedShapeFirst[i];
 	}
 
-	BasicTensor<valueType> resultTensor(retShape, 0);
+	BasicTensor<ValueType> resultTensor(retShape, 0);
 
 	// tells the position of a single computed matrix relative to the array of values
 	auto computeFramePos = [](const std::vector<size_t>& treePath,
@@ -391,8 +391,8 @@ BasicTensor<valueType> BasicTensor<valueType>::matmul(const BasicTensor& other) 
 	while(resElementPos < resultTensor.length_)
 	{
 		// proper data pointers with offsets for obtaining frame elements
-		const valueType* firstDataPtr = data_ + computeFramePos(firstTreePath, shape_);
-		const valueType* secondDataPtr =
+		const ValueType* firstDataPtr = data_ + computeFramePos(firstTreePath, shape_);
+		const ValueType* secondDataPtr =
 			other.data_ + computeFramePos(secondTreePath, other.shape_);
 
 		// rows and cols of result frame
@@ -439,8 +439,8 @@ BasicTensor<valueType> BasicTensor<valueType>::matmul(const BasicTensor& other) 
 	return resultTensor;
 }
 
-template <typename valueType>
-BasicTensor<valueType> BasicTensor<valueType>::transposed() const
+template <typename ValueType>
+BasicTensor<ValueType> BasicTensor<ValueType>::transposed() const
 {
 
 	std::vector<size_t> retShape;
@@ -457,7 +457,7 @@ BasicTensor<valueType> BasicTensor<valueType>::transposed() const
 	retShape.push_back(frameShapeSecond);
 	retShape.push_back(frameShapeFirst);
 
-	BasicTensor<valueType> ret(retShape);
+	BasicTensor<ValueType> ret(retShape);
 
 	for(size_t frameOffset = 0; frameOffset < length_; frameOffset += frameLength)
 	{
@@ -472,9 +472,9 @@ BasicTensor<valueType> BasicTensor<valueType>::transposed() const
 	return ret;
 }
 
-template <typename valueType>
-void BasicTensor<valueType>::assign(std::initializer_list<std::pair<size_t, size_t>> indices,
-									std::initializer_list<valueType> newData,
+template <typename ValueType>
+void BasicTensor<ValueType>::assign(std::initializer_list<std::pair<size_t, size_t>> indices,
+									std::initializer_list<ValueType> newData,
 									const bool wrapData)
 {
 	checkIndicesList_(indices.begin(), indices.end());
@@ -547,8 +547,8 @@ void BasicTensor<valueType>::assign(std::initializer_list<std::pair<size_t, size
 	}
 }
 
-template <typename valueType>
-void BasicTensor<valueType>::fill(const ITensorInitializer<valueType>& initializer)
+template <typename ValueType>
+void BasicTensor<ValueType>::fill(const ITensorInitializer<ValueType>& initializer)
 {
 	size_t elementPos = 0;
 	while(initializer.canYield() && (elementPos < length_))

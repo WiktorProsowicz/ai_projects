@@ -18,9 +18,9 @@ namespace mlCore
 /**
  * @brief Class implements a concept of tensor, support basic operation, transposition etc.
  * 
- * @tparam valueType Type of the underlying data
+ * @tparam ValueType Type of the underlying data
  */
-template <typename valueType>
+template <typename ValueType>
 class BasicTensor
 {
 	template <typename OperationsType>
@@ -46,14 +46,14 @@ public:
 	 * @param shape tensor's initial shape
 	 * @param initVal initital value
 	 */
-	BasicTensor(const std::vector<size_t>& shape, valueType initVal);
+	BasicTensor(const std::vector<size_t>& shape, ValueType initVal);
 	/**
 	 * @brief Constructs a new tensor from shape and gives it initial values
 	 * 
 	 * @param shape Tensor's initial shape
 	 * @param initValues Values to assign, there is no check of the init list length
 	 */
-	BasicTensor(const std::vector<size_t>& shape, std::initializer_list<valueType> initValues);
+	BasicTensor(const std::vector<size_t>& shape, std::initializer_list<ValueType> initValues);
 	~BasicTensor();
 
 	// assign
@@ -64,7 +64,7 @@ public:
 	 * 
 	 * @return
 	 */
-	BasicTensor& operator=(valueType);
+	BasicTensor& operator=(ValueType);
 
 	/// Gets tensor's shape
 	const std::vector<size_t>& shape() const noexcept
@@ -111,7 +111,7 @@ public:
 	 * @param wrapData whether the values should be repeated to fit. If false and there are to few values, an exception will be raised
 	 */
 	void assign(std::initializer_list<std::pair<size_t, size_t>> indices,
-				std::initializer_list<valueType> newData,
+				std::initializer_list<ValueType> newData,
 				bool wrapData = false);
 
 	BasicTensor operator+(const BasicTensor& other) const;
@@ -178,12 +178,12 @@ public:
 		}
 	}
 
-	inline void fill(std::initializer_list<valueType> newData, const bool wrapData = false)
+	inline void fill(std::initializer_list<ValueType> newData, const bool wrapData = false)
 	{
 		fill(newData.begin(), newData.end(), wrapData);
 	}
 
-	void fill(const ITensorInitializer<valueType>& initializer);
+	void fill(const ITensorInitializer<ValueType>& initializer);
 
 private:
 	class Iterator
@@ -191,9 +191,9 @@ private:
 	public:
 		using iterator_category = std::input_iterator_tag;
 		using difference_type = std::ptrdiff_t;
-		using value_type = valueType;
-		using pointer = valueType*;
-		using reference = valueType&;
+		using value_type = ValueType;
+		using pointer = ValueType*;
+		using reference = ValueType&;
 
 		Iterator(pointer ptr)
 			: currPtr_(ptr)
@@ -249,7 +249,7 @@ private:
 private:
 	size_t length_;
 	std::vector<size_t> shape_;
-	valueType* data_;
+	ValueType* data_;
 };
 
 template <typename TensorValueType>
