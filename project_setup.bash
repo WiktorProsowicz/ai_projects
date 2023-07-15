@@ -6,7 +6,7 @@ function build_project()
 {
     cmake -S "${PROJECT_HOME}" -B "${PROJECT_HOME}/build" "$@";
     cd "${PROJECT_HOME}/build" || return;
-    make;
+    make -j $(( $(grep -c ^processor /proc/cpuinfo) / 2 ));
     cd ..;
     cppcheck --enable=all --project=build/compile_commands.json --check-config -iForeignModules/* --std=c++11 --suppress=missingIncludeSystem -ibuild/* .;
 

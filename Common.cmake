@@ -22,7 +22,11 @@ macro(install_library)
                         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
                         $<INSTALL_INTERFACE:include>)
 
-    target_include_directories(${PROJECT_NAME} PUBLIC include PRIVATE src)
+    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/src/include)
+        target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/include)
+    endif()
+
+    target_include_directories(${PROJECT_NAME} PUBLIC include)
 
     install(TARGETS ${PROJECT_NAME} DESTINATION lib)
 
