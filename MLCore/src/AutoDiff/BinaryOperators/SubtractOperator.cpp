@@ -1,9 +1,9 @@
 #include <AutoDiff/BinaryOperators/SubtractOperator.h>
 
-namespace mlCore
+namespace mlCore::autoDiff::binaryOperators
 {
 void SubtractOperator::updateValue()
 {
 	value_ = lhsInput_->getValue() - rhsInput_->getValue();
 }
-} // namespace mlCore
+} // namespace mlCore::autoDiff::binaryOperators

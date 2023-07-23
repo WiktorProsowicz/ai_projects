@@ -7,7 +7,7 @@
 
 #include <Models/IMetric.hpp>
 
-namespace mlCore
+namespace mlCore::models
 {
 /**
  * @brief Interface for publisher classes that are measured by metrics.
@@ -56,6 +56,6 @@ public:
 };
 
 using IMeasurablePtr = std::shared_ptr<IMeasurable>;
-} // namespace mlCore
+} // namespace mlCore::models
 
 #endif

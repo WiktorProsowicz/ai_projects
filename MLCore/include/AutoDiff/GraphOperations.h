@@ -7,7 +7,7 @@
 /**
  * @brief Algorithms operating on GraphNodes, cooperating with ComputationGraph
 */
-namespace mlCore
+namespace mlCore::autoDiff
 {
 class BinaryOperations
 {
@@ -60,6 +60,6 @@ private:
 	std::shared_ptr<ComputationGraph> graph_ = nullptr;
 };
 
-} // namespace mlCore
+} // namespace mlCore::autoDiff
 
 #endif

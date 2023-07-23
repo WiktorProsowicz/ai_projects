@@ -3,7 +3,7 @@
 
 #include <memory>
 
-namespace mlCore
+namespace mlCore::models
 {
 
 class IMeasurable;
@@ -38,6 +38,6 @@ public:
 
 using IMetricPtr = std::shared_ptr<IMetric>;
 
-} // namespace mlCore
+} // namespace mlCore::models
 
 #endif

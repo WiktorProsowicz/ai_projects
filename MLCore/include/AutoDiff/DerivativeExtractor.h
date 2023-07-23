@@ -11,7 +11,7 @@
 #include <AutoDiff/BinaryOperators/PowerOperator.h>
 #include <AutoDiff/BinaryOperators/SubtractOperator.h>
 
-namespace mlCore
+namespace mlCore::autoDiff
 {
 /**
  * @brief Defines ways to compute derivative based on the operator's type and values of its inputs. 
@@ -37,7 +37,7 @@ public:
      * @param outerDerivative derivative to perform chain rule computation
      * @return derivative of oper updated with outerDerivative
      */
-	Tensor operator()(IUnaryOperatorPtr oper, const Tensor& outerDerivative) const;
+	Tensor operator()(unaryOperators::IUnaryOperatorPtr oper, const Tensor& outerDerivative) const;
 
 	/**
      * @brief Computes derivatives of a binary operator in respect of its inputs
@@ -46,24 +46,28 @@ public:
      * @param outerDerivative derivative to perform chain rule computation
      * @return derivatives of oper updated with outerDerivative
      */
-	std::pair<Tensor, Tensor> operator()(IBinaryOperatorPtr oper,
+	std::pair<Tensor, Tensor> operator()(binaryOperators::IBinaryOperatorPtr oper,
 										 const Tensor& outerDerivative) const;
 
 private:
 	/// Extraction functions for concrete unary operators' subclasses
-	static Tensor extract(ReluOperatorPtr oper, const Tensor& outerDerivative);
-	static Tensor extract(SigmoidOperatorPtr oper, const Tensor& outerDerivative);
+	static Tensor extract(unaryOperators::ReluOperatorPtr oper, const Tensor& outerDerivative);
+	static Tensor extract(unaryOperators::SigmoidOperatorPtr oper, const Tensor& outerDerivative);
 
 	/// Extraction functions for concrete binary operators' subclasses
-	static std::pair<Tensor, Tensor> extract(AddOperatorPtr oper, const Tensor& outerDerivative);
-	static std::pair<Tensor, Tensor> extract(DivideOperatorPtr oper, const Tensor& outerDerivative);
-	static std::pair<Tensor, Tensor> extract(MatmulOperatorPtr oper, const Tensor& outerDerivative);
-	static std::pair<Tensor, Tensor> extract(MultiplyOperatorPtr oper,
+	static std::pair<Tensor, Tensor> extract(binaryOperators::AddOperatorPtr oper,
 											 const Tensor& outerDerivative);
-	static std::pair<Tensor, Tensor> extract(PowerOperatorPtr oper, const Tensor& outerDerivative);
-	static std::pair<Tensor, Tensor> extract(SubtractOperatorPtr oper,
+	static std::pair<Tensor, Tensor> extract(binaryOperators::DivideOperatorPtr oper,
+											 const Tensor& outerDerivative);
+	static std::pair<Tensor, Tensor> extract(binaryOperators::MatmulOperatorPtr oper,
+											 const Tensor& outerDerivative);
+	static std::pair<Tensor, Tensor> extract(binaryOperators::MultiplyOperatorPtr oper,
+											 const Tensor& outerDerivative);
+	static std::pair<Tensor, Tensor> extract(binaryOperators::PowerOperatorPtr oper,
+											 const Tensor& outerDerivative);
+	static std::pair<Tensor, Tensor> extract(binaryOperators::SubtractOperatorPtr oper,
 											 const Tensor& outerDerivative);
 };
-} // namespace mlCore
+} // namespace mlCore::autoDiff
 
 #endif

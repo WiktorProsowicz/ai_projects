@@ -5,7 +5,7 @@
 
 #include <AutoDiff/GraphNodes.hpp>
 
-namespace mlCore
+namespace mlCore::models
 {
 /**
  * @brief Interface for classes optimizing layers' weights with use of gradients.
@@ -20,12 +20,12 @@ public:
      * @param weight Weight to be modified.
      * @param derivative Derivative matched to the weight.
      */
-	virtual void applyGradient(NodePtr weight, const Tensor& derivative) = 0;
+	virtual void applyGradient(autoDiff::NodePtr weight, const Tensor& derivative) = 0;
 
 	virtual ~IOptimizer() = default;
 };
 
 using IOptimizerPtr = std::shared_ptr<IOptimizer>;
-} // namespace mlCore
+} // namespace mlCore::models
 
 #endif

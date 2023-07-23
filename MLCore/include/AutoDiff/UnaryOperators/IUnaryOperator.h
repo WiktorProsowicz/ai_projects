@@ -3,7 +3,7 @@
 
 #include <AutoDiff/GraphNodes.hpp>
 
-namespace mlCore
+namespace mlCore::autoDiff::unaryOperators
 {
 /**
  * @brief Represents a result of modification of a single node. Its internal processing depends on its subclass, wraps TensorFunctions algorithms
@@ -30,6 +30,6 @@ protected:
 
 using IUnaryOperatorPtr = std::shared_ptr<IUnaryOperator>;
 
-} // namespace mlCore
+} // namespace mlCore::autoDiff::unaryOperators
 
 #endif

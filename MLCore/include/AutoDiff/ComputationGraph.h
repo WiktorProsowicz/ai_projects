@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-namespace mlCore
+namespace mlCore::autoDiff
 {
 class UnaryOperations;
 class BinaryOperations;
@@ -123,6 +123,6 @@ private:
 	std::map<NodePtr, Tensor> gradients_ = {};
 	bool areNodesSorted_ = true;
 };
-} // namespace mlCore
+} // namespace mlCore::autoDiff
 
 #endif

@@ -3,7 +3,7 @@
 
 #include <AutoDiff/BinaryOperators/IBinaryOperator.h>
 
-namespace mlCore
+namespace mlCore::autoDiff::binaryOperators
 {
 class SubtractOperator final : public IBinaryOperator
 {
@@ -16,6 +16,6 @@ public:
 
 using SubtractOperatorPtr = std::shared_ptr<SubtractOperator>;
 
-} // namespace mlCore
+} // namespace mlCore::autoDiff::binaryOperators
 
 #endif

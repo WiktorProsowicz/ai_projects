@@ -9,7 +9,7 @@
 #include <AutoDiff/UnaryOperators/ReluOperator.h>
 #include <AutoDiff/UnaryOperators/SigmoidOperator.h>
 
-namespace mlCore
+namespace mlCore::autoDiff
 {
 /****************
  * 
@@ -39,32 +39,32 @@ std::shared_ptr<ResultNodeType> BinaryOperations::operationImpl(const NodePtr lN
 
 NodePtr BinaryOperations::multiply(const NodePtr lNode, const NodePtr rNode)
 {
-	return operationImpl<MultiplyOperator>(lNode, rNode);
+	return operationImpl<binaryOperators::MultiplyOperator>(lNode, rNode);
 }
 
 NodePtr BinaryOperations::add(const NodePtr lNode, const NodePtr rNode)
 {
-	return operationImpl<AddOperator>(lNode, rNode);
+	return operationImpl<binaryOperators::AddOperator>(lNode, rNode);
 }
 
 NodePtr BinaryOperations::subtract(const NodePtr lNode, const NodePtr rNode)
 {
-	return operationImpl<SubtractOperator>(lNode, rNode);
+	return operationImpl<binaryOperators::SubtractOperator>(lNode, rNode);
 }
 
 NodePtr BinaryOperations::divide(const NodePtr lNode, const NodePtr rNode)
 {
-	return operationImpl<DivideOperator>(lNode, rNode);
+	return operationImpl<binaryOperators::DivideOperator>(lNode, rNode);
 }
 
 NodePtr BinaryOperations::power(const NodePtr baseNode, const NodePtr factorNode)
 {
-	return operationImpl<PowerOperator>(baseNode, factorNode);
+	return operationImpl<binaryOperators::PowerOperator>(baseNode, factorNode);
 }
 
 NodePtr BinaryOperations::matmul(const NodePtr lNode, const NodePtr rNode)
 {
-	return operationImpl<MatmulOperator>(lNode, rNode);
+	return operationImpl<binaryOperators::MatmulOperator>(lNode, rNode);
 }
 
 /****************
@@ -100,11 +100,11 @@ std::shared_ptr<ResultNodeType> NodesActivations::operationImpl(const NodePtr no
 
 NodePtr NodesActivations::relu(const NodePtr node)
 {
-	return operationImpl<ReluOperator>(node);
+	return operationImpl<unaryOperators::ReluOperator>(node);
 }
 
 NodePtr NodesActivations::sigmoid(const NodePtr node)
 {
-	return operationImpl<SigmoidOperator>(node);
+	return operationImpl<unaryOperators::SigmoidOperator>(node);
 }
-} // namespace mlCore
+} // namespace mlCore::autoDiff

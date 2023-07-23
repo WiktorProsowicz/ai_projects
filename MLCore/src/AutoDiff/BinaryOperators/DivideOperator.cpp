@@ -1,9 +1,9 @@
 #include <AutoDiff/BinaryOperators/DivideOperator.h>
 
-namespace mlCore
+namespace mlCore::autoDiff::binaryOperators
 {
 void DivideOperator::updateValue()
 {
 	value_ = lhsInput_->getValue() / rhsInput_->getValue();
 }
-} // namespace mlCore
+} // namespace mlCore::autoDiff::binaryOperators

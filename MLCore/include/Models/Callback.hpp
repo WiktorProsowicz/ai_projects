@@ -3,7 +3,7 @@
 
 #include <type_traits>
 
-namespace mlCore
+namespace mlCore::models
 {
 
 /**
@@ -59,6 +59,6 @@ private:
 };
 
 using CallbackPtr = std::shared_ptr<Callback>;
-} // namespace mlCore
+} // namespace mlCore::models
 
 #endif

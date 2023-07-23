@@ -18,13 +18,13 @@ namespace
  *********************************************/
 
 /// Test class for checking ILayer code building
-class TestLayer : public mlCore::ILayer
+class TestLayer : public mlCore::models::ILayer
 {
 public:
 	TestLayer() = default;
 	~TestLayer() = default;
 
-	mlCore::NodePtr build() override
+	mlCore::autoDiff::NodePtr build() override
 	{
 		return {};
 	}
@@ -34,7 +34,7 @@ public:
 		return mlCore::Tensor({}, 0);
 	}
 
-	std::vector<mlCore::NodePtr> getWeights() const override
+	std::vector<mlCore::autoDiff::NodePtr> getWeights() const override
 	{
 		return {};
 	}
@@ -46,31 +46,31 @@ public:
 };
 
 /// Test class for checking IOptimizer code building
-class TestOptimizer : public mlCore::IOptimizer
+class TestOptimizer : public mlCore::models::IOptimizer
 {
 public:
 	TestOptimizer() = default;
 	~TestOptimizer() = default;
 
-	void applyGradient(mlCore::NodePtr weight, const mlCore::Tensor& derivative) override
+	void applyGradient(mlCore::autoDiff::NodePtr weight, const mlCore::Tensor& derivative) override
 	{
 		weight->setValue(derivative);
 	}
 };
 
 /// Test class for checking IMeasurable code building
-class TestMeasurable : public mlCore::IMeasurable
+class TestMeasurable : public mlCore::models::IMeasurable
 {
 public:
 	TestMeasurable() = default;
 	~TestMeasurable() = default;
 
-	void registerMetric(mlCore::IMetricPtr metric) override
+	void registerMetric(mlCore::models::IMetricPtr metric) override
 	{
 		metrics_.push_back(metric);
 	}
 
-	void unregisterMetric(mlCore::IMetricPtr metric) override
+	void unregisterMetric(mlCore::models::IMetricPtr metric) override
 	{
 		metrics_.erase(std::remove_if(metrics_.begin(),
 									  metrics_.end(),
@@ -78,7 +78,7 @@ public:
 					   metrics_.end());
 	}
 
-	bool hasMetric(std::shared_ptr<mlCore::IMetric> metric) const override
+	bool hasMetric(std::shared_ptr<mlCore::models::IMetric> metric) const override
 	{
 		return std::find(metrics_.cbegin(), metrics_.cend(), metric) != metrics_.end();
 	}
@@ -87,7 +87,7 @@ public:
 	{
 		for(auto metric : metrics_)
 		{
-			auto context = std::make_shared<mlCore::MetricContext>();
+			auto context = std::make_shared<mlCore::models::MetricContext>();
 
 			metric->notify(context);
 		}
@@ -99,17 +99,17 @@ public:
 	}
 
 private:
-	std::vector<mlCore::IMetricPtr> metrics_{};
+	std::vector<mlCore::models::IMetricPtr> metrics_{};
 };
 
 /// Test class for checking IMetric code building
-class TestMetric : public mlCore::IMetric
+class TestMetric : public mlCore::models::IMetric
 {
 public:
 	TestMetric() = default;
 	~TestMetric() = default;
 
-	void notify(mlCore::MetricContextPtr context) override
+	void notify(mlCore::models::MetricContextPtr context) override
 	{
 		notified = true;
 	}
@@ -118,7 +118,7 @@ public:
 };
 
 /// Test class for checking Callback code building
-class TestCallback : public mlCore::Callback
+class TestCallback : public mlCore::models::Callback
 {
 public:
 	TestCallback() = default;
@@ -140,9 +140,9 @@ TEST(TestModels, testTestLayer)
 
 TEST(TestModels, testTestOptimizer)
 {
-	mlCore::IOptimizerPtr optimizer = std::make_shared<TestOptimizer>();
+	mlCore::models::IOptimizerPtr optimizer = std::make_shared<TestOptimizer>();
 
-	auto node = std::make_shared<mlCore::Node>(mlCore::Tensor(std::vector<size_t>{}));
+	auto node = std::make_shared<mlCore::autoDiff::Node>(mlCore::Tensor(std::vector<size_t>{}));
 	mlCore::Tensor tensor({}, 0);
 
 	optimizer->applyGradient(node, tensor);
@@ -173,15 +173,15 @@ TEST(TestModels, testTestCallback)
 {
 	TestCallback callback;
 
-	callback.addMode(mlCore::CallbackMode::END_OF_BATCH);
-	callback.addMode(mlCore::CallbackMode::END_OF_TRAINING);
+	callback.addMode(mlCore::models::CallbackMode::END_OF_BATCH);
+	callback.addMode(mlCore::models::CallbackMode::END_OF_TRAINING);
 
-	EXPECT_TRUE(callback.hasMode(mlCore::CallbackMode::END_OF_BATCH));
-	EXPECT_TRUE(callback.hasMode(mlCore::CallbackMode::END_OF_TRAINING));
+	EXPECT_TRUE(callback.hasMode(mlCore::models::CallbackMode::END_OF_BATCH));
+	EXPECT_TRUE(callback.hasMode(mlCore::models::CallbackMode::END_OF_TRAINING));
 
-	callback.removeMode(mlCore::CallbackMode::END_OF_BATCH);
+	callback.removeMode(mlCore::models::CallbackMode::END_OF_BATCH);
 
-	EXPECT_FALSE(callback.hasMode(mlCore::CallbackMode::END_OF_BATCH));
+	EXPECT_FALSE(callback.hasMode(mlCore::models::CallbackMode::END_OF_BATCH));
 }
 
 } // namespace

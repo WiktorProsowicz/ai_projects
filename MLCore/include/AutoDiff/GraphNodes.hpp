@@ -8,7 +8,7 @@
  * @brief Classes representing nodes in ComputationGraphs. Nodes hold tensors and can be linked to each other.
  * 
  */
-namespace mlCore
+namespace mlCore::autoDiff
 {
 
 class Node;
@@ -104,5 +104,5 @@ public:
 		: Node(std::vector<size_t>{}){};
 };
 
-} // namespace mlCore
+} // namespace mlCore::autoDiff
 #endif

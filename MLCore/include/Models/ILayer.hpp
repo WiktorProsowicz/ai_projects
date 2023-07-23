@@ -6,7 +6,7 @@
 #include <AutoDiff/GraphNodes.hpp>
 #include <MLCore/BasicTensor.h>
 
-namespace mlCore
+namespace mlCore::models
 {
 /**
  * @brief Interface for models' components. Defines a scope inside a model rather than a linear layer inside NN.
@@ -20,7 +20,7 @@ public:
      * 
      * @return Expected layer's output.
      */
-	virtual NodePtr build() = 0;
+	virtual autoDiff::NodePtr build() = 0;
 
 	/**
       * @brief Computes the layer's output.
@@ -34,7 +34,7 @@ public:
       * 
       * @return Model's weights.
       */
-	virtual std::vector<NodePtr> getWeights() const = 0;
+	virtual std::vector<autoDiff::NodePtr> getWeights() const = 0;
 
 	/**
       * @brief Compiles textual description of the layer based on its type and parameters.
@@ -47,6 +47,6 @@ public:
 };
 
 using ILayerPtr = std::shared_ptr<ILayer>;
-} // namespace mlCore
+} // namespace mlCore::models
 
 #endif

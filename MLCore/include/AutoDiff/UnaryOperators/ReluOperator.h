@@ -3,7 +3,7 @@
 
 #include <AutoDiff/UnaryOperators/IUnaryOperator.h>
 
-namespace mlCore
+namespace mlCore::autoDiff::unaryOperators
 {
 /**
  * @brief ReluOperator represents REctified Linear Unit tensor operation
@@ -20,6 +20,6 @@ public:
 
 using ReluOperatorPtr = std::shared_ptr<ReluOperator>;
 
-} // namespace mlCore
+} // namespace mlCore::autoDiff::unaryOperators
 
 #endif

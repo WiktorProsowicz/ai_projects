@@ -1,17 +1,17 @@
 #include <AutoDiff/DerivativeExtractor.h>
 #include <MLCore/TensorOperations.h>
 
-namespace mlCore
+namespace mlCore::autoDiff
 {
-Tensor DerivativeExtractor::operator()(const IUnaryOperatorPtr oper,
+Tensor DerivativeExtractor::operator()(const unaryOperators::IUnaryOperatorPtr oper,
 									   const Tensor& outerDerivative) const
 {
-	if(const auto casted = std::dynamic_pointer_cast<ReluOperator>(oper))
+	if(const auto casted = std::dynamic_pointer_cast<unaryOperators::ReluOperator>(oper))
 	{
 		return extract(casted, outerDerivative);
 	}
 
-	if(const auto casted = std::dynamic_pointer_cast<SigmoidOperator>(oper))
+	if(const auto casted = std::dynamic_pointer_cast<unaryOperators::SigmoidOperator>(oper))
 	{
 		return extract(casted, outerDerivative);
 	}
@@ -20,30 +20,31 @@ Tensor DerivativeExtractor::operator()(const IUnaryOperatorPtr oper,
 	return {{}, 0};
 }
 
-std::pair<Tensor, Tensor> DerivativeExtractor::operator()(const IBinaryOperatorPtr oper,
-														  const Tensor& outerDerivative) const
+std::pair<Tensor, Tensor>
+DerivativeExtractor::operator()(const binaryOperators::IBinaryOperatorPtr oper,
+								const Tensor& outerDerivative) const
 {
-	if(const auto casted = std::dynamic_pointer_cast<AddOperator>(oper))
+	if(const auto casted = std::dynamic_pointer_cast<binaryOperators::AddOperator>(oper))
 	{
 		return extract(casted, outerDerivative);
 	}
-	if(const auto casted = std::dynamic_pointer_cast<DivideOperator>(oper))
+	if(const auto casted = std::dynamic_pointer_cast<binaryOperators::DivideOperator>(oper))
 	{
 		return extract(casted, outerDerivative);
 	}
-	if(const auto casted = std::dynamic_pointer_cast<MatmulOperator>(oper))
+	if(const auto casted = std::dynamic_pointer_cast<binaryOperators::MatmulOperator>(oper))
 	{
 		return extract(casted, outerDerivative);
 	}
-	if(const auto casted = std::dynamic_pointer_cast<MultiplyOperator>(oper))
+	if(const auto casted = std::dynamic_pointer_cast<binaryOperators::MultiplyOperator>(oper))
 	{
 		return extract(casted, outerDerivative);
 	}
-	if(const auto casted = std::dynamic_pointer_cast<PowerOperator>(oper))
+	if(const auto casted = std::dynamic_pointer_cast<binaryOperators::PowerOperator>(oper))
 	{
 		return extract(casted, outerDerivative);
 	}
-	if(const auto casted = std::dynamic_pointer_cast<SubtractOperator>(oper))
+	if(const auto casted = std::dynamic_pointer_cast<binaryOperators::SubtractOperator>(oper))
 	{
 		return extract(casted, outerDerivative);
 	}
@@ -52,7 +53,8 @@ std::pair<Tensor, Tensor> DerivativeExtractor::operator()(const IBinaryOperatorP
 	return {{{}, 0}, {{}, 0}};
 }
 
-Tensor DerivativeExtractor::extract(const ReluOperatorPtr oper, const Tensor& outerDerivative)
+Tensor DerivativeExtractor::extract(const unaryOperators::ReluOperatorPtr oper,
+									const Tensor& outerDerivative)
 {
 	Tensor inputCopy = oper->getValue();
 	for(auto& val : inputCopy)
@@ -63,7 +65,8 @@ Tensor DerivativeExtractor::extract(const ReluOperatorPtr oper, const Tensor& ou
 	return inputCopy * outerDerivative;
 }
 
-Tensor DerivativeExtractor::extract(const SigmoidOperatorPtr oper, const Tensor& outerDerivative)
+Tensor DerivativeExtractor::extract(const unaryOperators::SigmoidOperatorPtr oper,
+									const Tensor& outerDerivative)
 {
 	Tensor inputCopy = oper->getValue();
 
@@ -75,20 +78,23 @@ Tensor DerivativeExtractor::extract(const SigmoidOperatorPtr oper, const Tensor&
 	return inputCopy * outerDerivative;
 }
 
-std::pair<Tensor, Tensor> DerivativeExtractor::extract(const AddOperatorPtr /*unused*/,
-													   const Tensor& outerDerivative)
+std::pair<Tensor, Tensor>
+DerivativeExtractor::extract(const binaryOperators::AddOperatorPtr /*unused*/,
+							 const Tensor& outerDerivative)
 {
 	return {outerDerivative, outerDerivative};
 }
 
-std::pair<Tensor, Tensor> DerivativeExtractor::extract(const SubtractOperatorPtr /*unused*/,
-													   const Tensor& outerDerivative)
+std::pair<Tensor, Tensor>
+DerivativeExtractor::extract(const binaryOperators::SubtractOperatorPtr /*unused*/,
+							 const Tensor& outerDerivative)
 {
 	return {outerDerivative, -outerDerivative};
 }
 
-std::pair<Tensor, Tensor> DerivativeExtractor::extract(const DivideOperatorPtr oper,
-													   const Tensor& outerDerivative)
+std::pair<Tensor, Tensor>
+DerivativeExtractor::extract(const binaryOperators::DivideOperatorPtr oper,
+							 const Tensor& outerDerivative)
 {
 	const auto& [leftInputNode, rightInputNode] = oper->getInputs();
 	const auto& leftValue = leftInputNode->getValue();
@@ -98,8 +104,9 @@ std::pair<Tensor, Tensor> DerivativeExtractor::extract(const DivideOperatorPtr o
 			-leftValue / (rightValue * rightValue) * outerDerivative};
 }
 
-std::pair<Tensor, Tensor> DerivativeExtractor::extract(const MatmulOperatorPtr oper,
-													   const Tensor& outerDerivative)
+std::pair<Tensor, Tensor>
+DerivativeExtractor::extract(const binaryOperators::MatmulOperatorPtr oper,
+							 const Tensor& outerDerivative)
 {
 	const auto& [leftInputNode, rightInputNode] = oper->getInputs();
 	const auto& leftValue = leftInputNode->getValue();
@@ -109,8 +116,9 @@ std::pair<Tensor, Tensor> DerivativeExtractor::extract(const MatmulOperatorPtr o
 			leftValue.transposed().matmul(outerDerivative)};
 }
 
-std::pair<Tensor, Tensor> DerivativeExtractor::extract(const MultiplyOperatorPtr oper,
-													   const Tensor& outerDerivative)
+std::pair<Tensor, Tensor>
+DerivativeExtractor::extract(const binaryOperators::MultiplyOperatorPtr oper,
+							 const Tensor& outerDerivative)
 {
 	const auto& [leftInputNode, rightInputNode] = oper->getInputs();
 	const auto& leftValue = leftInputNode->getValue();
@@ -119,7 +127,7 @@ std::pair<Tensor, Tensor> DerivativeExtractor::extract(const MultiplyOperatorPtr
 	return {rightValue * outerDerivative, leftValue * outerDerivative};
 }
 
-std::pair<Tensor, Tensor> DerivativeExtractor::extract(const PowerOperatorPtr oper,
+std::pair<Tensor, Tensor> DerivativeExtractor::extract(const binaryOperators::PowerOperatorPtr oper,
 													   const Tensor& outerDerivative)
 {
 	const auto& [leftInputNode, rightInputNode] = oper->getInputs();
@@ -131,4 +139,4 @@ std::pair<Tensor, Tensor> DerivativeExtractor::extract(const PowerOperatorPtr op
 			TensorOperations::ln(leftValue) * TensorOperations::power(leftValue, rightValue) *
 				outerDerivative};
 }
-} // namespace mlCore
+} // namespace mlCore::autoDiff

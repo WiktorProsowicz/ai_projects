@@ -3,7 +3,7 @@
 
 #include <AutoDiff/GraphNodes.hpp>
 
-namespace mlCore
+namespace mlCore::autoDiff::binaryOperators
 {
 /**
  * @brief Represents a result of operation on two nodes. Its internal processing depends on its type, wraps TensorFunctions algorithms
@@ -32,6 +32,6 @@ protected:
 
 using IBinaryOperatorPtr = std::shared_ptr<IBinaryOperator>;
 
-} // namespace mlCore
+} // namespace mlCore::autoDiff::binaryOperators
 
 #endif

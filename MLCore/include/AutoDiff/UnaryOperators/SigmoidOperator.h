@@ -3,7 +3,7 @@
 
 #include <AutoDiff/UnaryOperators/IUnaryOperator.h>
 
-namespace mlCore
+namespace mlCore::autoDiff::unaryOperators
 {
 /**
  * @brief SigmoidOperator wraps sigmoid - a tensor unary operation
@@ -20,6 +20,6 @@ public:
 
 using SigmoidOperatorPtr = std::shared_ptr<SigmoidOperator>;
 
-} // namespace mlCore
+} // namespace mlCore::autoDiff::unaryOperators
 
 #endif
