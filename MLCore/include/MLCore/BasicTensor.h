@@ -3,6 +3,7 @@
 
 #include "LoggingLib/LoggingLib.h"
 #include "MLCore/Utilities.h"
+#include <MLCore/TensorInitializers/ITensorInitializer.h>
 #include <algorithm>
 #include <exception>
 #include <functional>
@@ -183,7 +184,7 @@ public:
 		fill(newData.begin(), newData.end(), wrapData);
 	}
 
-	void fill(const ITensorInitializer<ValueType>& initializer);
+	void fill(const tensorInitializers::ITensorInitializer<ValueType>& initializer);
 
 private:
 	class Iterator

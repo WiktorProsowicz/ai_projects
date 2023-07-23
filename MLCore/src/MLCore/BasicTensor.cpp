@@ -548,7 +548,8 @@ void BasicTensor<ValueType>::assign(std::initializer_list<std::pair<size_t, size
 }
 
 template <typename ValueType>
-void BasicTensor<ValueType>::fill(const ITensorInitializer<ValueType>& initializer)
+void BasicTensor<ValueType>::fill(
+	const tensorInitializers::ITensorInitializer<ValueType>& initializer)
 {
 	size_t elementPos = 0;
 	while(initializer.canYield() && (elementPos < length_))

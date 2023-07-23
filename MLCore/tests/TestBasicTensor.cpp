@@ -7,6 +7,7 @@
  **********************/
 
 #include <LoggingLib/LoggingLib.h>
+#include <MLCore/TensorInitializers/RangeTensorInitializer.h>
 #include <MLCore/BasicTensor.h>
 #include <gtest/gtest.h>
 #include <iostream>
@@ -245,9 +246,11 @@ R"(<BasicTensor dtype=d shape=(3, 3, 3, 1, )>
 
 TEST_F(TestBasicTensor, testCopy)
 {
+	using mlCore::tensorInitializers::RangeTensorInitializer;
+
 	mlCore::Tensor tensor1(std::vector<size_t>{2, 3, 4});
 
-	tensor1.fill(mlCore::RangeTensorInitializer<double>(0));
+	tensor1.fill(RangeTensorInitializer<double>(0));
 	mlCore::Tensor tensor2 = tensor1;
 
 	checkTensorEquality(tensor1, tensor2);
@@ -260,10 +263,12 @@ TEST_F(TestBasicTensor, testCopy)
 
 TEST_F(TestBasicTensor, testMove)
 {
+	using mlCore::tensorInitializers::RangeTensorInitializer;
+
 	// NOLINTBEGIN(bugprone-use-after-move)
 	mlCore::Tensor tensorBase(std::vector<size_t>{2, 3, 4});
 
-	tensorBase.fill(mlCore::RangeTensorInitializer<double>(0));
+	tensorBase.fill(RangeTensorInitializer<double>(0));
 	mlCore::Tensor tensorBase_1 = tensorBase;
 	mlCore::Tensor tensorBase_2 = tensorBase;
 
@@ -413,11 +418,13 @@ TEST_F(TestBasicTensor, testOperatorsWithBroadcastingInPlace)
 
 TEST_F(TestBasicTensor, testMatrixMultiplicationClassicMatrices)
 {
+	using mlCore::tensorInitializers::RangeTensorInitializer;
+
 	mlCore::Tensor firstTensor(std::vector<size_t>{3, 2});
 	mlCore::Tensor secondTensor(std::vector<size_t>{2, 4});
 
-	firstTensor.fill(mlCore::RangeTensorInitializer<double>(1));
-	secondTensor.fill(mlCore::RangeTensorInitializer<double>(1));
+	firstTensor.fill(RangeTensorInitializer<double>(1));
+	secondTensor.fill(RangeTensorInitializer<double>(1));
 
 	mlCore::Tensor resultTensor = firstTensor.matmul(secondTensor);
 
@@ -428,11 +435,13 @@ TEST_F(TestBasicTensor, testMatrixMultiplicationClassicMatrices)
 
 TEST_F(TestBasicTensor, testMatrixMultiplicationExtended)
 {
+	using mlCore::tensorInitializers::RangeTensorInitializer;
+
 	mlCore::Tensor firstTensor({2, 4, 2});
 	mlCore::Tensor secondTensor({2, 5});
 
-	firstTensor.fill(mlCore::RangeTensorInitializer<double>(1));
-	secondTensor.fill(mlCore::RangeTensorInitializer<double>(1));
+	firstTensor.fill(RangeTensorInitializer<double>(1));
+	secondTensor.fill(RangeTensorInitializer<double>(1));
 
 	auto result = firstTensor.matmul(secondTensor);
 
@@ -446,13 +455,15 @@ TEST_F(TestBasicTensor, testMatrixMultiplicationExtended)
 
 TEST_F(TestBasicTensor, testTransposition)
 {
+	using mlCore::tensorInitializers::RangeTensorInitializer;
+
 	// 0  1  2  3  4
 	// 5  6  7  8  9
 	// 10 11 12 13 14
 	// 15 16 17 18 19
 	mlCore::Tensor tensor({4, 5});
 
-	tensor.fill(mlCore::RangeTensorInitializer<double>(0));
+	tensor.fill(RangeTensorInitializer<double>(0));
 
 	// 0  5  10  15
 	// 1  6  11  16

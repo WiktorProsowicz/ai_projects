@@ -8,6 +8,7 @@
 
 #include <AutoDiff/DerivativeExtractor.h>
 #include <AutoDiff/GraphOperations.h>
+#include <MLCore/TensorInitializers/RangeTensorInitializer.h>
 #include <gtest/gtest.h>
 #include <iostream>
 
@@ -33,15 +34,15 @@ concept BinaryNodeOperation = requires(OperType oper, const mlCore::NodePtr node
 struct UnaryParams
 {
 	std::vector<uint64_t> tensorShape;
-	std::unique_ptr<mlCore::ITensorInitializer<double>> initializer;
+	std::unique_ptr<mlCore::tensorInitializers::ITensorInitializer<double>> initializer;
 };
 
 struct BinaryParams
 {
 	std::vector<uint64_t> leftTensorShape;
-	std::unique_ptr<mlCore::ITensorInitializer<double>> leftInitializer;
+	std::unique_ptr<mlCore::tensorInitializers::ITensorInitializer<double>> leftInitializer;
 	std::vector<uint64_t> rightTensorShape;
-	std::unique_ptr<mlCore::ITensorInitializer<double>> rightInitializer;
+	std::unique_ptr<mlCore::tensorInitializers::ITensorInitializer<double>> rightInitializer;
 };
 
 std::string stringifyTensor(const mlCore::Tensor& tensor)
@@ -224,9 +225,11 @@ protected:
 
 TEST_F(TestDerivativeExtractor, testReluDerivative)
 {
-	const UnaryParams params{
-		.tensorShape = {3, 3},
-		.initializer = std::make_unique<mlCore::RangeTensorInitializer<double>>(-3.0, .7)};
+	using mlCore::tensorInitializers::RangeTensorInitializer;
+
+	const UnaryParams params{.tensorShape = {3, 3},
+							 .initializer =
+								 std::make_unique<RangeTensorInitializer<double>>(-3.0, .7)};
 
 	testUnaryOperationDerivative(
 		[](mlCore::NodePtr node) { return mlCore::NodesActivations{}.relu(node); }, params);
@@ -234,9 +237,11 @@ TEST_F(TestDerivativeExtractor, testReluDerivative)
 
 TEST_F(TestDerivativeExtractor, testSigmoidDerivative)
 {
-	const UnaryParams params{
-		.tensorShape = {5, 5},
-		.initializer = std::make_unique<mlCore::RangeTensorInitializer<double>>(-9.0, .7)};
+	using mlCore::tensorInitializers::RangeTensorInitializer;
+
+	const UnaryParams params{.tensorShape = {5, 5},
+							 .initializer =
+								 std::make_unique<RangeTensorInitializer<double>>(-9.0, .7)};
 
 	testUnaryOperationDerivative(
 		[](mlCore::NodePtr node) { return mlCore::NodesActivations{}.sigmoid(node); }, params);
@@ -244,11 +249,13 @@ TEST_F(TestDerivativeExtractor, testSigmoidDerivative)
 
 TEST_F(TestDerivativeExtractor, testMultiplyDerivative)
 {
+	using mlCore::tensorInitializers::RangeTensorInitializer;
+
 	const BinaryParams params{
 		.leftTensorShape = {3, 5},
-		.leftInitializer = std::make_unique<mlCore::RangeTensorInitializer<double>>(-4, .8),
+		.leftInitializer = std::make_unique<RangeTensorInitializer<double>>(-4, .8),
 		.rightTensorShape = {3, 5},
-		.rightInitializer = std::make_unique<mlCore::RangeTensorInitializer<double>>(5, .3)};
+		.rightInitializer = std::make_unique<RangeTensorInitializer<double>>(5, .3)};
 
 	testBinaryOperationDerivative(
 		[](mlCore::NodePtr left, mlCore::NodePtr right) {
@@ -259,11 +266,13 @@ TEST_F(TestDerivativeExtractor, testMultiplyDerivative)
 
 TEST_F(TestDerivativeExtractor, testDivideDerivative)
 {
+	using mlCore::tensorInitializers::RangeTensorInitializer;
+
 	const BinaryParams params{
 		.leftTensorShape = {3, 5},
-		.leftInitializer = std::make_unique<mlCore::RangeTensorInitializer<double>>(-4, .7),
+		.leftInitializer = std::make_unique<RangeTensorInitializer<double>>(-4, .7),
 		.rightTensorShape = {3, 5},
-		.rightInitializer = std::make_unique<mlCore::RangeTensorInitializer<double>>(5, .3)};
+		.rightInitializer = std::make_unique<RangeTensorInitializer<double>>(5, .3)};
 
 	testBinaryOperationDerivative(
 		[](mlCore::NodePtr left, mlCore::NodePtr right) {
@@ -274,11 +283,13 @@ TEST_F(TestDerivativeExtractor, testDivideDerivative)
 
 TEST_F(TestDerivativeExtractor, testAddDerivative)
 {
+	using mlCore::tensorInitializers::RangeTensorInitializer;
+
 	const BinaryParams params{
 		.leftTensorShape = {3, 5},
-		.leftInitializer = std::make_unique<mlCore::RangeTensorInitializer<double>>(-4, .7),
+		.leftInitializer = std::make_unique<RangeTensorInitializer<double>>(-4, .7),
 		.rightTensorShape = {3, 5},
-		.rightInitializer = std::make_unique<mlCore::RangeTensorInitializer<double>>(5, .3)};
+		.rightInitializer = std::make_unique<RangeTensorInitializer<double>>(5, .3)};
 
 	testBinaryOperationDerivative(
 		[](mlCore::NodePtr left, mlCore::NodePtr right) {
@@ -289,11 +300,13 @@ TEST_F(TestDerivativeExtractor, testAddDerivative)
 
 TEST_F(TestDerivativeExtractor, testSubtractDerivative)
 {
+	using mlCore::tensorInitializers::RangeTensorInitializer;
+
 	const BinaryParams params{
 		.leftTensorShape = {3, 5},
-		.leftInitializer = std::make_unique<mlCore::RangeTensorInitializer<double>>(-4, .7),
+		.leftInitializer = std::make_unique<RangeTensorInitializer<double>>(-4, .7),
 		.rightTensorShape = {3, 5},
-		.rightInitializer = std::make_unique<mlCore::RangeTensorInitializer<double>>(5, .3)};
+		.rightInitializer = std::make_unique<RangeTensorInitializer<double>>(5, .3)};
 
 	testBinaryOperationDerivative(
 		[](mlCore::NodePtr left, mlCore::NodePtr right) {
@@ -304,26 +317,30 @@ TEST_F(TestDerivativeExtractor, testSubtractDerivative)
 
 TEST_F(TestDerivativeExtractor, testPowerDerivative)
 {
+	using mlCore::tensorInitializers::RangeTensorInitializer;
+
 	const auto powerLambda = [](mlCore::NodePtr left, mlCore::NodePtr right) {
 		return mlCore::BinaryOperations{}.power(left, right);
 	};
 
 	const BinaryParams paramsWithLeftScalar{
 		.leftTensorShape = {3, 5},
-		.leftInitializer = std::make_unique<mlCore::RangeTensorInitializer<double>>(1.3, .1),
+		.leftInitializer = std::make_unique<RangeTensorInitializer<double>>(1.3, .1),
 		.rightTensorShape = {3, 5},
-		.rightInitializer = std::make_unique<mlCore::RangeTensorInitializer<double>>(5, .1)};
+		.rightInitializer = std::make_unique<RangeTensorInitializer<double>>(5, .1)};
 
 	testBinaryOperationDerivative(powerLambda, paramsWithLeftScalar);
 }
 
 TEST_F(TestDerivativeExtractor, testMatmulDerivative)
 {
+	using mlCore::tensorInitializers::RangeTensorInitializer;
+
 	mlCore::Tensor leftInput({4, 3});
-	leftInput.fill(mlCore::RangeTensorInitializer<double>(-4, .7));
+	leftInput.fill(RangeTensorInitializer<double>(-4, .7));
 
 	mlCore::Tensor rightInput({3, 2});
-	rightInput.fill(mlCore::RangeTensorInitializer<double>(5, .3));
+	rightInput.fill(RangeTensorInitializer<double>(5, .3));
 
 	mlCore::Tensor outerDerivative({4, 2});
 	outerDerivative.fill({1, 2, 3, 4}, true);

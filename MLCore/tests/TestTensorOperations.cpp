@@ -7,6 +7,7 @@
  **********************/
 
 #include <MLCore/TensorOperations.h>
+#include <MLCore/TensorInitializers/RangeTensorInitializer.h>
 #include <MLCore/Utilities.h>
 #include <gtest/gtest.h>
 
@@ -26,7 +27,8 @@ concept UnaryTensorOperation = requires(OperType oper, const mlCore::Tensor& ten
 
 struct UnaryTestParams
 {
-	std::unique_ptr<mlCore::ITensorInitializer<double>> initializer;
+
+	std::unique_ptr<mlCore::tensorInitializers::ITensorInitializer<double>> initializer;
 	std::vector<double> expectedValues;
 };
 
@@ -40,8 +42,8 @@ concept BinaryTensorOperation = requires(OperType oper, const mlCore::Tensor& te
 
 struct BinaryTestParams
 {
-	std::unique_ptr<mlCore::ITensorInitializer<double>> leftInitializer;
-	std::unique_ptr<mlCore::ITensorInitializer<double>> rightInitializer;
+	std::unique_ptr<mlCore::tensorInitializers::ITensorInitializer<double>> leftInitializer;
+	std::unique_ptr<mlCore::tensorInitializers::ITensorInitializer<double>> rightInitializer;
 	std::vector<double> expectedValues;
 };
 
@@ -114,29 +116,34 @@ protected:
 
 TEST_F(TestTensorOperations, testNaturalLogarithm)
 {
-	UnaryTestParams params{
-		.initializer = std::make_unique<mlCore::RangeTensorInitializer<double>>(1.0),
-		.expectedValues = {0.000, 0.693, 1.099, 1.386, 1.609, 1.792, 1.946, 2.079, 2.197,
-						   2.303, 2.398, 2.485, 2.565, 2.639, 2.708, 2.773, 2.833, 2.890,
-						   2.944, 2.996, 3.045, 3.091, 3.135, 3.178, 3.219, 3.258, 3.296}};
+	using mlCore::tensorInitializers::RangeTensorInitializer;
+
+	UnaryTestParams params{.initializer = std::make_unique<RangeTensorInitializer<double>>(1.0),
+						   .expectedValues = {0.000, 0.693, 1.099, 1.386, 1.609, 1.792, 1.946,
+											  2.079, 2.197, 2.303, 2.398, 2.485, 2.565, 2.639,
+											  2.708, 2.773, 2.833, 2.890, 2.944, 2.996, 3.045,
+											  3.091, 3.135, 3.178, 3.219, 3.258, 3.296}};
 
 	performUnaryOperationAndCompare(params, mlCore::TensorOperations::ln);
 }
 
 TEST_F(TestTensorOperations, testRelu)
 {
-	UnaryTestParams params{
-		.initializer = std::make_unique<mlCore::RangeTensorInitializer<double>>(-12.0),
-		.expectedValues = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,	 0.0,  0.0,	 0.0,  0.0, 1.0,
-						   2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0}};
+	using mlCore::tensorInitializers::RangeTensorInitializer;
+	UnaryTestParams params{.initializer = std::make_unique<RangeTensorInitializer<double>>(-12.0),
+						   .expectedValues = {0.0, 0.0, 0.0, 0.0, 0.0,	0.0,  0.0,	0.0,  0.0,
+											  0.0, 0.0, 0.0, 0.0, 1.0,	2.0,  3.0,	4.0,  5.0,
+											  6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0}};
 
 	performUnaryOperationAndCompare(params, mlCore::TensorOperations::relu);
 }
 
 TEST_F(TestTensorOperations, testSigmoid)
 {
+	using mlCore::tensorInitializers::RangeTensorInitializer;
+
 	UnaryTestParams params{
-		.initializer = std::make_unique<mlCore::RangeTensorInitializer<double>>(-6.0, .5),
+		.initializer = std::make_unique<RangeTensorInitializer<double>>(-6.0, .5),
 		.expectedValues = {0.00247, 0.00407, 0.00669, 0.01099, 0.01799, 0.02931, 0.04743,
 						   0.07586, 0.11920, 0.18243, 0.26894, 0.37754, 0.50000, 0.62246,
 						   0.73106, 0.81757, 0.88080, 0.92414, 0.95257, 0.97069, 0.98201,
@@ -147,9 +154,11 @@ TEST_F(TestTensorOperations, testSigmoid)
 
 TEST_F(TestTensorOperations, testPower)
 {
+	using mlCore::tensorInitializers::RangeTensorInitializer;
+
 	BinaryTestParams params{
-		.leftInitializer = std::make_unique<mlCore::RangeTensorInitializer<double>>(.5, .5),
-		.rightInitializer = std::make_unique<mlCore::RangeTensorInitializer<double>>(-6.0, .5),
+		.leftInitializer = std::make_unique<RangeTensorInitializer<double>>(.5, .5),
+		.rightInitializer = std::make_unique<RangeTensorInitializer<double>>(-6.0, .5),
 		.expectedValues = {
 			64.000,	   1.000,	   0.132,	   0.044,		0.026,		  0.021,	   0.023,
 			0.031,	   0.049,	   0.089,	   0.182,		0.408,		  1.000,	   2.646,
