@@ -1,15 +1,15 @@
 #ifndef BINARYOPERATORS_ADDOPERATOR_H
 #define BINARYOPERATORS_ADDOPERATOR_H
 
-#include <AutoDiff/BinaryOperators/IBinaryOperator.h>
+#include <AutoDiff/BinaryOperators/BinaryOperator.h>
 
 namespace mlCore::autoDiff::binaryOperators
 {
-class AddOperator final : public IBinaryOperator
+class AddOperator final : public BinaryOperator
 {
 public:
 	AddOperator(const NodePtr lhsInput, const NodePtr rhsInput)
-		: IBinaryOperator(lhsInput, rhsInput){};
+		: BinaryOperator(lhsInput, rhsInput){};
 
 	void updateValue() override;
 };

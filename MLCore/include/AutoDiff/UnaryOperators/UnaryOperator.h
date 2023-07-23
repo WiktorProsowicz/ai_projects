@@ -9,10 +9,10 @@ namespace mlCore::autoDiff::unaryOperators
  * @brief Represents a result of modification of a single node. Its internal processing depends on its subclass, wraps TensorFunctions algorithms
  * 
  */
-class IUnaryOperator : public Node
+class UnaryOperator : public Node
 {
 public:
-	IUnaryOperator(const NodePtr input)
+	UnaryOperator(const NodePtr input)
 		: Node(std::vector<size_t>{})
 		, input_(input){};
 
@@ -28,7 +28,7 @@ protected:
 	NodePtr input_;
 };
 
-using IUnaryOperatorPtr = std::shared_ptr<IUnaryOperator>;
+using UnaryOperatorPtr = std::shared_ptr<UnaryOperator>;
 
 } // namespace mlCore::autoDiff::unaryOperators
 

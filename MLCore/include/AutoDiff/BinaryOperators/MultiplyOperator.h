@@ -1,15 +1,15 @@
 #ifndef BINARYOPERATORS_MULTIPLYOPERATOR_H
 #define BINARYOPERATORS_MULTIPLYOPERATOR_H
 
-#include <AutoDiff/BinaryOperators/IBinaryOperator.h>
+#include <AutoDiff/BinaryOperators/BinaryOperator.h>
 
 namespace mlCore::autoDiff::binaryOperators
 {
-class MultiplyOperator final : public IBinaryOperator
+class MultiplyOperator final : public BinaryOperator
 {
 public:
 	MultiplyOperator(const NodePtr lhsInput, const NodePtr rhsInput)
-		: IBinaryOperator(lhsInput, rhsInput){};
+		: BinaryOperator(lhsInput, rhsInput){};
 
 	void updateValue() override;
 };

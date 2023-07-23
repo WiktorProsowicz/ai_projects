@@ -9,10 +9,10 @@ namespace mlCore::autoDiff::binaryOperators
  * @brief Represents a result of operation on two nodes. Its internal processing depends on its type, wraps TensorFunctions algorithms
  * 
  */
-class IBinaryOperator : public Node
+class BinaryOperator : public Node
 {
 public:
-	IBinaryOperator(const NodePtr lhsInput, const NodePtr rhsInput)
+	BinaryOperator(const NodePtr lhsInput, const NodePtr rhsInput)
 		: Node(std::vector<size_t>{})
 		, lhsInput_(lhsInput)
 		, rhsInput_(rhsInput){};
@@ -30,7 +30,7 @@ protected:
 	const NodePtr rhsInput_;
 };
 
-using IBinaryOperatorPtr = std::shared_ptr<IBinaryOperator>;
+using BinaryOperatorPtr = std::shared_ptr<BinaryOperator>;
 
 } // namespace mlCore::autoDiff::binaryOperators
 

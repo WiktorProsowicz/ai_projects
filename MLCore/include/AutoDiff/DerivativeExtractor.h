@@ -37,7 +37,7 @@ public:
      * @param outerDerivative derivative to perform chain rule computation
      * @return derivative of oper updated with outerDerivative
      */
-	Tensor operator()(unaryOperators::IUnaryOperatorPtr oper, const Tensor& outerDerivative) const;
+	Tensor operator()(unaryOperators::UnaryOperatorPtr oper, const Tensor& outerDerivative) const;
 
 	/**
      * @brief Computes derivatives of a binary operator in respect of its inputs
@@ -46,7 +46,7 @@ public:
      * @param outerDerivative derivative to perform chain rule computation
      * @return derivatives of oper updated with outerDerivative
      */
-	std::pair<Tensor, Tensor> operator()(binaryOperators::IBinaryOperatorPtr oper,
+	std::pair<Tensor, Tensor> operator()(binaryOperators::BinaryOperatorPtr oper,
 										 const Tensor& outerDerivative) const;
 
 private:

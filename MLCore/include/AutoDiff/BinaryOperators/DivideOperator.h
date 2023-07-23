@@ -1,15 +1,15 @@
 #ifndef BINARYOPERATORS_DIVIDEOPERATOR_H
 #define BINARYOPERATORS_DIVIDEOPERATOR_H
 
-#include <AutoDiff/BinaryOperators/IBinaryOperator.h>
+#include <AutoDiff/BinaryOperators/BinaryOperator.h>
 
 namespace mlCore::autoDiff::binaryOperators
 {
-class DivideOperator final : public IBinaryOperator
+class DivideOperator final : public BinaryOperator
 {
 public:
 	DivideOperator(const NodePtr lhsInput, const NodePtr rhsInput)
-		: IBinaryOperator(lhsInput, rhsInput){};
+		: BinaryOperator(lhsInput, rhsInput){};
 
 	void updateValue() override;
 };

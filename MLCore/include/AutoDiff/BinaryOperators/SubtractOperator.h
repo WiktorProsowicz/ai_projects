@@ -1,15 +1,15 @@
 #ifndef BINARYOPERATORS_SUBTRACTOPERATOR_H
 #define BINARYOPERATORS_SUBTRACTOPERATOR_H
 
-#include <AutoDiff/BinaryOperators/IBinaryOperator.h>
+#include <AutoDiff/BinaryOperators/BinaryOperator.h>
 
 namespace mlCore::autoDiff::binaryOperators
 {
-class SubtractOperator final : public IBinaryOperator
+class SubtractOperator final : public BinaryOperator
 {
 public:
 	SubtractOperator(const NodePtr lhsInput, const NodePtr rhsInput)
-		: IBinaryOperator(lhsInput, rhsInput){};
+		: BinaryOperator(lhsInput, rhsInput){};
 
 	void updateValue() override;
 };

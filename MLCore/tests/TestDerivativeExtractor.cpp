@@ -96,7 +96,7 @@ protected:
 	template <BinaryNodeOperation Operation>
 	static void testBinaryOperationDerivative(Operation oper, const BinaryParams& params)
 	{
-		using mlCore::autoDiff::binaryOperators::IBinaryOperator;
+		using mlCore::autoDiff::binaryOperators::BinaryOperator;
 
 		// input tensors
 		mlCore::Tensor leftNodeValue(params.leftTensorShape);
@@ -111,7 +111,7 @@ protected:
 
 		// operation result
 		const auto operationResult =
-			std::dynamic_pointer_cast<IBinaryOperator>(oper(leftInputNode, rightInputNode));
+			std::dynamic_pointer_cast<BinaryOperator>(oper(leftInputNode, rightInputNode));
 
 		if(!operationResult)
 		{
@@ -155,7 +155,7 @@ protected:
 	template <UnaryNodeOperation Operation>
 	static void testUnaryOperationDerivative(Operation oper, const UnaryParams& params)
 	{
-		using mlCore::autoDiff::unaryOperators::IUnaryOperator;
+		using mlCore::autoDiff::unaryOperators::UnaryOperator;
 
 		// input tensor
 		mlCore::Tensor nodeValue(params.tensorShape);
@@ -165,7 +165,7 @@ protected:
 		const auto inputNode = std::make_shared<mlCore::autoDiff::Constant>(nodeValue);
 
 		// operation result
-		const auto operationResult = std::dynamic_pointer_cast<IUnaryOperator>(oper(inputNode));
+		const auto operationResult = std::dynamic_pointer_cast<UnaryOperator>(oper(inputNode));
 
 		if(!operationResult)
 		{
@@ -194,18 +194,18 @@ protected:
 	{
 		using mlCore::autoDiff::BinaryOperations;
 		using mlCore::autoDiff::DerivativeExtractor;
-		using mlCore::autoDiff::binaryOperators::IBinaryOperator;
+		using mlCore::autoDiff::binaryOperators::BinaryOperator;
 
 		const auto leftNode = std::make_shared<mlCore::autoDiff::Constant>(leftTensor);
 		const auto rightNode = std::make_shared<mlCore::autoDiff::Constant>(rightTensor);
 
 		const auto operationResult =
-			std::dynamic_pointer_cast<mlCore::autoDiff::binaryOperators::IBinaryOperator>(
+			std::dynamic_pointer_cast<mlCore::autoDiff::binaryOperators::BinaryOperator>(
 				BinaryOperations{}.matmul(leftNode, rightNode));
 
 		if(!operationResult)
 		{
-			FAIL() << "Matmul operation yielded something other than IBinaryOperator!";
+			FAIL() << "Matmul operation yielded something other than BinaryOperator!";
 		}
 
 		const auto [leftDerivative, rightDerivative] =

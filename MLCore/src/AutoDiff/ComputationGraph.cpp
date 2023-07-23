@@ -1,7 +1,7 @@
-#include <AutoDiff/BinaryOperators/IBinaryOperator.h>
+#include <AutoDiff/BinaryOperators/BinaryOperator.h>
 #include <AutoDiff/ComputationGraph.h>
 #include <AutoDiff/DerivativeExtractor.h>
-#include <AutoDiff/UnaryOperators/IUnaryOperator.h>
+#include <AutoDiff/UnaryOperators/UnaryOperator.h>
 
 namespace mlCore::autoDiff
 {
@@ -64,14 +64,14 @@ void ComputationGraph::sortNodes()
 	std::function<void(const NodePtr)> traverseTree;
 	traverseTree = [&traverseTree, &newNodes](const NodePtr node) {
 		if(const auto castedBinaryOp =
-			   std::dynamic_pointer_cast<binaryOperators::IBinaryOperator>(node))
+			   std::dynamic_pointer_cast<binaryOperators::BinaryOperator>(node))
 		{
 			const auto& [lhs, rhs] = castedBinaryOp->getInputs();
 			traverseTree(lhs);
 			traverseTree(rhs);
 		}
 		else if(const auto castedUnaryOp =
-					std::dynamic_pointer_cast<unaryOperators::IUnaryOperator>(node))
+					std::dynamic_pointer_cast<unaryOperators::UnaryOperator>(node))
 		{
 			traverseTree(castedUnaryOp->getInput());
 		}
@@ -105,12 +105,12 @@ void ComputationGraph::forwardPass(const std::map<PlaceholderPtr, Tensor>& feedD
 			placeholder->setValue(feedDict.at(placeholder));
 		}
 		else if(const auto binaryOper =
-					std::dynamic_pointer_cast<binaryOperators::IBinaryOperator>(node))
+					std::dynamic_pointer_cast<binaryOperators::BinaryOperator>(node))
 		{
 			binaryOper->updateValue();
 		}
 		else if(const auto unaryOper =
-					std::dynamic_pointer_cast<unaryOperators::IUnaryOperator>(node))
+					std::dynamic_pointer_cast<unaryOperators::UnaryOperator>(node))
 		{
 			unaryOper->updateValue();
 		}
@@ -138,14 +138,14 @@ void ComputationGraph::computeGradients(const NodePtr root)
 			grad = grad + cumulatedGradient;
 		}
 
-		if(const auto castedUnary = std::dynamic_pointer_cast<unaryOperators::IUnaryOperator>(node))
+		if(const auto castedUnary = std::dynamic_pointer_cast<unaryOperators::UnaryOperator>(node))
 		{
 			const auto input = castedUnary->getInput();
 			const auto derivative = DerivativeExtractor{}(castedUnary, cumulatedGradient);
 			backPropagate(input, cumulatedGradient);
 		}
 		else if(const auto castedBinary =
-					std::dynamic_pointer_cast<binaryOperators::IBinaryOperator>(node))
+					std::dynamic_pointer_cast<binaryOperators::BinaryOperator>(node))
 		{
 			const auto [lInput, rInput] = castedBinary->getInputs();
 			const auto [lDerivative, rDerivative] =

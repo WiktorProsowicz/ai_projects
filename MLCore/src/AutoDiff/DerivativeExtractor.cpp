@@ -3,7 +3,7 @@
 
 namespace mlCore::autoDiff
 {
-Tensor DerivativeExtractor::operator()(const unaryOperators::IUnaryOperatorPtr oper,
+Tensor DerivativeExtractor::operator()(const unaryOperators::UnaryOperatorPtr oper,
 									   const Tensor& outerDerivative) const
 {
 	if(const auto casted = std::dynamic_pointer_cast<unaryOperators::ReluOperator>(oper))
@@ -21,7 +21,7 @@ Tensor DerivativeExtractor::operator()(const unaryOperators::IUnaryOperatorPtr o
 }
 
 std::pair<Tensor, Tensor>
-DerivativeExtractor::operator()(const binaryOperators::IBinaryOperatorPtr oper,
+DerivativeExtractor::operator()(const binaryOperators::BinaryOperatorPtr oper,
 								const Tensor& outerDerivative) const
 {
 	if(const auto casted = std::dynamic_pointer_cast<binaryOperators::AddOperator>(oper))
