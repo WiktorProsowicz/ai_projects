@@ -1,9 +1,6 @@
 #ifndef MLCORE_BASICTENSOR_H
 #define MLCORE_BASICTENSOR_H
 
-#include "LoggingLib/LoggingLib.h"
-#include "MLCore/Utilities.h"
-#include <MLCore/TensorInitializers/ITensorInitializer.h>
 #include <algorithm>
 #include <exception>
 #include <functional>
@@ -13,6 +10,11 @@
 #include <memory>
 #include <numeric>
 #include <vector>
+
+#include <LoggingLib/LoggingLib.h>
+#include <MLCore/Utilities.h>
+#include <MLCore/TensorInitializers/ITensorInitializer.h>
+#include <MLCore/TensorIterator.hpp>
 
 namespace mlCore
 {
@@ -30,122 +32,184 @@ class BasicTensor
 	template <typename OperationsImplType>
 	friend class TensorOperationsImpl;
 
-	class Iterator;
-
 public:
-	BasicTensor() = delete;
-	BasicTensor(const BasicTensor&); // copy constructor
-	BasicTensor(BasicTensor&&); // move constructor
 	/**
-	 * @brief constructs tensor from shape
+	 * @brief Constructs a new scalar-type tensor.
 	 * 
 	 */
-	BasicTensor(const std::vector<size_t>&);
+	BasicTensor();
+
 	/**
-	 * @brief constructs tensor from shape and fills it with initial value
+	 * @brief Copy constructor.
 	 * 
-	 * @param shape tensor's initial shape
-	 * @param initVal initital value
+	 * @param other Tensor to copy.
+	 */
+	BasicTensor(const BasicTensor& other);
+
+	/**
+	 * @brief Move constructor.
+	 * 
+	 * @param other Tensor to move.
+	 */
+	BasicTensor(BasicTensor&& other);
+
+	/**
+	 * @brief Construct a new tensor with given shape.
+	 * 
+	 * @param shape Tensor's initial shape.
+	 */
+	BasicTensor(const std::vector<size_t>& shape);
+
+	/**
+	 * @brief Constructs tensor from shape and fills it with initial value.
+	 * 
+	 * @param shape Tensor's initial shape.
+	 * @param initVal Initial value for the whole tensor's data.
 	 */
 	BasicTensor(const std::vector<size_t>& shape, ValueType initVal);
+
 	/**
-	 * @brief Constructs a new tensor from shape and gives it initial values
+	 * @brief Constructs a new tensor from shape and gives it initial values.
 	 * 
-	 * @param shape Tensor's initial shape
-	 * @param initValues Values to assign, there is no check of the init list length
+	 * @param shape Tensor's initial shape.
+	 * @param initValues Values to assign, there is no check of the init list length.
 	 */
 	BasicTensor(const std::vector<size_t>& shape, std::initializer_list<ValueType> initValues);
+
+	/**
+	 * @brief Tensor's destructor releasing the resources.
+	 * 
+	 */
 	~BasicTensor();
 
-	// assign
-	BasicTensor& operator=(const BasicTensor&); // copy assignment
-	BasicTensor& operator=(BasicTensor&&); // move assignment
 	/**
-	 * @brief fills tensor with passed value
+	 * @brief Copy assignment operator.
 	 * 
-	 * @return
+	 * @param other Tensor to copy.
+	 * @return BasicTensor& 
 	 */
-	BasicTensor& operator=(ValueType);
+	BasicTensor& operator=(const BasicTensor& other);
 
-	/// Gets tensor's shape
+	/**
+	 * @brief Move assignment operator.
+	 * 
+	 * @param other Tensor to move.
+	 * @return BasicTensor& 
+	 */
+	BasicTensor& operator=(BasicTensor&& other);
+
+	/// Gets tensor's shape.
 	const std::vector<size_t>& shape() const noexcept
 	{
 		return shape_;
 	}
 
-	/// Gets number of tensor's dimensions
+	/// Gets number of tensor's dimensions.
 	size_t nDimensions() const noexcept
 	{
 		return shape_.size();
 	}
 
-	/// Gets number of tensor's elements
+	/// Gets number of tensor's elements.
 	size_t size() const noexcept
 	{
 		return length_;
 	}
 
-	/// Gets beginning tensor's iterator
-	Iterator begin() const
+	/// Gets beginning tensor's iterator.
+	inline TensorIterator<ValueType> begin() const
 	{
-		return Iterator(data_);
+		return TensorIterator<ValueType>(data_);
 	}
 
-	/// Gets ending tensor's iterator
-	Iterator end() const
+	/// Gets ending tensor's iterator.
+	inline TensorIterator<ValueType> end() const
 	{
-		return Iterator(data_ + length_);
+		return TensorIterator<ValueType>(data_ + length_);
 	}
 
 	/**
-	 * @brief Changes shape of the tensor. Basic checks over the given shape are performed
+	 * @brief Changes shape of the tensor. Basic checks over the given shape are performed.
 	 * 
-	 * @param newShape The new shape to assign
+	 * @param newShape The new shape to assign.
 	 */
 	void reshape(const std::vector<size_t>& newShape);
 
 	/**
-	 * @brief assigns new values to tensor in places specified by axes ranges
+	 * @brief Assigns new values to tensor in places specified by axes ranges.
 	 * 
-	 * @param indices list of ranges through each axis that will be taken into account while assigning new data
-	 * @param newData list of values to assign
-	 * @param wrapData whether the values should be repeated to fit. If false and there are to few values, an exception will be raised
+	 * @param indices List of ranges through each axis that will be taken into account while assigning new data.
+	 * @param newData List of values to assign.
+	 * @param wrapData Whether the values should be repeated to fit. If false and there are to few values, an exception will be raised.
 	 */
 	void assign(std::initializer_list<std::pair<size_t, size_t>> indices,
 				std::initializer_list<ValueType> newData,
 				bool wrapData = false);
 
+	/// Creates a product of adding `this` with `other` tensor.
 	BasicTensor operator+(const BasicTensor& other) const;
-	BasicTensor operator-(const BasicTensor& other) const;
-	BasicTensor operator*(const BasicTensor& other) const;
-	BasicTensor operator/(const BasicTensor& other) const;
-	BasicTensor operator-() const;
 
+	/// Creates a product of subtracting `other` tensor from `this`.
+	BasicTensor operator-(const BasicTensor& other) const;
+
+	/// Creates a product of multiplying `this` by `other` tensor.
+	BasicTensor operator*(const BasicTensor& other) const;
+
+	/// Creates a product of dividing `this` by `other` tensor.
+	BasicTensor operator/(const BasicTensor& other) const;
+
+	/// Adds `other` tensor to `this`.
 	BasicTensor& operator+=(const BasicTensor& other);
+
+	/// Subtract `other` tensor from `this`.
 	BasicTensor& operator-=(const BasicTensor& other);
+
+	/// Multiplies `this` by `other` tensor.
 	BasicTensor& operator*=(const BasicTensor& other);
+
+	/// Divides `this` by `other` tensor.
 	BasicTensor& operator/=(const BasicTensor& other);
 
-	BasicTensor matmul(const BasicTensor&) const;
+	/// Creates the negation of `this`.
+	BasicTensor operator-() const;
 
 	/**
-	 * @brief Create copy of the tensor and return its transposed version
+	 * @brief Performs matrix multiplication operation on `this` and `other` tensor.
 	 * 
-	 * @return Transposed tensor
+	 * @param other Tensor to matrix-multiply `this` by.
+	 * @return BasicTensor Product of matrix multiplication.
+	 */
+	BasicTensor matmul(const BasicTensor& other) const;
+
+	/**
+	 * @brief Creates transposed version of `this`.
+	 * 
+	 * @return Transposed tensor.
 	 */
 	BasicTensor transposed() const;
 
-	// displaying
-	template <typename TensorValueType>
-	friend std::ostream& operator<<(std::ostream&, const BasicTensor<TensorValueType>&);
+	/**
+	 * @brief Fills the tensor with given data.
+	 * 
+	 * @param newData Data to assign to tensor.
+	 * @param wrapData Whether to repeat the data to fit.
+	 */
+	void fill(std::initializer_list<ValueType> newData, bool wrapData = false);
 
 	/**
-	 * @brief assigns values to the tensor
+	 * @brief Fills the tensor with data given by initializer.
 	 * 
-	 * @tparam InputIter type of iterator to take data from
-	 * @param first beginning iterator of values collection
-	 * @param last ending iterator
-	 * @param wrapData whether the values should be repeated to fit. If false and there are to few values, an exception will be raised
+	 * @param initializer Initializer object from which the data to assign is taken.
+	 */
+	void fill(const tensorInitializers::ITensorInitializer<ValueType>& initializer);
+
+	/**
+	 * @brief Assigns values to the tensor.
+	 * 
+	 * @tparam InputIter Type of iterator to take data from.
+	 * @param first Beginning iterator of values collection.
+	 * @param last Ending iterator.
+	 * @param wrapData Whether the values should be repeated to fit. If false and there are to few values, an exception will be raised.
 	 */
 	template <typename InputIter>
 	void fill(InputIter first, InputIter last, const bool wrapData = false)
@@ -179,73 +243,25 @@ public:
 		}
 	}
 
-	inline void fill(std::initializer_list<ValueType> newData, const bool wrapData = false)
-	{
-		fill(newData.begin(), newData.end(), wrapData);
-	}
-
-	void fill(const tensorInitializers::ITensorInitializer<ValueType>& initializer);
+	template <typename TensorValueType>
+	friend std::ostream& operator<<(std::ostream& out, const BasicTensor<TensorValueType>& tensor);
 
 private:
-	class Iterator
-	{
-	public:
-		using iterator_category = std::input_iterator_tag;
-		using difference_type = std::ptrdiff_t;
-		using value_type = ValueType;
-		using pointer = ValueType*;
-		using reference = ValueType&;
-
-		Iterator(pointer ptr)
-			: currPtr_(ptr)
-		{ }
-
-		reference operator*()
-		{
-			return *currPtr_;
-		}
-		pointer operator->()
-		{
-			return currPtr_;
-		}
-		Iterator& operator++()
-		{
-			currPtr_++;
-			return *this;
-		}
-
-		// NOLINTBEGIN(readability-const-return-type)
-		const Iterator operator++(int)
-		{
-			auto tmp = *this;
-			++(*this);
-			return tmp;
-		}
-		// NOLINTEND(readability-const-return-type)
-
-		friend bool operator==(const Iterator& iter1, const Iterator& iter2)
-		{
-			return iter1.currPtr_ == iter2.currPtr_;
-		}
-
-		friend bool operator!=(const Iterator& iter1, const Iterator& iter2)
-		{
-			return iter1.currPtr_ != iter2.currPtr_;
-		}
-		friend bool operator<(const Iterator& iter1, const Iterator& iter2)
-		{
-			return iter1.currPtr_ < iter2.currPtr_;
-		}
-
-	private:
-		pointer currPtr_;
-	};
-
-private:
+	/// Traverses list of indices and checks ranges correctness. Correct indices specify tensor slice that can be modified via value assignment.
+	/// Throws std::out_of_range if upper[i] > shape[i] or 0 > indices.size() > shape_.size().
+	/// Indices is a list of pairs of min-max indices from axis zero i.e for tensor([[1, 2], [3, 4]]) -> list{{0, 1}} -> [1, 2].
 	void
-	checkIndicesList_(std::initializer_list<std::pair<size_t, size_t>>::const_iterator beg,
+	_checkIndicesList(std::initializer_list<std::pair<size_t, size_t>>::const_iterator beg,
 					  std::initializer_list<std::pair<size_t, size_t>>::const_iterator end) const;
-	void checkShape_(const std::vector<size_t>&) const;
+
+	/// Checks if all of the `shape`'s elements are positive i.e. eligible to be present in the shape.
+	static void _checkShapeElementsPositive(const std::vector<size_t>& shape);
+
+	/// Checks if the number of elements produced by `shape` fits in datatype bounds.
+	static void _checkShapeFitsInBounds(const std::vector<size_t>& shape);
+
+	/// Checks if the given `shape` is compatible with the number of elements held by the tensor
+	void _checkShapeCompatible(const std::vector<size_t>& shape) const;
 
 private:
 	size_t length_;

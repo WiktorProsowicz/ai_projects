@@ -4,9 +4,20 @@
 
 namespace mlCore
 {
-// explicit instantiation
+/**************************
+ * Explicit instantiations
+ **************************/
 template class BasicTensor<double>;
 template std::ostream& operator<<(std::ostream& out, const BasicTensor<double>& tensor);
+
+template <typename ValueType>
+BasicTensor<ValueType>::BasicTensor()
+	: length_(1)
+	, shape_()
+	, data_()
+{
+	data_ = new ValueType[1];
+}
 
 template <typename ValueType>
 BasicTensor<ValueType>::BasicTensor(const std::vector<size_t>& shape)
@@ -16,10 +27,9 @@ BasicTensor<ValueType>::BasicTensor(const std::vector<size_t>& shape)
 {
 	try
 	{
-		// shape checking chain
-		checkShape_(shape_);
+		_checkShapeElementsPositive(shape_);
 	}
-	catch(const std::invalid_argument&)
+	catch(const std::runtime_error&)
 	{
 		LOG_WARN("BasicTensor",
 				 "Shape's members have to be greater than zero. Changing all zero dims to 1's.");
@@ -31,7 +41,12 @@ BasicTensor<ValueType>::BasicTensor(const std::vector<size_t>& shape)
 			}
 		});
 	}
-	catch(const std::length_error&)
+
+	try
+	{
+		_checkShapeFitsInBounds(shape_);
+	}
+	catch(const std::runtime_error&)
 	{
 		size_t nElements = 1;
 		std::vector<size_t> newShape;
@@ -156,19 +171,25 @@ BasicTensor<ValueType>& BasicTensor<ValueType>::operator=(BasicTensor&& other)
 template <typename ValueType>
 void BasicTensor<ValueType>::reshape(const std::vector<size_t>& newShape)
 {
-	checkShape_(newShape);
+	_checkShapeElementsPositive(newShape);
+	_checkShapeFitsInBounds(newShape);
+	_checkShapeCompatible(newShape);
+
 	shape_ = newShape;
 }
 
 template <typename ValueType>
-void BasicTensor<ValueType>::checkShape_(const std::vector<size_t>& shape) const
+void BasicTensor<ValueType>::_checkShapeElementsPositive(const std::vector<size_t>& shape)
 {
 	if(std::any_of(shape.begin(), shape.end(), [](const auto axis) { return axis <= 0; }))
 	{
-		throw std::invalid_argument("Shape's members have to be greater than zero.");
+		throw std::runtime_error("Shape's members have to be greater than zero.");
 	}
+}
 
-	// counts all elements given by the shape to check validity
+template <typename ValueType>
+void BasicTensor<ValueType>::_checkShapeFitsInBounds(const std::vector<size_t>& shape)
+{
 	size_t nElements = 1;
 	for_each(shape.begin(), shape.end(), [&nElements](const auto dim) {
 		if(nElements <= (ULLONG_MAX / dim))
@@ -177,16 +198,20 @@ void BasicTensor<ValueType>::checkShape_(const std::vector<size_t>& shape) const
 		}
 		else
 		{
-			throw std::length_error("Cumulative number of elements in shape exceeds ULLONG_MAX");
+			throw std::runtime_error("Cumulative number of elements in shape exceeds ULLONG_MAX");
 		}
 	});
+}
 
-	if(const auto newLength =
-		   std::accumulate(shape.begin(),
-						   shape.end(),
-						   size_t(0),
-						   [](const auto current, const auto axis) { return current * axis; });
-	   newLength != length_)
+template <typename ValueType>
+void BasicTensor<ValueType>::_checkShapeCompatible(const std::vector<size_t>& shape) const
+{
+	const auto newLength = std::accumulate(
+		shape.begin(), shape.end(), size_t(0), [](const auto current, const auto axis) {
+			return current * axis;
+		});
+
+	if(newLength != length_)
 	{
 		throw std::out_of_range("Cannot reshape if new shape's total size (" +
 								std::to_string(newLength) + ") does not match current (" +
@@ -194,15 +219,8 @@ void BasicTensor<ValueType>::checkShape_(const std::vector<size_t>& shape) const
 	}
 }
 
-/**
- * @brief traverses list of indices and checks ranges correctness. Correct indices specify tensor slice that can be modified via value assignment.
- * Throws std::out_of_range if upper[i] > shape[i] or 0 > indices.size() > shape_.size()
- * 
- * @tparam ValueType dtype of tensor
- * @param indices list of pairs of min-max indices from axis zero i.e for tensor([[1, 2], [3, 4]]) -> list{{0, 1}} -> [1, 2]
- */
 template <typename ValueType>
-void BasicTensor<ValueType>::checkIndicesList_(
+void BasicTensor<ValueType>::_checkIndicesList(
 	const std::initializer_list<std::pair<size_t, size_t>>::const_iterator _beg,
 	const std::initializer_list<std::pair<size_t, size_t>>::const_iterator _end) const
 {
@@ -477,7 +495,7 @@ void BasicTensor<ValueType>::assign(std::initializer_list<std::pair<size_t, size
 									std::initializer_list<ValueType> newData,
 									const bool wrapData)
 {
-	checkIndicesList_(indices.begin(), indices.end());
+	_checkIndicesList(indices.begin(), indices.end());
 
 	size_t itemsToAssign = 1;
 	for(const auto& [lower, upper] : indices)
@@ -561,6 +579,12 @@ void BasicTensor<ValueType>::fill(
 	{
 		throw std::out_of_range("Too few values to assign to the tensor.");
 	}
+}
+
+template <typename ValueType>
+void BasicTensor<ValueType>::fill(std::initializer_list<ValueType> newData, const bool wrapData)
+{
+	fill(newData.begin(), newData.end(), wrapData);
 }
 
 template <typename TensorValueType>
