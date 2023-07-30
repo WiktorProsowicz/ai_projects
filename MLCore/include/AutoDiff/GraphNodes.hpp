@@ -29,10 +29,10 @@ class Node
 {
 public:
 	Node() = delete;
-	Node(const Tensor& tensor, const std::string& name = "")
+	Node(const Tensor& tensor)
 		: index_(nodesCount_++)
 		, value_(tensor)
-		, name_(name){};
+		, name_(){};
 
 	virtual ~Node() = default;
 
@@ -51,6 +51,11 @@ public:
 		return name_;
 	}
 
+	void setName(const std::string& name)
+	{
+		name_ = name;
+	}
+
 	virtual void setValue(const Tensor& tensor)
 	{
 		value_ = tensor;
@@ -60,7 +65,7 @@ protected:
 	uint64_t index_;
 	static inline uint64_t nodesCount_ = 0;
 	Tensor value_;
-	const std::string name_;
+	std::string name_;
 };
 
 /**
@@ -72,8 +77,8 @@ class Variable : public Node
 public:
 	Variable()
 		: Node(std::vector<size_t>{}){};
-	Variable(const Tensor& tensor, const std::string& name = "")
-		: Node(tensor, name){};
+	Variable(const Tensor& tensor)
+		: Node(tensor){};
 };
 
 /**
@@ -84,8 +89,8 @@ class Constant : public Node
 {
 public:
 	Constant() = delete;
-	Constant(const Tensor& tensor, const std::string& name = "")
-		: Node(tensor, name){};
+	Constant(const Tensor& tensor)
+		: Node(tensor){};
 
 	void setValue(const Tensor& /*tensor*/) override
 	{
