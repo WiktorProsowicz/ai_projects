@@ -16,6 +16,10 @@ public:
 		: UnaryOperator(input){};
 
 	void updateValue() override;
+
+	Tensor computeDerivative(const Tensor& outerDerivative) const override;
+
+	Tensor computeDirectDerivative() const override;
 };
 
 using ReluOperatorPtr = std::shared_ptr<ReluOperator>;

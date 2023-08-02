@@ -1,6 +1,5 @@
 #include <AutoDiff/BinaryOperators/BinaryOperator.h>
 #include <AutoDiff/ComputationGraph.h>
-#include <AutoDiff/DerivativeExtractor.h>
 #include <AutoDiff/UnaryOperators/UnaryOperator.h>
 
 namespace mlCore::autoDiff
@@ -141,7 +140,7 @@ void ComputationGraph::computeGradients(const NodePtr root)
 		if(const auto castedUnary = std::dynamic_pointer_cast<unaryOperators::UnaryOperator>(node))
 		{
 			const auto input = castedUnary->getInput();
-			const auto derivative = DerivativeExtractor{}(castedUnary, cumulatedGradient);
+			const auto derivative = castedUnary->computeDerivative(cumulatedGradient);
 			backPropagate(input, cumulatedGradient);
 		}
 		else if(const auto castedBinary =
@@ -149,7 +148,7 @@ void ComputationGraph::computeGradients(const NodePtr root)
 		{
 			const auto [lInput, rInput] = castedBinary->getInputs();
 			const auto [lDerivative, rDerivative] =
-				DerivativeExtractor{}(castedBinary, cumulatedGradient);
+				castedBinary->computeDerivative(cumulatedGradient);
 
 			backPropagate(lInput, lDerivative);
 			backPropagate(rInput, rDerivative);

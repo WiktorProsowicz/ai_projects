@@ -19,38 +19,65 @@ namespace mlCore::autoDiff
  * Binary
  * 
  ****************/
+namespace
+{
+/// Creates an binary operator node of the provided type and updates its value.
+template <typename BinaryOperator>
+NodePtr binaryOperationImpl(const NodePtr& lNode, const NodePtr& rNode)
+{
+	auto result = std::make_shared<BinaryOperator>(lNode, rNode);
+
+	result->updateValue();
+
+	return result;
+}
+} // namespace
 namespace binaryOperations
 {
 NodePtr multiply(const NodePtr lNode, const NodePtr rNode)
 {
-	return std::make_shared<binaryOperators::MultiplyOperator>(lNode, rNode);
+	return binaryOperationImpl<binaryOperators::MultiplyOperator>(lNode, rNode);
 }
 
 NodePtr add(const NodePtr lNode, const NodePtr rNode)
 {
-	return std::make_shared<binaryOperators::AddOperator>(lNode, rNode);
+	return binaryOperationImpl<binaryOperators::AddOperator>(lNode, rNode);
 }
 
 NodePtr subtract(const NodePtr lNode, const NodePtr rNode)
 {
-	return std::make_shared<binaryOperators::SubtractOperator>(lNode, rNode);
+	return binaryOperationImpl<binaryOperators::SubtractOperator>(lNode, rNode);
 }
 
 NodePtr divide(const NodePtr lNode, const NodePtr rNode)
 {
-	return std::make_shared<binaryOperators::DivideOperator>(lNode, rNode);
+	return binaryOperationImpl<binaryOperators::DivideOperator>(lNode, rNode);
 }
 
 NodePtr power(const NodePtr baseNode, const NodePtr factorNode)
 {
-	return std::make_shared<binaryOperators::PowerOperator>(baseNode, factorNode);
+	return binaryOperationImpl<binaryOperators::PowerOperator>(baseNode, factorNode);
 }
 
 NodePtr matmul(const NodePtr lNode, const NodePtr rNode)
 {
-	return std::make_shared<binaryOperators::MatmulOperator>(lNode, rNode);
+	return binaryOperationImpl<binaryOperators::MatmulOperator>(lNode, rNode);
 }
 } // namespace binaryOperations
+
+namespace
+{
+/// Creates an unary operator node of the provided type and updates its value.
+template <typename UnaryOperator>
+NodePtr unaryOperationImpl(const NodePtr& node)
+{
+	auto result = std::make_shared<UnaryOperator>(node);
+
+	result->updateValue();
+
+	return result;
+}
+} // namespace
 
 /****************
  * 
@@ -62,7 +89,7 @@ namespace unaryOperations
 {
 NodePtr ln(NodePtr node)
 {
-	return std::make_shared<unaryOperators::LnOperator>(node);
+	return unaryOperationImpl<unaryOperators::LnOperator>(node);
 }
 } // namespace unaryOperations
 
@@ -76,12 +103,12 @@ namespace nodesActivations
 {
 NodePtr relu(const NodePtr node)
 {
-	return std::make_shared<unaryOperators::ReluOperator>(node);
+	return unaryOperationImpl<unaryOperators::ReluOperator>(node);
 }
 
 NodePtr sigmoid(const NodePtr node)
 {
-	return std::make_shared<unaryOperators::SigmoidOperator>(node);
+	return unaryOperationImpl<unaryOperators::SigmoidOperator>(node);
 }
 } // namespace nodesActivations
 } // namespace mlCore::autoDiff

@@ -12,6 +12,10 @@ public:
 		: BinaryOperator(lhsInput, rhsInput){};
 
 	void updateValue() override;
+
+	std::pair<Tensor, Tensor> computeDerivative(const Tensor& outerDerivative) const override;
+
+	std::pair<Tensor, Tensor> computeDirectDerivative() const override;
 };
 
 using SubtractOperatorPtr = std::shared_ptr<SubtractOperator>;

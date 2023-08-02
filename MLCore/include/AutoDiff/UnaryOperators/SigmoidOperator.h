@@ -16,6 +16,10 @@ public:
 		: UnaryOperator(input){};
 
 	void updateValue() override;
+
+	Tensor computeDerivative(const Tensor& outerDerivative) const override;
+
+	Tensor computeDirectDerivative() const override;
 };
 
 using SigmoidOperatorPtr = std::shared_ptr<SigmoidOperator>;
