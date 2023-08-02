@@ -7,9 +7,7 @@ namespace mlCore::tensorInitializers
 template class RangeTensorInitializer<double>;
 
 template <typename ValueType>
-RangeTensorInitializer<ValueType>::RangeTensorInitializer(ValueType firstValue,
-														  ValueType step,
-														  ValueType maxValue)
+RangeTensorInitializer<ValueType>::RangeTensorInitializer(ValueType firstValue, ValueType step, ValueType maxValue)
 	: currentValue_(firstValue)
 	, maxValue_(maxValue)
 	, step_(step)

@@ -7,29 +7,23 @@ namespace mlCore::autoDiff
 
 bool ComputationGraph::hasGradient(const size_t& nodeId) const
 {
-	return std::find_if(gradients_.begin(),
-						gradients_.end(),
-						[&nodeId](const std::pair<NodePtr, Tensor>& nodeGrad) {
-							return nodeGrad.first->getIndex() == nodeId;
-						}) == gradients_.end();
+	return std::find_if(gradients_.begin(), gradients_.end(), [&nodeId](const std::pair<NodePtr, Tensor>& nodeGrad) {
+			   return nodeGrad.first->getIndex() == nodeId;
+		   }) == gradients_.end();
 }
 
 bool ComputationGraph::hasGradient(const std::string& nodeName) const
 {
-	return std::find_if(gradients_.begin(),
-						gradients_.end(),
-						[&nodeName](const std::pair<NodePtr, Tensor>& nodeGrad) {
-							return nodeGrad.first->getName() == nodeName;
-						}) == gradients_.end();
+	return std::find_if(gradients_.begin(), gradients_.end(), [&nodeName](const std::pair<NodePtr, Tensor>& nodeGrad) {
+			   return nodeGrad.first->getName() == nodeName;
+		   }) == gradients_.end();
 }
 
 const Tensor& ComputationGraph::getGradientByNodeId(const size_t& nodeId) const
 {
 	return std::find_if(gradients_.begin(),
 						gradients_.end(),
-						[&nodeId](const std::pair<NodePtr, Tensor>& nodeGrad) {
-							return nodeGrad.first->getIndex() == nodeId;
-						})
+						[&nodeId](const std::pair<NodePtr, Tensor>& nodeGrad) { return nodeGrad.first->getIndex() == nodeId; })
 		->second;
 }
 
@@ -37,9 +31,7 @@ const Tensor& ComputationGraph::getGradientByNodeName(const std::string& nodeNam
 {
 	return std::find_if(gradients_.begin(),
 						gradients_.end(),
-						[&nodeName](const std::pair<NodePtr, Tensor>& nodeGrad) {
-							return nodeGrad.first->getName() == nodeName;
-						})
+						[&nodeName](const std::pair<NodePtr, Tensor>& nodeGrad) { return nodeGrad.first->getName() == nodeName; })
 		->second;
 }
 
@@ -62,15 +54,13 @@ void ComputationGraph::sortNodes()
 	// recursively goes down the tree in a DFS manner and adds nodes to newNodes so that all inputs can be assigned before the operators
 	std::function<void(const NodePtr)> traverseTree;
 	traverseTree = [&traverseTree, &newNodes](const NodePtr node) {
-		if(const auto castedBinaryOp =
-			   std::dynamic_pointer_cast<binaryOperators::BinaryOperator>(node))
+		if(const auto castedBinaryOp = std::dynamic_pointer_cast<binaryOperators::BinaryOperator>(node))
 		{
 			const auto& [lhs, rhs] = castedBinaryOp->getInputs();
 			traverseTree(lhs);
 			traverseTree(rhs);
 		}
-		else if(const auto castedUnaryOp =
-					std::dynamic_pointer_cast<unaryOperators::UnaryOperator>(node))
+		else if(const auto castedUnaryOp = std::dynamic_pointer_cast<unaryOperators::UnaryOperator>(node))
 		{
 			traverseTree(castedUnaryOp->getInput());
 		}
@@ -103,13 +93,11 @@ void ComputationGraph::forwardPass(const std::map<PlaceholderPtr, Tensor>& feedD
 		{
 			placeholder->setValue(feedDict.at(placeholder));
 		}
-		else if(const auto binaryOper =
-					std::dynamic_pointer_cast<binaryOperators::BinaryOperator>(node))
+		else if(const auto binaryOper = std::dynamic_pointer_cast<binaryOperators::BinaryOperator>(node))
 		{
 			binaryOper->updateValue();
 		}
-		else if(const auto unaryOper =
-					std::dynamic_pointer_cast<unaryOperators::UnaryOperator>(node))
+		else if(const auto unaryOper = std::dynamic_pointer_cast<unaryOperators::UnaryOperator>(node))
 		{
 			unaryOper->updateValue();
 		}
@@ -143,12 +131,10 @@ void ComputationGraph::computeGradients(const NodePtr root)
 			const auto derivative = castedUnary->computeDerivative(cumulatedGradient);
 			backPropagate(input, cumulatedGradient);
 		}
-		else if(const auto castedBinary =
-					std::dynamic_pointer_cast<binaryOperators::BinaryOperator>(node))
+		else if(const auto castedBinary = std::dynamic_pointer_cast<binaryOperators::BinaryOperator>(node))
 		{
 			const auto [lInput, rInput] = castedBinary->getInputs();
-			const auto [lDerivative, rDerivative] =
-				castedBinary->computeDerivative(cumulatedGradient);
+			const auto [lDerivative, rDerivative] = castedBinary->computeDerivative(cumulatedGradient);
 
 			backPropagate(lInput, lDerivative);
 			backPropagate(rInput, rDerivative);

@@ -16,7 +16,6 @@ std::pair<Tensor, Tensor> AddOperator::computeDirectDerivative() const
 {
 	const auto& [leftInput, rightInput] = getInputs();
 
-	return {Tensor(leftInput->getValue().shape(), 1.0),
-			Tensor(rightInput->getValue().shape(), 1.0)};
+	return {Tensor(leftInput->getValue().shape(), 1.0), Tensor(rightInput->getValue().shape(), 1.0)};
 }
 } // namespace mlCore::autoDiff::binaryOperators

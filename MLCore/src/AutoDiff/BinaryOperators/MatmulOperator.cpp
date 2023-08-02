@@ -13,8 +13,7 @@ std::pair<Tensor, Tensor> MatmulOperator::computeDerivative(const Tensor& outerD
 	const auto& leftValue = leftInputNode->getValue();
 	const auto& rightValue = rightInputNode->getValue();
 
-	return {outerDerivative.matmul(rightValue.transposed()),
-			leftValue.transposed().matmul(outerDerivative)};
+	return {outerDerivative.matmul(rightValue.transposed()), leftValue.transposed().matmul(outerDerivative)};
 }
 
 std::pair<Tensor, Tensor> MatmulOperator::computeDirectDerivative() const
@@ -25,7 +24,6 @@ std::pair<Tensor, Tensor> MatmulOperator::computeDirectDerivative() const
 
 	const Tensor onesWithOutputShape(value_.shape(), 1.0);
 
-	return {onesWithOutputShape.matmul(rightValue.transposed()),
-			leftValue.transposed().matmul(onesWithOutputShape)};
+	return {onesWithOutputShape.matmul(rightValue.transposed()), leftValue.transposed().matmul(onesWithOutputShape)};
 }
 } // namespace mlCore::autoDiff::binaryOperators

@@ -21,8 +21,7 @@ std::pair<Tensor, Tensor> PowerOperator::computeDirectDerivative() const
 	const auto& leftValue = leftInputNode->getValue();
 	const auto& rightValue = rightInputNode->getValue();
 
-	return {TensorOperations::power(leftValue, rightValue - Tensor(rightValue.shape(), 1)) *
-				rightValue,
+	return {TensorOperations::power(leftValue, rightValue - Tensor(rightValue.shape(), 1)) * rightValue,
 			TensorOperations::ln(leftValue) * TensorOperations::power(leftValue, rightValue)};
 }
 } // namespace mlCore::autoDiff::binaryOperators

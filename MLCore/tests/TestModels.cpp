@@ -72,9 +72,7 @@ public:
 
 	void unregisterMetric(mlCore::models::IMetricPtr metric) override
 	{
-		metrics_.erase(std::remove_if(metrics_.begin(),
-									  metrics_.end(),
-									  [&metric](const auto m) { return m == metric; }),
+		metrics_.erase(std::remove_if(metrics_.begin(), metrics_.end(), [&metric](const auto m) { return m == metric; }),
 					   metrics_.end());
 	}
 
