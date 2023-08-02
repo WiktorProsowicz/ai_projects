@@ -1,0 +1,25 @@
+#ifndef MLCORE_INCLUDE_AUTODIFF_UNARYOPERATORS_LNOPERATOR_H
+#define MLCORE_INCLUDE_AUTODIFF_UNARYOPERATORS_LNOPERATOR_H
+
+#include <AutoDiff/UnaryOperators/UnaryOperator.h>
+
+namespace mlCore::autoDiff::unaryOperators
+{
+/**
+ * @brief LnOperator represents natural logarithm operation performed on contained value.
+ * 
+ */
+class LnOperator final : public UnaryOperator
+{
+public:
+	LnOperator(const NodePtr input)
+		: UnaryOperator(input){};
+
+	void updateValue() override;
+};
+
+using LnOperatorPtr = std::shared_ptr<LnOperator>;
+
+} // namespace mlCore::autoDiff::unaryOperators
+
+#endif

@@ -8,9 +8,6 @@
 
 namespace mlCore::autoDiff
 {
-class UnaryOperations;
-class BinaryOperations;
-class NodesActivations;
 
 /**
  * @brief Class used to build tree of Nodes. Stores information about all of the parts 
@@ -19,9 +16,6 @@ class NodesActivations;
  */
 class ComputationGraph
 {
-	friend class UnaryOperations;
-	friend class BinaryOperations;
-	friend class NodesActivations;
 
 public:
 	ComputationGraph() = default;
@@ -37,7 +31,7 @@ public:
 	 * @return true Graph is declared to be able to extend 
 	 * @return false Graph should not be extended
 	 */
-	bool isActive() const
+	inline bool isActive() const noexcept
 	{
 		return isActive_;
 	}
@@ -46,7 +40,7 @@ public:
 	 * @brief Erases all graph structure nodes
 	 * 
 	 */
-	void reset() noexcept
+	inline void reset() noexcept
 	{
 		nodes_.clear();
 		gradients_.clear();
@@ -56,7 +50,7 @@ public:
 	 * @brief Enables adding nodes to the graph by friend Operations classes
 	 * 
 	 */
-	void activate()
+	inline void activate() noexcept
 	{
 		isActive_ = false;
 	}
@@ -65,7 +59,7 @@ public:
 	 * @brief Blocks the graph and disallow it to extend
 	 * 
 	 */
-	void deactivate()
+	inline void deactivate() noexcept
 	{
 		isActive_ = false;
 	}
@@ -112,9 +106,14 @@ public:
 	 */
 	void computeGradients(NodePtr root);
 
-private:
+	/**
+	 * @brief Adds new node to the graph.
+	 * 
+	 * @param node Node to be added.
+	 */
 	void addNode(NodePtr node);
 
+private:
 	void sortNodes();
 
 private:

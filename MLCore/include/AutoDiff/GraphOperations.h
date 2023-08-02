@@ -5,61 +5,75 @@
 #include <AutoDiff/GraphNodes.hpp>
 
 /**
- * @brief Algorithms operating on GraphNodes, cooperating with ComputationGraph
+ * @brief Algorithms operating on GraphNodes.
 */
 namespace mlCore::autoDiff
 {
-class BinaryOperations
+
+/// Concept for functions taking any number of shared pointers of types inheriting from Node and returning analogous type
+template <typename Operation, typename... NodePtrs>
+concept NodeOperation = requires(NodePtrs... inputNodes, Operation op)
 {
-public:
-	BinaryOperations() = default;
-	BinaryOperations(std::shared_ptr<ComputationGraph> graph);
+	// input types are shared pointers
+	(... && std::is_same_v<std::shared_ptr<decltype(*inputNodes)>, decltype(inputNodes)>);
 
-	BinaryOperations(const BinaryOperations&) = delete; // Copy ctor
-	BinaryOperations(BinaryOperations&&) = delete; // Move ctor
-	BinaryOperations& operator=(const BinaryOperations&) = delete; // Copy assignment
-	BinaryOperations& operator=(BinaryOperations&&) = delete; // Move assignment
+	// pointed types are derived from Node
+	(... && std::is_base_of_v<Node, decltype(*inputNodes)>);
 
-	NodePtr multiply(NodePtr lNode, NodePtr rNode);
-	NodePtr add(NodePtr lNode, NodePtr rNode);
-	NodePtr subtract(NodePtr lNode, NodePtr rNode);
-	NodePtr divide(NodePtr lNode, NodePtr rNode);
-	NodePtr matmul(NodePtr lNode, NodePtr rNode);
-	NodePtr power(NodePtr baseNode, NodePtr factorNode);
+	// result type is shared ptr
+	std::is_same_v<std::shared_ptr<decltype(*op(inputNodes...))>, decltype(op(inputNodes...))>;
 
-private:
-	template <typename ResultNodeType>
-	std::shared_ptr<ResultNodeType> operationImpl(NodePtr lNode, NodePtr rNode);
-
-private:
-	std::shared_ptr<ComputationGraph> graph_ = nullptr;
+	// result pointer points to something derived from Node
+	std::is_base_of_v<Node, decltype(*(op(inputNodes...)))>;
 };
 
-class UnaryOperations
-{ };
-
-class NodesActivations
+/**
+ * @brief Performs given operation on input nodes returning NodePtr and adds the result to ComputationGraph if provided. 
+ * 
+ * @param operation Operation complying with NodeOperation concept.
+ * @param graph Pointer to computation graph instance to which the result will be added.
+ * @param inputNodes Arguments for `operation`.
+ * @return Result of the `operation` based on `inputNodes`.
+ */
+template <typename Operation, typename... NodePtrs>
+NodePtr performAndAdd(Operation operation,
+					  std::shared_ptr<ComputationGraph> graph,
+					  NodePtrs... inputNodes) requires NodeOperation<Operation, NodePtrs...>
 {
-public:
-	NodesActivations() = default;
-	NodesActivations(std::shared_ptr<ComputationGraph> graph);
+	auto result = operation(inputNodes...);
 
-	NodesActivations(const NodesActivations&) = delete; // Copy ctor
-	NodesActivations(NodesActivations&&) = delete; // Move ctor
-	NodesActivations& operator=(const NodesActivations&) = delete; // Copy assignment
-	NodesActivations& operator=(NodesActivations&&) = delete; // Move assignment
+	if(graph && graph->isActive())
+	{
+		graph->addNode(result);
+	}
 
-	NodePtr relu(NodePtr node);
-	NodePtr sigmoid(NodePtr node);
+	return result;
+}
 
-private:
-	template <typename ResultNodeType>
-	std::shared_ptr<ResultNodeType> operationImpl(NodePtr lNode);
+namespace binaryOperations
+{
 
-private:
-	std::shared_ptr<ComputationGraph> graph_ = nullptr;
-};
+NodePtr multiply(NodePtr lNode, NodePtr rNode);
+NodePtr add(NodePtr lNode, NodePtr rNode);
+NodePtr subtract(NodePtr lNode, NodePtr rNode);
+NodePtr divide(NodePtr lNode, NodePtr rNode);
+NodePtr matmul(NodePtr lNode, NodePtr rNode);
+NodePtr power(NodePtr baseNode, NodePtr factorNode);
 
+} // namespace binaryOperations
+
+namespace unaryOperations
+{
+NodePtr ln(NodePtr node);
+} // namespace unaryOperations
+
+namespace nodesActivations
+{
+
+NodePtr relu(NodePtr node);
+NodePtr sigmoid(NodePtr node);
+
+} // namespace nodesActivations
 } // namespace mlCore::autoDiff
 
 #endif

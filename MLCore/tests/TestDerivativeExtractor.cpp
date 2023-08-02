@@ -192,7 +192,7 @@ protected:
 								   const mlCore::Tensor& outer,
 								   const std::pair<mlCore::Tensor, mlCore::Tensor>& expected)
 	{
-		using mlCore::autoDiff::BinaryOperations;
+
 		using mlCore::autoDiff::DerivativeExtractor;
 		using mlCore::autoDiff::binaryOperators::BinaryOperator;
 
@@ -201,7 +201,7 @@ protected:
 
 		const auto operationResult =
 			std::dynamic_pointer_cast<mlCore::autoDiff::binaryOperators::BinaryOperator>(
-				BinaryOperations{}.matmul(leftNode, rightNode));
+				mlCore::autoDiff::binaryOperations::matmul(leftNode, rightNode));
 
 		if(!operationResult)
 		{
@@ -240,8 +240,7 @@ TEST_F(TestDerivativeExtractor, testReluDerivative)
 							 .initializer =
 								 std::make_unique<RangeTensorInitializer<double>>(-3.0, .7)};
 
-	testUnaryOperationDerivative([](NodePtr node) { return NodesActivations{}.relu(node); },
-								 params);
+	testUnaryOperationDerivative([](NodePtr node) { return nodesActivations::relu(node); }, params);
 }
 
 TEST_F(TestDerivativeExtractor, testSigmoidDerivative)
@@ -253,7 +252,7 @@ TEST_F(TestDerivativeExtractor, testSigmoidDerivative)
 							 .initializer =
 								 std::make_unique<RangeTensorInitializer<double>>(-9.0, .7)};
 
-	testUnaryOperationDerivative([](NodePtr node) { return NodesActivations{}.sigmoid(node); },
+	testUnaryOperationDerivative([](NodePtr node) { return nodesActivations::sigmoid(node); },
 								 params);
 }
 
@@ -269,7 +268,7 @@ TEST_F(TestDerivativeExtractor, testMultiplyDerivative)
 		.rightInitializer = std::make_unique<RangeTensorInitializer<double>>(5, .3)};
 
 	testBinaryOperationDerivative(
-		[](NodePtr left, NodePtr right) { return BinaryOperations{}.multiply(left, right); },
+		[](NodePtr left, NodePtr right) { return binaryOperations::multiply(left, right); },
 		params);
 }
 
@@ -285,7 +284,7 @@ TEST_F(TestDerivativeExtractor, testDivideDerivative)
 		.rightInitializer = std::make_unique<RangeTensorInitializer<double>>(5, .3)};
 
 	testBinaryOperationDerivative(
-		[](NodePtr left, NodePtr right) { return BinaryOperations{}.divide(left, right); }, params);
+		[](NodePtr left, NodePtr right) { return binaryOperations::divide(left, right); }, params);
 }
 
 TEST_F(TestDerivativeExtractor, testAddDerivative)
@@ -300,7 +299,7 @@ TEST_F(TestDerivativeExtractor, testAddDerivative)
 		.rightInitializer = std::make_unique<RangeTensorInitializer<double>>(5, .3)};
 
 	testBinaryOperationDerivative(
-		[](NodePtr left, NodePtr right) { return BinaryOperations{}.add(left, right); }, params);
+		[](NodePtr left, NodePtr right) { return binaryOperations::add(left, right); }, params);
 }
 
 TEST_F(TestDerivativeExtractor, testSubtractDerivative)
@@ -315,7 +314,7 @@ TEST_F(TestDerivativeExtractor, testSubtractDerivative)
 		.rightInitializer = std::make_unique<RangeTensorInitializer<double>>(5, .3)};
 
 	testBinaryOperationDerivative(
-		[](NodePtr left, NodePtr right) { return BinaryOperations{}.subtract(left, right); },
+		[](NodePtr left, NodePtr right) { return binaryOperations::subtract(left, right); },
 		params);
 }
 
@@ -325,7 +324,7 @@ TEST_F(TestDerivativeExtractor, testPowerDerivative)
 	using namespace mlCore::autoDiff;
 
 	const auto powerLambda = [](NodePtr left, NodePtr right) {
-		return BinaryOperations{}.power(left, right);
+		return binaryOperations::power(left, right);
 	};
 
 	const BinaryParams paramsWithLeftScalar{
