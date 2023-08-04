@@ -30,6 +30,15 @@ function run_clang_tidy()
 
 }
 
+function apply_clang_format()
+{
+    find "${PROJECT_HOME}" \
+        \( -name "*.cpp" -o -name "*.c" -o -name "*.cc" \) \
+        -not \( -path "${PROJECT_HOME}/ForeignModules/*" -prune \) \
+        -not \( -path "${PROJECT_HOME}/build/*" -prune \) \
+        -exec clang-format -i {} \;
+}
+
 function run_tests()
 {
     ctest --test-dir "${PROJECT_HOME}/build" --output-on-failure 
