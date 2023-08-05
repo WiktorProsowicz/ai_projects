@@ -1,5 +1,8 @@
-#include <AutoDiff/BinaryOperators/BinaryOperator.h>
 #include <AutoDiff/ComputationGraph.h>
+
+#include <set>
+
+#include <AutoDiff/BinaryOperators/BinaryOperator.h>
 #include <AutoDiff/UnaryOperators/UnaryOperator.h>
 
 namespace mlCore::autoDiff
@@ -49,6 +52,32 @@ void ComputationGraph::addNode(const NodePtr node)
 
 void ComputationGraph::sortNodes()
 {
+
+	std::set<NodePtr> nodesWithParent;
+
+	for(const auto& node : nodes_)
+	{
+		if(const auto castedBinaryOp = std::dynamic_pointer_cast<binaryOperators::BinaryOperator>(node))
+		{
+			const auto& [lhs, rhs] = castedBinaryOp->getInputs();
+
+			nodesWithParent.insert(lhs);
+			nodesWithParent.insert(rhs);
+		}
+		else if(const auto castedUnaryOp = std::dynamic_pointer_cast<unaryOperators::UnaryOperator>(node))
+		{
+			nodesWithParent.insert(castedUnaryOp->getInput());
+		}
+	}
+
+	std::set<NodePtr> orphanedNodes;
+
+	std::set_difference(nodes_.cbegin(),
+						nodes_.cend(),
+						nodesWithParent.cbegin(),
+						nodesWithParent.cend(),
+						std::inserter(orphanedNodes, orphanedNodes.end()));
+
 	std::vector<NodePtr> newNodes;
 
 	// recursively goes down the tree in a DFS manner and adds nodes to newNodes so that all inputs can be assigned before the operators
@@ -71,10 +100,12 @@ void ComputationGraph::sortNodes()
 		}
 	};
 
-	for(auto nodesIter = nodes_.crbegin(); nodesIter < nodes_.crend(); nodesIter++)
+	for(const auto& orphanedNode : orphanedNodes)
 	{
-		traverseTree(*nodesIter);
+		traverseTree(orphanedNode);
 	}
+
+	nodes_ = newNodes;
 
 	areNodesSorted_ = true;
 }

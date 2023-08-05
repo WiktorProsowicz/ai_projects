@@ -52,7 +52,7 @@ public:
 	 */
 	inline void activate() noexcept
 	{
-		isActive_ = false;
+		isActive_ = true;
 	}
 
 	/**
