@@ -42,9 +42,12 @@ macro(install_library)
 
         set_target_properties(${FILE_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/test/${PROJECT_NAME}/)
 
-        # add_test(NAME "${FILE_NAME}" COMMAND $<TARGET_FILE:${FILE_NAME}>)
+        add_test(NAME "${FILE_NAME}" COMMAND $<TARGET_FILE:${FILE_NAME}>)
 
-        gtest_add_tests(TARGET "${FILE_NAME}" TEST_LIST "${FILE_NAME}")
+        # set_tests_properties("${FILE_NAME}" PROPERTIES LABELS "ut;${FILE_NAME}")
+
+        # gtest_add_tests(TARGET "${FILE_NAME}" TEST_LIST "${FILE_NAME}")
+        gtest_discover_tests("${FILE_NAME}")
 
     endforeach()
 
