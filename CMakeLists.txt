@@ -7,8 +7,8 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-option(CMAKE_C_COMPILER "verision of c compiler" gcc-8.1)
-option(CMAKE_CXX_COMPILER "version of c++ compiler" gcc-11.3)
+# set(CMAKE_C_COMPILER gcc)
+# set(CMAKE_CXX_COMPILER /usr/bin/gcc)
 
 enable_testing()
 
