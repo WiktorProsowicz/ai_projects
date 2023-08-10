@@ -47,6 +47,15 @@ public:
 	}
 
 	/**
+     * @brief Cleans the graph from cumulated gradient.
+     * 
+     */
+	inline void clearGradients()
+	{
+		gradients_.clear();
+	}
+
+	/**
 	 * @brief Enables adding nodes to the graph by friend Operations classes
 	 * 
 	 */
@@ -97,7 +106,7 @@ public:
 	 * 
 	 * @param feedDict Stores values that should fill chosen placeholders. If not given, placeholders keep their old values.
 	 */
-	void forwardPass(const std::map<PlaceholderPtr, Tensor>& feedDict);
+	void forwardPass(const std::map<PlaceholderPtr, Tensor>& feedDict = {});
 
 	/**
 	 * @brief Goes through the graph starting from the root and perform backward propagation
@@ -114,7 +123,7 @@ public:
 	void addNode(NodePtr node);
 
 private:
-	void sortNodes();
+	void _sortNodes();
 
 private:
 	bool isActive_ = false;

@@ -50,7 +50,7 @@ void ComputationGraph::addNode(const NodePtr node)
 	nodes_.push_back(node);
 }
 
-void ComputationGraph::sortNodes()
+void ComputationGraph::_sortNodes()
 {
 
 	std::set<NodePtr> nodesWithParent;
@@ -114,7 +114,7 @@ void ComputationGraph::forwardPass(const std::map<PlaceholderPtr, Tensor>& feedD
 {
 	if(!areNodesSorted_)
 	{
-		sortNodes();
+		_sortNodes();
 	}
 
 	for(const auto& node : nodes_)
@@ -139,7 +139,7 @@ void ComputationGraph::computeGradients(const NodePtr root)
 {
 	if(!areNodesSorted_)
 	{
-		sortNodes();
+		_sortNodes();
 	}
 
 	std::function<void(const NodePtr, const Tensor&)> backPropagate;

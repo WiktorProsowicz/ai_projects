@@ -105,8 +105,8 @@ public:
 class Placeholder : public Node
 {
 public:
-	Placeholder()
-		: Node(std::vector<size_t>{}){};
+	Placeholder(const std::vector<size_t>& shape = {})
+		: Node(shape){};
 };
 
 } // namespace mlCore::autoDiff
