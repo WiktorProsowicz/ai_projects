@@ -155,7 +155,7 @@ TEST_F(TestBasicTensor, testDisplayingTensor)
 
 	// clang-format off
 	const std::vector<std::string> reprs{
-R"(<BasicTensor dtype=d shape=(2, 2, 3, )>
+R"(<BasicTensor dtype=d shape=(2, 2, 3)>
 [
  [
   [ 1,  2,  3]
@@ -167,7 +167,7 @@ R"(<BasicTensor dtype=d shape=(2, 2, 3, )>
  ]
 ])",
 
-R"(<BasicTensor dtype=d shape=(3, 3, 3, 1, )>
+R"(<BasicTensor dtype=d shape=(3, 3, 3, 1)>
 [
  [
   [
