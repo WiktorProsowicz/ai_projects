@@ -13,7 +13,7 @@
 #include <gtest/gtest.h>
 #include <iostream>
 
-#include <MLCore/TensorInitializers/RangeTensorInitializer.h>
+#include <MLCore/TensorInitializers/RangeTensorInitializer.hpp>
 namespace
 {
 

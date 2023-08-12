@@ -7,7 +7,7 @@
  **********************/
 
 #include <LoggingLib/LoggingLib.h>
-#include <MLCore/TensorInitializers/RangeTensorInitializer.h>
+#include <MLCore/TensorInitializers/RangeTensorInitializer.hpp>
 #include <MLCore/BasicTensor.h>
 #include <gtest/gtest.h>
 #include <iostream>

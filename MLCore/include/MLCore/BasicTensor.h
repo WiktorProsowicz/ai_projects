@@ -13,7 +13,7 @@
 
 #include <LoggingLib/LoggingLib.h>
 #include <MLCore/Utilities.h>
-#include <MLCore/TensorInitializers/ITensorInitializer.h>
+#include <MLCore/TensorInitializers/ITensorInitializer.hpp>
 #include <MLCore/TensorIterator.hpp>
 
 namespace mlCore
@@ -250,9 +250,8 @@ private:
 	/// Traverses list of indices and checks ranges correctness. Correct indices specify tensor slice that can be modified via value assignment.
 	/// Throws std::out_of_range if upper[i] > shape[i] or 0 > indices.size() > shape_.size().
 	/// Indices is a list of pairs of min-max indices from axis zero i.e for tensor([[1, 2], [3, 4]]) -> list{{0, 1}} -> [1, 2].
-	void
-	_checkIndicesList(std::initializer_list<std::pair<size_t, size_t>>::const_iterator beg,
-					  std::initializer_list<std::pair<size_t, size_t>>::const_iterator end) const;
+	void _checkIndicesList(std::initializer_list<std::pair<size_t, size_t>>::const_iterator beg,
+						   std::initializer_list<std::pair<size_t, size_t>>::const_iterator end) const;
 
 	/// Checks if all of the `shape`'s elements are positive i.e. eligible to be present in the shape.
 	static void _checkShapeElementsPositive(const std::vector<size_t>& shape);

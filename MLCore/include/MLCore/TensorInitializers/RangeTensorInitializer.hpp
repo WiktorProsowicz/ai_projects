@@ -1,7 +1,9 @@
-#ifndef MLCORE_INCLUDE_MLCORE_TENSORINITIALIZERS_RANGETENSORINITIALIZER_H
-#define MLCORE_INCLUDE_MLCORE_TENSORINITIALIZERS_RANGETENSORINITIALIZER_H
+#ifndef MLCORE_INCLUDE_MLCORE_TENSORINITIALIZERS_RANGETENSORINITIALIZER_HPP
+#define MLCORE_INCLUDE_MLCORE_TENSORINITIALIZERS_RANGETENSORINITIALIZER_HPP
 
-#include <MLCore/TensorInitializers/ITensorInitializer.h>
+#include <MLCore/TensorInitializers/ITensorInitializer.hpp>
+
+#include <stdexcept>
 #include <limits>
 
 namespace mlCore::tensorInitializers
@@ -21,9 +23,14 @@ public:
 	 * @param step The increment factor of the initializer's value
 	 * @param maxValue The border value at which the initializer stops 
 	 */
-	RangeTensorInitializer(ValueType firstValue,
-						   ValueType step = 1,
-						   ValueType maxValue = std::numeric_limits<ValueType>::max());
+	explicit RangeTensorInitializer(ValueType firstValue,
+									ValueType step = 1,
+									ValueType maxValue = std::numeric_limits<ValueType>::max())
+		: currentValue_(firstValue)
+		, maxValue_(maxValue)
+		, step_(step)
+
+	{ }
 
 	RangeTensorInitializer(RangeTensorInitializer&&) = delete; // Move ctor
 	RangeTensorInitializer(const RangeTensorInitializer&) = delete; // Copy ctor
@@ -32,9 +39,22 @@ public:
 
 	~RangeTensorInitializer() = default;
 
-	ValueType yield() const override;
+	ValueType yield() const override
+	{
+		if(!canYield())
+		{
+			throw std::out_of_range("Cannot obtain value from RangeTensorYielder.");
+		}
 
-	bool canYield() const override;
+		ValueType out = currentValue_;
+		currentValue_ += step_;
+		return out;
+	}
+
+	bool canYield() const override
+	{
+		return currentValue_ <= maxValue_;
+	}
 
 private:
 	mutable ValueType currentValue_;

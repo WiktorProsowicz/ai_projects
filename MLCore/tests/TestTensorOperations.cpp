@@ -7,7 +7,7 @@
  **********************/
 
 #include <MLCore/TensorOperations.h>
-#include <MLCore/TensorInitializers/RangeTensorInitializer.h>
+#include <MLCore/TensorInitializers/RangeTensorInitializer.hpp>
 #include <MLCore/Utilities.h>
 #include <gtest/gtest.h>
 
