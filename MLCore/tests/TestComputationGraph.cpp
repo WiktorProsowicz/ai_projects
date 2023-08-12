@@ -14,7 +14,8 @@
 #include <AutoDiff/BinaryOperators/BinaryOperator.h>
 #include <AutoDiff/UnaryOperators/UnaryOperator.h>
 #include <AutoDiff/GraphOperations.h>
-#include <MLCore/TensorInitializers/RangeTensorInitializer.h>
+#include <MLCore/TensorInitializers/RangeTensorInitializer.hpp>
+#include <MLCore/TensorInitializers/GaussianInitializer.hpp>
 
 namespace
 {
@@ -323,52 +324,6 @@ protected:
 	}
 
 	/**
-     * @brief Traverses the graph and checks whether the nodes are connected as expected.
-     * 
-     * @param expectedRelations Set of (parent, child) pairs containing ids of graph nodes from root perspective.
-     * @param root Node from whose perspective the relations are collected.
-     */
-	static void checkNodesRelationships(const std::set<std::pair<uint64_t, uint64_t>>& expectedRelations,
-										mlCore::autoDiff::NodePtr root)
-	{
-		using namespace mlCore::autoDiff;
-
-		std::set<std::pair<uint64_t, uint64_t>> collectedRelations;
-
-		std::function<void(const NodePtr)> traverseTree;
-
-		traverseTree = [&traverseTree, &collectedRelations](const NodePtr node) {
-			if(const auto casted = std::dynamic_pointer_cast<unaryOperators::UnaryOperator>(node))
-			{
-				collectedRelations.emplace(casted->getIndex(), casted->getInput()->getIndex());
-
-				traverseTree(casted->getInput());
-			}
-			else if(const auto casted = std::dynamic_pointer_cast<binaryOperators::BinaryOperator>(node))
-			{
-				const auto [leftInput, rightInput] = casted->getInputs();
-
-				collectedRelations.emplace(casted->getIndex(), leftInput->getIndex());
-
-				collectedRelations.emplace(casted->getIndex(), rightInput->getIndex());
-
-				traverseTree(leftInput);
-				traverseTree(rightInput);
-			}
-		};
-
-		traverseTree(root);
-
-		ASSERT_EQ(collectedRelations.size(), expectedRelations.size());
-
-		for(const auto& parentChildPair : expectedRelations)
-		{
-			ASSERT_TRUE(std::find(collectedRelations.cbegin(), collectedRelations.cend(), parentChildPair) !=
-						collectedRelations.end());
-		}
-	}
-
-	/**
      * @brief Traverses tree and returns all unique nodes.
      * 
      * @param root Root node of the traversed tree.
@@ -423,6 +378,78 @@ protected:
 	}
 
 	/**
+	 * @brief Creates a feed map that can be used in forward-pass of ComputationGraph.
+	 * 
+	 * @param inputs Placeholders to assign input tensors to.
+	 * @return Created feed map with random generated inputs. 
+	 */
+	static std::map<mlCore::autoDiff::PlaceholderPtr, mlCore::Tensor>
+	createFeedMap(const std::set<mlCore::autoDiff::PlaceholderPtr>& inputs)
+	{
+		using namespace mlCore::autoDiff;
+
+		std::map<PlaceholderPtr, mlCore::Tensor> feedMap;
+
+		for(const auto& input : inputs)
+		{
+			mlCore::tensorInitializers::GaussianInitializer<double> initializer;
+			mlCore::Tensor inputTensor(input->getValue().shape());
+
+			inputTensor.fill(initializer);
+
+			feedMap.emplace(input, std::move(inputTensor));
+		}
+
+		return feedMap;
+	}
+
+	/**
+     * @brief Traverses the graph and checks whether the nodes are connected as expected.
+     * 
+     * @param expectedRelations Set of (parent, child) pairs containing ids of graph nodes from root perspective.
+     * @param root Node from whose perspective the relations are collected.
+     */
+	static void checkNodesRelationships(const std::set<std::pair<uint64_t, uint64_t>>& expectedRelations,
+										mlCore::autoDiff::NodePtr root)
+	{
+		using namespace mlCore::autoDiff;
+
+		std::set<std::pair<uint64_t, uint64_t>> collectedRelations;
+
+		std::function<void(const NodePtr)> traverseTree;
+
+		traverseTree = [&traverseTree, &collectedRelations](const NodePtr node) {
+			if(const auto casted = std::dynamic_pointer_cast<unaryOperators::UnaryOperator>(node))
+			{
+				collectedRelations.emplace(casted->getIndex(), casted->getInput()->getIndex());
+
+				traverseTree(casted->getInput());
+			}
+			else if(const auto casted = std::dynamic_pointer_cast<binaryOperators::BinaryOperator>(node))
+			{
+				const auto [leftInput, rightInput] = casted->getInputs();
+
+				collectedRelations.emplace(casted->getIndex(), leftInput->getIndex());
+
+				collectedRelations.emplace(casted->getIndex(), rightInput->getIndex());
+
+				traverseTree(leftInput);
+				traverseTree(rightInput);
+			}
+		};
+
+		traverseTree(root);
+
+		ASSERT_EQ(collectedRelations.size(), expectedRelations.size());
+
+		for(const auto& parentChildPair : expectedRelations)
+		{
+			ASSERT_TRUE(std::find(collectedRelations.cbegin(), collectedRelations.cend(), parentChildPair) !=
+						collectedRelations.end());
+		}
+	}
+
+	/**
      * @brief Constructs an instance of ComputationGraph and runs it in both directions, collecting gradients and checking whether all of the value-updating 
      * and derivative-computing operations are run.  
      * 
@@ -463,6 +490,13 @@ protected:
 		}
 	}
 
+	/**
+	 * @brief Simulates computation graph forward pass and gradients updates.
+	 * 
+	 * @param tree Root node of the nodes tree.
+	 * @param trainableWeights Weights to be updated with gradient.
+	 * @param input Input layer for feed map.
+	 */
 	void performGradientDescent(const mlCore::autoDiff::NodePtr tree,
 								const std::set<mlCore::autoDiff::NodePtr>& trainableWeights,
 								mlCore::autoDiff::PlaceholderPtr input)
@@ -485,23 +519,20 @@ protected:
 
 			for(uint8_t loopCount = 0; loopCount < 32; loopCount++)
 			{
-				mlCore::tensorInitializers::RangeTensorInitializer<double> init(.1, .1);
-				mlCore::Tensor inputTensor(input->getValue().shape());
-				inputTensor.fill(init);
+				const auto feedMap = createFeedMap({input});
 
-				const std::map<PlaceholderPtr, mlCore::Tensor> feedMap{{input, inputTensor}};
+				std::cout << feedMap.at(input) << std::endl;
 
 				graph_->forwardPass(feedMap);
-				graph_->computeGradients(tree);
 			}
+
+			graph_->computeGradients(tree);
 
 			for(auto weight : trainableWeights)
 			{
 				const auto& derivative = graph_->getGradientByNodeId(weight->getIndex());
 				weight->setValue(weight->getValue() - scaleTensor(derivative, .1));
 			}
-
-			std::cout << tree->getValue();
 		}
 	}
 
