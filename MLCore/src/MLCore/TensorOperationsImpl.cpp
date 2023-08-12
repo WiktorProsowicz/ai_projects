@@ -22,6 +22,17 @@
 		return;                                                                                                                  \
 	}
 
+// Used when one of the tensors is scalar type and expensive broadcasting could be avoided
+#define OPERATION_WITH_SCALAR(lhs, rhs, oper)                                                                                    \
+	if(rhs.shape_.empty())                                                                                                       \
+	{                                                                                                                            \
+		for(size_t dataPos = 0; dataPos < lhs.length_; dataPos++)                                                                \
+		{                                                                                                                        \
+			lhs.data_[dataPos] = oper(lhs.data_[dataPos], rhs.data_[0]);                                                         \
+		}                                                                                                                        \
+		return;                                                                                                                  \
+	}
+
 // Computes the position of an element in tensor's payload
 #define COMPUTE_ELEMENT_POSITION(path, shape, positionName)                                                                      \
 	size_t positionName = 0;                                                                                                     \
@@ -158,6 +169,7 @@ template <typename ValueType>
 void TensorOperationsImpl<ValueType>::addTensorsInPlace(BasicTensor<ValueType>& lhs, const BasicTensor<ValueType>& rhs)
 {
 	COMPAT_SHAPES_OPERATION(lhs, rhs, __SIMPLE_PLUS)
+	OPERATION_WITH_SCALAR(lhs, rhs, __SIMPLE_PLUS)
 	BROADCASTED_TENSOR_OPERATION(lhs, rhs, __SIMPLE_PLUS)
 }
 
@@ -165,6 +177,7 @@ template <typename ValueType>
 void TensorOperationsImpl<ValueType>::multiplyTensorsInPlace(BasicTensor<ValueType>& lhs, const BasicTensor<ValueType>& rhs)
 {
 	COMPAT_SHAPES_OPERATION(lhs, rhs, __SIMPLE_MULTIPLY)
+	OPERATION_WITH_SCALAR(lhs, rhs, __SIMPLE_MULTIPLY)
 	BROADCASTED_TENSOR_OPERATION(lhs, rhs, __SIMPLE_MULTIPLY)
 }
 
@@ -172,6 +185,7 @@ template <typename ValueType>
 void TensorOperationsImpl<ValueType>::subtractTensorsInPlace(BasicTensor<ValueType>& lhs, const BasicTensor<ValueType>& rhs)
 {
 	COMPAT_SHAPES_OPERATION(lhs, rhs, __SIMPLE_MINUS)
+	OPERATION_WITH_SCALAR(lhs, rhs, __SIMPLE_MINUS)
 	BROADCASTED_TENSOR_OPERATION(lhs, rhs, __SIMPLE_MINUS)
 }
 
@@ -179,6 +193,7 @@ template <typename ValueType>
 void TensorOperationsImpl<ValueType>::divideTensorsInPlace(BasicTensor<ValueType>& lhs, const BasicTensor<ValueType>& rhs)
 {
 	COMPAT_SHAPES_OPERATION(lhs, rhs, __SIMPLE_DIVIDE)
+	OPERATION_WITH_SCALAR(lhs, rhs, __SIMPLE_DIVIDE)
 	BROADCASTED_TENSOR_OPERATION(lhs, rhs, __SIMPLE_DIVIDE)
 }
 
@@ -186,6 +201,7 @@ template <typename ValueType>
 void TensorOperationsImpl<ValueType>::powerInPlace(BasicTensor<ValueType>& lhs, const BasicTensor<ValueType>& rhs)
 {
 	COMPAT_SHAPES_OPERATION(lhs, rhs, std::pow)
+	OPERATION_WITH_SCALAR(lhs, rhs, std::pow)
 	BROADCASTED_TENSOR_OPERATION(lhs, rhs, std::pow)
 }
 

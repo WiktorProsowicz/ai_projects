@@ -67,13 +67,13 @@ protected:
 	{
 		constexpr double kEpsilon = 1e-6;
 
-		const auto backShiftedNode = std::make_shared<mlCore::autoDiff::Constant>(inputTensor - mlCore::Tensor({}, kEpsilon));
-		const auto frontShiftedNode = std::make_shared<mlCore::autoDiff::Constant>(inputTensor + mlCore::Tensor({}, kEpsilon));
+		const auto backShiftedNode = std::make_shared<mlCore::autoDiff::Constant>(inputTensor - kEpsilon);
+		const auto frontShiftedNode = std::make_shared<mlCore::autoDiff::Constant>(inputTensor + kEpsilon);
 
 		const auto backShiftedResult = oper(backShiftedNode);
 		const auto frontShiftedResult = oper(frontShiftedNode);
 
-		return (frontShiftedResult->getValue() - backShiftedResult->getValue()) / mlCore::Tensor({}, 2 * kEpsilon);
+		return (frontShiftedResult->getValue() - backShiftedResult->getValue()) / (2 * kEpsilon);
 	}
 
 	static void compareTwoDerivatives(const mlCore::Tensor& computedDerivative,
@@ -84,8 +84,9 @@ protected:
 			(gotTensorIt < computedDerivative.end()) && (expectedTensorIt < expDerivative.end());
 			gotTensorIt++, expectedTensorIt++)
 		{
-			ASSERT_NEAR(*gotTensorIt, *expectedTensorIt, 1e-4) << fmt::format(
-				"{}\n\nComputed derivative:\n{}\n\nExpected derivative:\n{}", message, computedDerivative, expDerivative);
+			ASSERT_NEAR(*gotTensorIt, *expectedTensorIt, 1e-4) << message << "\n\nComputed derivative:\n"
+															   << computedDerivative << "\n\nExpected derivative:\n"
+															   << expDerivative;
 		}
 	}
 

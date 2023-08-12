@@ -401,17 +401,33 @@ TEST_F(TestBasicTensor, testOperatorsWithBroadcastingInPlace)
 	mlCore::Tensor tensor2(shape2);
 	tensor2.fill({1, 2, 3});
 
-	std::cout << tensor1 << "\n\n" << tensor2 << "\n\n";
-
 	tensor1 += tensor2;
-
-	std::cout << tensor1;
 
 	ASSERT_EQ(tensor1.shape(), resShape);
 	const std::vector<double> resValues{2, 3,  4,  5,  6,  7,  8,  3,  4,  5,  6,  7,  8,  9,  4,  5,  6,  7,  8,  9,  10,
 										9, 10, 11, 12, 13, 14, 15, 10, 11, 12, 13, 14, 15, 16, 11, 12, 13, 14, 15, 16, 17};
 
 	checkTensorValues(tensor1, resValues);
+}
+
+TEST_F(TestBasicTensor, testOperationsWithScalarTensor)
+{
+	const std::vector<size_t> shape{2, 3};
+
+	mlCore::Tensor tensor(shape);
+	tensor.fill(mlCore::tensorInitializers::RangeTensorInitializer<double>(0.0));
+
+	std::cout << tensor << std::endl;
+
+	tensor += 3.0;
+
+	std::cout << tensor << std::endl;
+
+	ASSERT_EQ(tensor.shape(), shape);
+
+	const std::vector<double> expectedValues{3, 4, 5, 6, 7, 8};
+
+	checkTensorValues(tensor, expectedValues);
 }
 
 TEST_F(TestBasicTensor, testMatrixMultiplicationClassicMatrices)

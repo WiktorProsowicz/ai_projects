@@ -22,6 +22,13 @@ BasicTensor<ValueType>::BasicTensor()
 }
 
 template <typename ValueType>
+BasicTensor<ValueType>::BasicTensor(ValueType initVal)
+	: BasicTensor()
+{
+	*data_ = initVal;
+}
+
+template <typename ValueType>
 BasicTensor<ValueType>::BasicTensor(const std::vector<size_t>& shape)
 	: length_()
 	, shape_(shape)
@@ -233,15 +240,16 @@ void BasicTensor<ValueType>::_checkIndicesList(const std::initializer_list<std::
 
 		if(upper <= lower)
 		{
-			throw std::out_of_range(
-				"Upper index is not greater than lower for shape '{}' at index {}.", stringifyVector(shape), shapeIt);
+			throw std::out_of_range(fmt::format(
+				"Upper index is not greater than lower for shape '{}' at index {}.", stringifyVector(shape_), shapeIt));
 		}
 
 		if(upper > shape_[shapeIt])
 		{
-			throw std::out_of_range("Upper index cannot be greater than particular dimension size for shape '{}' at index {}.",
-									stringifyVector(shape_),
-									shapeIt);
+			throw std::out_of_range(
+				fmt::format("Upper index cannot be greater than particular dimension size for shape '{}' at index {}.",
+							stringifyVector(shape_),
+							shapeIt));
 		}
 	}
 }
@@ -324,10 +332,10 @@ BasicTensor<ValueType> BasicTensor<ValueType>::matmul(const BasicTensor& other) 
 {
 	// for clean error throwing with additional info about shapes
 	auto throwInformative = [this, &other](const std::string& message) {
-		throw std::runtime_error("Cannot perform matrix multiplication for shapes '{}' and '{}' - {}",
-								 stringifyVector(shape_),
-								 stringifyVector(other.shaoe_),
-								 message);
+		throw std::runtime_error(fmt::format("Cannot perform matrix multiplication for shapes '{}' and '{}' - {}",
+											 stringifyVector(shape_),
+											 stringifyVector(other.shape_),
+											 message));
 	};
 
 	// checking if first tensor can be padded to nDims >= 2

@@ -40,6 +40,18 @@ public:
 	BasicTensor();
 
 	/**
+	 * @brief Constructs a new scalar-type tensor with initial value. Useful as a conversion from ValueType.
+	 * Example:
+	 * 
+	 * tensor : BasicTensor<double>
+	 * 
+	 * tensor + 5.0   ->   tensor + BasicTensor<double>(5.0)
+	 * 
+	 * @param initVal 
+	 */
+	BasicTensor(ValueType initVal);
+
+	/**
 	 * @brief Copy constructor.
 	 * 
 	 * @param other Tensor to copy.
