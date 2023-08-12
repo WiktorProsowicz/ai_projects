@@ -84,9 +84,8 @@ protected:
 			(gotTensorIt < computedDerivative.end()) && (expectedTensorIt < expDerivative.end());
 			gotTensorIt++, expectedTensorIt++)
 		{
-			ASSERT_NEAR(*gotTensorIt, *expectedTensorIt, 1e-4) << message << "\n\nComputed derivative:\n"
-															   << computedDerivative << "\n\nExpected derivative:\n"
-															   << expDerivative;
+			ASSERT_NEAR(*gotTensorIt, *expectedTensorIt, 1e-4) << fmt::format(
+				"{}\n\nComputed derivative:\n{}\n\nExpected derivative:\n{}", message, computedDerivative, expDerivative);
 		}
 	}
 

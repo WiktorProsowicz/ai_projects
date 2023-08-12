@@ -1,5 +1,7 @@
-
 #include "MLCore/BasicTensor.h"
+
+#include <fmt/format.h>
+
 #include <MLCore/TensorOperationsImpl.h>
 
 namespace mlCore
@@ -206,8 +208,8 @@ void BasicTensor<ValueType>::_checkShapeCompatible(const std::vector<size_t>& sh
 
 	if(newLength != length_)
 	{
-		throw std::out_of_range("Cannot reshape if new shape's total size (" + std::to_string(newLength) +
-								") does not match current (" + std::to_string(length_) + ")");
+		throw std::out_of_range(fmt::format(
+			"Cannot reshape if the new shape's total size ({}) does not match current the ({}).", newLength, length_));
 	}
 }
 
@@ -231,14 +233,15 @@ void BasicTensor<ValueType>::_checkIndicesList(const std::initializer_list<std::
 
 		if(upper <= lower)
 		{
-			throw std::out_of_range(std::string("Upper index is not greater than lower for shape '") + stringifyVector(shape_) +
-									"' at index " + std::to_string(shapeIt) + ".");
+			throw std::out_of_range(
+				"Upper index is not greater than lower for shape '{}' at index {}.", stringifyVector(shape), shapeIt);
 		}
 
 		if(upper > shape_[shapeIt])
 		{
-			throw std::out_of_range(std::string("Upper index cannot be greater than particular dimension size for shape '") +
-									stringifyVector(shape_) + "' at index " + std::to_string(shapeIt) + ".");
+			throw std::out_of_range("Upper index cannot be greater than particular dimension size for shape '{}' at index {}.",
+									stringifyVector(shape_),
+									shapeIt);
 		}
 	}
 }
@@ -321,14 +324,16 @@ BasicTensor<ValueType> BasicTensor<ValueType>::matmul(const BasicTensor& other) 
 {
 	// for clean error throwing with additional info about shapes
 	auto throwInformative = [this, &other](const std::string& message) {
-		throw std::invalid_argument("Can't perform matrix multiplication for shapes: " + stringifyVector(shape_) + ", " +
-									stringifyVector(other.shape_) + " - " + message);
+		throw std::runtime_error("Cannot perform matrix multiplication for shapes '{}' and '{}' - {}",
+								 stringifyVector(shape_),
+								 stringifyVector(other.shaoe_),
+								 message);
 	};
 
 	// checking if first tensor can be padded to nDims >= 2
 	if(other.shape_.size() < 2)
 	{
-		throwInformative("cannot obtain last but one dimension of the second tensor.");
+		throwInformative("Cannot obtain last but one dimension of the second tensor");
 	}
 
 	// for padding tensors shapes
@@ -348,14 +353,14 @@ BasicTensor<ValueType> BasicTensor<ValueType>::matmul(const BasicTensor& other) 
 	// checking matmul conditions
 	if(paddedShapeFirst[biggerSize - 1] != paddedShapeSecond[biggerSize - 2])
 	{
-		throwInformative("last two dimensions are incompatible.");
+		throwInformative("Last two dimensions are incompatible");
 	}
 
 	for(size_t i = 0; i < biggerSize - 2; i++)
 	{
 		if((paddedShapeFirst[i] != paddedShapeSecond[i]) && (paddedShapeFirst[i] != 1) && (paddedShapeSecond[i] != 1))
 		{
-			throwInformative("shapes are incompatible.");
+			throwInformative("shapes are incompatible");
 		}
 	}
 
@@ -552,7 +557,7 @@ void BasicTensor<ValueType>::fill(const tensorInitializers::ITensorInitializer<V
 	}
 	if(elementPos < length_)
 	{
-		throw std::out_of_range("Too few values to assign to the tensor.");
+		throw std::out_of_range("Too few values to assign to the tensor");
 	}
 }
 

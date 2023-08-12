@@ -6,18 +6,15 @@
 #include <sstream>
 #include <vector>
 
+#include <fmt/format.h>
+
 namespace mlCore
 {
 
 template <typename T>
 std::string stringifyVector(const std::vector<T>& vect, const char* const openSign = "(", const char* const closeSign = ")")
 {
-	std::ostringstream serializingStream;
-	serializingStream << openSign;
-	std::copy(vect.cbegin(), std::prev(vect.cend()), std::ostream_iterator<T>(serializingStream, ", "));
-	serializingStream << *vect.crbegin();
-	serializingStream << closeSign;
-	return serializingStream.str();
+	return fmt::format("{}{}{}", openSign, fmt::join(vect, ", "), closeSign);
 }
 
 } // namespace mlCore

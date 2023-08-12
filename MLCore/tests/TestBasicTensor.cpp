@@ -6,11 +6,15 @@
  * by Wiktor Prosowicz
  **********************/
 
+#include <MLCore/BasicTensor.h>
+
+#include <iostream>
+
+#include <gtest/gtest.h>
+#include <fmt/format.h>
+
 #include <LoggingLib/LoggingLib.h>
 #include <MLCore/TensorInitializers/RangeTensorInitializer.hpp>
-#include <MLCore/BasicTensor.h>
-#include <gtest/gtest.h>
-#include <iostream>
 
 namespace
 {
@@ -233,9 +237,11 @@ R"(<BasicTensor dtype=d shape=(3, 3, 3, 1)>
 
 		if(strcmp(displayStream.str().c_str(), reprs[i].c_str()) != 0)
 		{
-			ADD_FAILURE() << "Differences between streamed representation of tensor: \n\n"
-						  << displayStream.str().c_str() << "\n\nand expected one:\n\n"
-						  << reprs[i].c_str();
+
+			ADD_FAILURE() << fmt::format(
+				"Differences between streamed representation of tensor: \n\n{}\n\nand expected one:\n\n{}",
+				displayStream.str(),
+				reprs.at(i));
 		}
 	}
 }

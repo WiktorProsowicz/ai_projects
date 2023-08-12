@@ -1,6 +1,10 @@
 #include <MLCore/TensorOperationsImpl.h>
-#include <MLCore/Utilities.h>
+
 #include <cmath>
+
+#include <fmt/format.h>
+
+#include <MLCore/Utilities.h>
 
 #define __SIMPLE_PLUS(a, b) a + b
 #define __SIMPLE_MINUS(a, b) a - b
@@ -109,8 +113,9 @@ void checkShapesForBroadcasting(const std::vector<size_t>& shape1, const std::ve
 		if((*leftShapeIter != 1) && (*rightShapeIter != 1) && (*leftShapeIter != *rightShapeIter))
 		{
 			LOG_ERROR("TensorOperations",
-					  "Can't perform broadcasting operation on tensors with invalid shapes: " << stringifyVector(shape1)
-																							  << " " + stringifyVector(shape2));
+					  fmt::format("Cannot perform broadcasting operation on tensors with invalid shapes: '{}' '{}'.",
+								  stringifyVector(shape1),
+								  stringifyVector(shape2)));
 		}
 	}
 }
