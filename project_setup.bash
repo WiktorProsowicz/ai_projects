@@ -7,9 +7,12 @@ function build_project()
     cmake -S "${PROJECT_HOME}" -B "${PROJECT_HOME}/build" "$@";
     cd "${PROJECT_HOME}/build" || return;
     make -j $(( $(grep -c ^processor /proc/cpuinfo) / 2 ));
-    cd ..;
+    cd ..;    
+}
+
+function run_cppcheck()
+{
     cppcheck --enable=all --project=build/compile_commands.json --check-config -iForeignModules/* --std=c++20 --suppress=missingIncludeSystem -ibuild/* .;
-    
 }
 
 function rebuild_project()
@@ -49,6 +52,7 @@ function download_dependencies
     cd "${PROJECT_HOME}"/ForeignModules || return
     
     git clone --recursive "git@github.com:google/googletest.git"
+    git clone --recursive "https://github.com/fmtlib/fmt.git"
     
     cd ..
 }
