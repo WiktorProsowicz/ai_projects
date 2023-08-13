@@ -34,7 +34,7 @@ public:
 		return distribution_(engine_);
 	}
 
-	~GaussianInitializer() = default;
+	~GaussianInitializer() override = default;
 
 private:
 	mutable std::normal_distribution<ValueType> distribution_;

@@ -6,6 +6,8 @@
 
 #include <MLCore/Utilities.h>
 
+// NOLINTBEGIN
+
 #define __SIMPLE_PLUS(a, b) a + b
 #define __SIMPLE_MINUS(a, b) a - b
 #define __SIMPLE_DIVIDE(a, b) a / b
@@ -206,3 +208,5 @@ void TensorOperationsImpl<ValueType>::powerInPlace(BasicTensor<ValueType>& lhs, 
 }
 
 } // namespace mlCore
+
+// NOLINTEND

@@ -30,7 +30,7 @@ class UnaryOperatorDecorator;
 enum class WrapperLogChannel : uint8_t;
 
 mlCore::autoDiff::NodePtr wrapNode(mlCore::autoDiff::NodePtr node,
-								   const std::shared_ptr<std::map<WrapperLogChannel, std::vector<std::string>>> logs);
+								   std::shared_ptr<std::map<WrapperLogChannel, std::vector<std::string>>> logs);
 
 // Enum specifying type of log made by computation graph node wrappers.
 enum class WrapperLogChannel : uint8_t
@@ -144,14 +144,71 @@ mlCore::autoDiff::NodePtr wrapNode(mlCore::autoDiff::NodePtr node,
 	{
 		return std::make_shared<BinaryOperatorDecorator>(casted, logs);
 	}
-	else if(const auto casted = std::dynamic_pointer_cast<unaryOperators::UnaryOperator>(node))
+
+	if(const auto casted = std::dynamic_pointer_cast<unaryOperators::UnaryOperator>(node))
 	{
 		return std::make_shared<UnaryOperatorDecorator>(casted, logs);
 	}
-	else
+
+	return node;
+}
+
+mlCore::autoDiff::NodePtr getUnaryOperationByDesc(const std::string& description, const mlCore::autoDiff::NodePtr& input)
+{
+	using namespace mlCore::autoDiff;
+
+	if(description == "LN")
 	{
-		return node;
+		return unaryOperations::ln(input);
 	}
+
+	if(description == "RELU")
+	{
+		return nodesActivations::relu(input);
+	}
+
+	if(description == "SIGMOID")
+	{
+		return nodesActivations::sigmoid(input);
+	}
+
+	LOG_ERROR("TestComputationGraph", "Unknown operation type: " << description);
+	return {};
+}
+
+mlCore::autoDiff::NodePtr getBinaryOperationByDesc(const std::string& description,
+												   const mlCore::autoDiff::NodePtr& lhs,
+												   const mlCore::autoDiff::NodePtr& rhs)
+{
+	using namespace mlCore::autoDiff;
+
+	if(description == "MULTIPLY")
+	{
+		return binaryOperations::multiply(lhs, rhs);
+	}
+	if(description == "ADD")
+	{
+		return binaryOperations::add(lhs, rhs);
+	}
+	if(description == "POWER")
+	{
+		return binaryOperations::power(lhs, rhs);
+	}
+	if(description == "SUBTRACT")
+	{
+		return binaryOperations::subtract(lhs, rhs);
+	}
+	if(description == "MATMUL")
+	{
+		return binaryOperations::matmul(lhs, rhs);
+	}
+	if(description == "DIVIDE")
+	{
+		return binaryOperations::divide(lhs, rhs);
+	}
+
+	LOG_ERROR("TestComputationGraph", "Unknown operation type: " << description);
+	return {};
 }
 
 /**
@@ -194,7 +251,8 @@ constructTree(const std::vector<std::pair<std::string, std::string>>& config)
 
 			return node;
 		}
-		else if(oper == "PLACEHOLDER")
+
+		if(oper == "PLACEHOLDER")
 		{
 			recipe = recipe.substr(1, recipe.size() - 2);
 
@@ -228,36 +286,7 @@ constructTree(const std::vector<std::pair<std::string, std::string>>& config)
 			auto lhs = nodes.at(inputNames[0]);
 			auto rhs = nodes.at(inputNames[1]);
 
-			NodePtr binaryOper;
-
-			if(oper == "MULTIPLY")
-			{
-				binaryOper = binaryOperations::multiply(lhs, rhs);
-			}
-			else if(oper == "ADD")
-			{
-				binaryOper = binaryOperations::add(lhs, rhs);
-			}
-			else if(oper == "POWER")
-			{
-				binaryOper = binaryOperations::power(lhs, rhs);
-			}
-			else if(oper == "SUBTRACT")
-			{
-				binaryOper = binaryOperations::subtract(lhs, rhs);
-			}
-			else if(oper == "MATMUL")
-			{
-				binaryOper = binaryOperations::matmul(lhs, rhs);
-			}
-			else if(oper == "DIVIDE")
-			{
-				binaryOper = binaryOperations::divide(lhs, rhs);
-			}
-			else
-			{
-				LOG_ERROR("TestComputationGraph", "Unknown operation type: " << oper);
-			}
+			NodePtr binaryOper = getBinaryOperationByDesc(oper, lhs, rhs);
 
 			binaryOper->setName(name);
 
@@ -266,28 +295,12 @@ constructTree(const std::vector<std::pair<std::string, std::string>>& config)
 
 			return binaryOper;
 		}
-		else if(inputNames.size() == 1)
+
+		if(inputNames.size() == 1)
 		{
 			auto input = nodes.at(inputNames[0]);
 
-			NodePtr unaryOper;
-
-			if(oper == "LN")
-			{
-				unaryOper = unaryOperations::ln(input);
-			}
-			else if(oper == "RELU")
-			{
-				unaryOper = nodesActivations::relu(input);
-			}
-			else if(oper == "SIGMOID")
-			{
-				unaryOper = nodesActivations::sigmoid(input);
-			}
-			else
-			{
-				LOG_ERROR("TestComputationGraph", "Unknown operation type: " << oper);
-			}
+			NodePtr unaryOper = getUnaryOperationByDesc(oper, input);
 
 			unaryOper->setName(name);
 
@@ -295,11 +308,9 @@ constructTree(const std::vector<std::pair<std::string, std::string>>& config)
 
 			return unaryOper;
 		}
-		else
-		{
-			LOG_ERROR("TestComputationGraph", "Unhandled number of inputs: " << inputNames.size());
-			return {};
-		}
+
+		LOG_ERROR("TestComputationGraph", "Unhandled number of inputs: " << inputNames.size());
+		return {};
 	};
 
 	for(const auto& [name, recipe] : config)

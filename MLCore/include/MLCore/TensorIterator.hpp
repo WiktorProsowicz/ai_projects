@@ -52,6 +52,7 @@ public:
 		return *this;
 	}
 
+	// NOLINTBEGIN
 	/**
      * @brief Postfix increment operator. 
      * 
@@ -63,6 +64,7 @@ public:
 		++(*this);
 		return tmp;
 	}
+	// NOLINTEND
 
 	/**
 	 * @brief Compares two operators.
@@ -71,7 +73,7 @@ public:
 	 * @return true If iterators are equal.
 	 * @return false In the opposite case.
 	 */
-	bool operator==(const TensorIterator& other)
+	bool operator==(const TensorIterator& other) const
 	{
 		return currPtr_ == other.currPtr_;
 	}
@@ -83,7 +85,7 @@ public:
      * @return true If the tensors are different.
      * @return false In the opposite case.
      */
-	bool operator!=(const TensorIterator& other)
+	bool operator!=(const TensorIterator& other) const
 	{
 		return currPtr_ != other.currPtr_;
 	}

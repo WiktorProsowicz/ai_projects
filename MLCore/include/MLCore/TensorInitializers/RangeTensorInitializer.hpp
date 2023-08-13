@@ -37,7 +37,7 @@ public:
 	RangeTensorInitializer& operator=(RangeTensorInitializer&&) = delete; // Move assign
 	RangeTensorInitializer& operator=(const RangeTensorInitializer&) = delete; // Copy assign
 
-	~RangeTensorInitializer() = default;
+	~RangeTensorInitializer() override = default;
 
 	ValueType yield() const override
 	{

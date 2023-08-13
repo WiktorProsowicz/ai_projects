@@ -23,14 +23,35 @@ function rebuild_project()
     build_project "$@";
 }
 
+function _run_clang_tidy()
+{
+    echo "Checking file $($1)"
+}
+
 function run_clang_tidy()
 {
-    find "${PROJECT_HOME}" \
-    \( -name "*.cpp" -o -name "*.c" -o -name "*.cc" \) \
-    -not \( -path "${PROJECT_HOME}/ForeignModules/*" -prune \) \
-    -not \( -path "${PROJECT_HOME}/build/*" -prune \) \
-    -exec clang-tidy -p "${PROJECT_HOME}/build" -config-file="${PROJECT_HOME}/.clang-tidy" -extra-arg=-std=c++20 -header-filter=".*" {} \;
-    
+    local paths=$(find "${PROJECT_HOME}" \
+                \( -name "*.cpp" -o -name "*.c" -o -name "*.cc" \) \
+                -not \( -path "${PROJECT_HOME}/ForeignModules/*" -prune \) \
+                -not \( -path "${PROJECT_HOME}/build/*" -prune \) \
+                -print );
+
+    for path in $paths; do
+        printf "\033[1;34m\nChecking path '$path':\n\033[0m"
+
+        clang-tidy-14 -p "${PROJECT_HOME}/build" -config-file="${PROJECT_HOME}/.clang-tidy" -extra-arg=-std=c++20 -header-filter=".*" $path &> .cltid__
+
+        local output=$(cat .cltid__ | wc -l)
+
+        if [[ $output == 3 ]]
+        then
+            printf "\033[1;32mOK\033[0m"
+        else
+            cat .cltid__
+        fi
+
+        rm .cltid__
+    done
 }
 
 function apply_clang_format()

@@ -31,8 +31,7 @@ public:
 	Node() = delete;
 	Node(const Tensor& tensor)
 		: index_(nodesCount_++)
-		, value_(tensor)
-		, name_(){};
+		, value_(tensor){};
 
 	virtual ~Node() = default;
 
@@ -60,7 +59,7 @@ protected:
 	uint64_t index_;
 	static inline uint64_t nodesCount_ = 0;
 	Tensor value_;
-	std::string name_;
+	std::string name_ = "";
 };
 
 /**

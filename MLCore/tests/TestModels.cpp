@@ -22,7 +22,7 @@ class TestLayer : public mlCore::models::ILayer
 {
 public:
 	TestLayer() = default;
-	~TestLayer() = default;
+	~TestLayer() override = default;
 
 	mlCore::autoDiff::NodePtr build() override
 	{
@@ -31,7 +31,7 @@ public:
 
 	mlCore::Tensor compute() override
 	{
-		return mlCore::Tensor({}, 0);
+		return 0.0;
 	}
 
 	std::vector<mlCore::autoDiff::NodePtr> getAllWeights() const override
@@ -55,7 +55,7 @@ class TestOptimizer : public mlCore::models::IOptimizer
 {
 public:
 	TestOptimizer() = default;
-	~TestOptimizer() = default;
+	~TestOptimizer() override = default;
 
 	void applyGradient(mlCore::autoDiff::NodePtr weight, mlCore::Tensor derivative) override
 	{
@@ -68,7 +68,7 @@ class TestMeasurable : public mlCore::models::IMeasurable
 {
 public:
 	TestMeasurable() = default;
-	~TestMeasurable() = default;
+	~TestMeasurable() override = default;
 
 	void registerMetric(mlCore::models::IMetricPtr metric) override
 	{
@@ -77,7 +77,7 @@ public:
 
 	void unregisterMetric(mlCore::models::IMetricPtr metric) override
 	{
-		metrics_.erase(std::remove_if(metrics_.begin(), metrics_.end(), [&metric](const auto m) { return m == metric; }),
+		metrics_.erase(std::remove_if(metrics_.begin(), metrics_.end(), [&metric](const auto met) { return met == metric; }),
 					   metrics_.end());
 	}
 
@@ -110,7 +110,7 @@ class TestMetric : public mlCore::models::IMetric
 {
 public:
 	TestMetric() = default;
-	~TestMetric() = default;
+	~TestMetric() override = default;
 
 	void notify(mlCore::models::MetricContextPtr context) override
 	{
@@ -125,7 +125,7 @@ class TestCallback : public mlCore::models::Callback
 {
 public:
 	TestCallback() = default;
-	~TestCallback() = default;
+	~TestCallback() override = default;
 
 	void call() override { }
 };

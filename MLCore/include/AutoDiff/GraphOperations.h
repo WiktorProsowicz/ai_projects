@@ -12,7 +12,7 @@ namespace mlCore::autoDiff
 
 /// Concept for functions taking any number of shared pointers of types inheriting from Node and returning analogous type
 template <typename Operation, typename... NodePtrs>
-concept NodeOperation = requires(NodePtrs... inputNodes, Operation op)
+concept NodeOperation = requires(NodePtrs... inputNodes, Operation oper)
 {
 	// input types are shared pointers
 	(... && std::is_same_v<std::shared_ptr<decltype(*inputNodes)>, decltype(inputNodes)>);
@@ -21,10 +21,10 @@ concept NodeOperation = requires(NodePtrs... inputNodes, Operation op)
 	(... && std::is_base_of_v<Node, decltype(*inputNodes)>);
 
 	// result type is shared ptr
-	std::is_same_v<std::shared_ptr<decltype(*op(inputNodes...))>, decltype(op(inputNodes...))>;
+	std::is_same_v<std::shared_ptr<decltype(*oper(inputNodes...))>, decltype(oper(inputNodes...))>;
 
 	// result pointer points to something derived from Node
-	std::is_base_of_v<Node, decltype(*(op(inputNodes...)))>;
+	std::is_base_of_v<Node, decltype(*(oper(inputNodes...)))>;
 };
 
 /**

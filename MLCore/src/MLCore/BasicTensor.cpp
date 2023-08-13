@@ -327,9 +327,11 @@ BasicTensor<ValueType> BasicTensor<ValueType>::operator-() const
 	return ret;
 }
 
+// NOLINTBEGIN
 template <typename ValueType>
 BasicTensor<ValueType> BasicTensor<ValueType>::matmul(const BasicTensor& other) const
 {
+
 	// for clean error throwing with additional info about shapes
 	auto throwInformative = [this, &other](const std::string& message) {
 		throw std::runtime_error(fmt::format("Cannot perform matrix multiplication for shapes '{}' and '{}' - {}",
@@ -447,6 +449,7 @@ BasicTensor<ValueType> BasicTensor<ValueType>::matmul(const BasicTensor& other) 
 
 	return resultTensor;
 }
+// NOLINTEND
 
 template <typename ValueType>
 BasicTensor<ValueType> BasicTensor<ValueType>::transposed() const
