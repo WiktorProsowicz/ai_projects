@@ -3,4 +3,47 @@ cmake_minimum_required(VERSION "${CMAKE_MINIMUM_REQUIRED_VERSION}")
 
 project(ai_projects VERSION 1.0.0)
 
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+set(BUILD_SHARED_LIBS True)
+
+# set(CMAKE_C_COMPILER gcc)
+# set(CMAKE_CXX_COMPILER /usr/bin/gcc)
+
+enable_testing()
+
+include(GoogleTest)
+
+
+set(COMMON_COMPILE_OPTIONS
+    -Wall
+    -std=c++23
+    -Wextra 
+    -Weffc++ 
+    -Wunused 
+    -Wnarrowing 
+    -Wlogical-op 
+    -Wcast-align 
+    -Wconversion 
+    -Winvalid-pch 
+    -Wuseless-cast
+    -Wold-style-cast 
+    -Wredundant-decls 
+    -Wsign-conversion 
+    -Wduplicated-cond 
+    -Wnull-dereference 
+    -Wnon-virtual-dtor 
+    -Woverloaded-virtual 
+    -Wmissing-declarations 
+    -Wmissing-include-dirs 
+    -Wmisleading-indentation 
+    -Wmissing-format-attribute 
+)
+
+add_subdirectory(LoggingLib)
+add_subdirectory(ForeignModules)
+
 add_subdirectory(LocalSearch)
+add_subdirectory(MLCore)
