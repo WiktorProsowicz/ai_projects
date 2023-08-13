@@ -11,6 +11,7 @@ MLCore is a module containing the core components for other data processing / ma
 - Introduced [ITensorInitializer](#itensorinitializer) interface
 - Added new [TensorInitializers](#TensorInitializers)
     - [RangeTensorInitializer](#RangeTensorInitializer)
+    - [GaussianTensorInitializer](#GaussianTensorInitializer)
 - Introduced base [GraphNodes](#GraphNodes) interface ([Node](#Node)) 
 - Added new [GraphNodes](#GraphNodes)
     - [Variable](#variable)
@@ -55,6 +56,8 @@ Class enables several ways to create the object other than by copy/move.
 
 ```cpp
 mlCore::BasicTensor<double> scalarTensor;
+
+mlCore::BasicTensor<double> scalarTensorWithValue = 5.0;
 
 mlCore::BasicTensor<double> shapedTensor({3, 4, 5});
 
@@ -229,11 +232,39 @@ while(initializer.canYield())
 }
 ```
 
+### GaussianTensorInitializer
+
+Class implementing [ITensorInitializer](#ITensorInitializer) interface. 
+
+Implementation:
+```cpp
+namespace mlCore::tensorInitializers
+{
+    template <class ValueType>
+    class GaussianTensorInitializer : public ITensorInitializer<ValueType>;
+}
+```
+
+GaussianTensorInitializer samples data from gaussian distribution parametrized by the given mean and standard deviation.
+
+```cpp
+constexpr double kMean = 0.0;
+constexpr double kStdDev = 1.0;
+
+mlCore::tensorInitializers::GaussianTensorInitializer<uint64_t> initializer(kMean, kStdDev);
+
+while(initializer.canYield())
+{
+    // 5.0672514740e-1   4.9139724980e-1 4.2433275600e-2 ...
+    std::cout << initializer.yield();
+}
+```
+
 ## GraphNodes
 
 Group of classes in form of [BasicTensor](#BasicTensor) wrappers with associated functionality and semantics depending on the concrete subclass. GraphNodes make up a huge part of automatic differentiation functionality. They are used as the components of tree structures used by [ComputationGraph](#ComputationGraph).
 
-![GraphNodes hierarchy](./res/GraphNpdeshierarchy.drawio.png)
+![GraphNodes hierarchy](./res/GraphNodeshierarchy.drawio.png)
 
 ### Node
 
@@ -269,7 +300,7 @@ std::cout << node.getName() << '\n';
 
 // 25 25
 // 25 25
-node.setValue(node.getValue() * node.getValue());
+node.getValue() *= node.getValue();
 ```
 
 There is defined a typename for Node pointers.

@@ -36,7 +36,7 @@ public:
 
 	virtual ~Node() = default;
 
-	const Tensor& getValue() const
+	Tensor& getValue()
 	{
 		return value_;
 	}
@@ -54,11 +54,6 @@ public:
 	void setName(const std::string& name)
 	{
 		name_ = name;
-	}
-
-	virtual void setValue(const Tensor& tensor)
-	{
-		value_ = tensor;
 	}
 
 protected:
@@ -91,11 +86,6 @@ public:
 	Constant() = delete;
 	Constant(const Tensor& tensor)
 		: Node(tensor){};
-
-	void setValue(const Tensor& /*tensor*/) override
-	{
-		LOG_WARN("GraphNodes", "Attempt to assign value to constant");
-	}
 };
 
 /**

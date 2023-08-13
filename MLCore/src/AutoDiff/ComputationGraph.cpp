@@ -122,7 +122,7 @@ void ComputationGraph::forwardPass(const std::map<PlaceholderPtr, Tensor>& feedD
 		if(const auto placeholder = std::dynamic_pointer_cast<Placeholder>(node);
 		   placeholder && (feedDict.find(placeholder) != feedDict.end()))
 		{
-			placeholder->setValue(feedDict.at(placeholder));
+			placeholder->getValue() = feedDict.at(placeholder);
 		}
 		else if(const auto binaryOper = std::dynamic_pointer_cast<binaryOperators::BinaryOperator>(node))
 		{

@@ -359,25 +359,6 @@ protected:
 	}
 
 	/**
-     * @brief Copies given tensor and scales all of its values by given factor.
-     * 
-     * @param tensor Tensor to scale.
-     * @param factor Factor scaling to scale the tensor by.
-     * @return Scaled tensor.
-     */
-	static mlCore::Tensor scaleTensor(const mlCore::Tensor& tensor, const double factor)
-	{
-		auto tensorCopy = tensor;
-
-		for(auto& val : tensorCopy)
-		{
-			val *= factor;
-		}
-
-		return tensorCopy;
-	}
-
-	/**
 	 * @brief Creates a feed map that can be used in forward-pass of ComputationGraph.
 	 * 
 	 * @param inputs Placeholders to assign input tensors to.
@@ -531,7 +512,7 @@ protected:
 			for(auto weight : trainableWeights)
 			{
 				const auto& derivative = graph_->getGradientByNodeId(weight->getIndex());
-				weight->setValue(weight->getValue() - scaleTensor(derivative, .1));
+				weight->getValue() -= (derivative * .1);
 			}
 		}
 	}

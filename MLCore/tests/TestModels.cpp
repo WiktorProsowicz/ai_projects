@@ -57,9 +57,9 @@ public:
 	TestOptimizer() = default;
 	~TestOptimizer() = default;
 
-	void applyGradient(mlCore::autoDiff::NodePtr weight, const mlCore::Tensor& derivative) override
+	void applyGradient(mlCore::autoDiff::NodePtr weight, mlCore::Tensor derivative) override
 	{
-		weight->setValue(derivative);
+		weight->getValue() = std::move(derivative);
 	}
 };
 
