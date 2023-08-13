@@ -474,16 +474,172 @@ Set of activation functions performing certain operations on input node. They cr
 
 ## ComputationGraph
 
+Class responsible for storing [GraphNodes](#GRaphNodes) instances and performing operations on whole tree structure. It can collect nodes belonging to different trees creating computation forest. ComputationGraph makes for one of the main parts of automatic differentiation tools. 
+
+Basic workflow of the graph can be described as:
+1. Graph is activated, allowing to add more nodes.
+2. Nodes are added to the graph by the client.
+3. Graph is deactivated, disallowing to add anymore nodes.
+4. Forward pass is requested:
+    - Graph sorts its nodes so that the furthest ones are updated first. 
+    - Values of the nodes are updated either via given feed map or, in case of operators, via their internal updating mechanics.
+5. Backward pass is requested:
+    - Gradients computing starts from the given root node's perspective.
+    - Nodes tree is traversed backwards, collected gradients are stored, cumulated gradient is passed to next tree levels.
+6. Gradients are collected and used by the client.
+7. Gradients are flushed by the client, so that the graph is reset.
+
+Implementation:
+``` cpp
+namespace mlCore::autoDiff
+{
+class ComputationGraph;
+}
+```
+
+Example:
+```cpp
+using namespace mlCore::autoDiff;
+using mlCore::Tensor;
+
+std::set<NodePtr> getTree() { ... }
+
+std::map<PlaceHolderPtr, Tensor> getFeedMap() { ... }
+
+NodePtr getTreeOutput() { ... }
+
+ComputationGraph graph;
+
+graph.activate();
+
+for(const auto& node : getTree())
+{
+    graph.addNode(node);
+}
+
+graph.deactivate();
+
+graph.forwardPass({getFeedMap()});
+
+graph.computeGradients(getTreeOutput());
+
+for(const auto& node : getTree())
+{
+    const auto nodeId = node.getId();
+
+    if(graph.hasGradient(nodeId))
+    {
+        std::cout << nodeId <<  " - " << graph.getGradientById(nodeId) << std::endl;
+    }
+}
+
+graph.clearGradients();
+
+```
+
 ## TensorOperations
+
+Set of functions performing either binary or unary operations on [BasicTensor](#BasicTensor) instances. The functions can be used to avoid duplicate tensor-modifying code.
+
+Implementation:
+```cpp
+namespace mlCore
+{
+template <typename ValueType>
+class BasicTensorOperations;
+}
+```
+
+Available functions:
+- **power(lhs, rhs)** - implements power operation with base values from `lhs` and factors from `rhs`.
+- **ln(arg)** - implements natural logarithm.
+- **relu(arg)** - implements REctangular Linear Unit activation function.
+- **sigmoid(arg)** - implements Sigmoid activation function.
 
 ## Models
 
+Set of interfaces for classes being components of more complex architectures. They take part in the workflow of a given model and can help implement specific design patterns making for architecture of the desired structure. Models carry semantics sued in the functioning of a model. 
+
 ### Callback
+
+An interface for classes following the Command design pattern. They can hold various parts of a given model and perform certain actions (for example make a backup of the model) based on the internal mode.
+
+Implementation
+```cpp
+namespace mlCore::models
+{
+class Callback;
+
+using CallbackPtr = std::shared_ptr<Callback>;
+}
+```
+
+![Callback interface](./res/CallbackInterface.drawio.png)
 
 ### ILayer
 
+An interface for classes being parts of the model, covering a certain scope of it. Layers can be defined as specific levels of detailed model's description. Layers can be standalone and flat (for example a standard dense layer) or contain other layers inside (for example an encoder containing several levels of encoding). The second case can follow the Composite design pattern.
+
+Implementation
+```cpp
+namespace mlCore::models
+{
+class ILayer;
+
+using ILayerPtr = std::shared_ptr<ILayer>;
+}
+```
+
+![ILayer interface](./res/ILayerInterface.drawio.png)
+
 ### IMeasurable
+
+An interface for classes following the Observer design pattern, prone to be measured by classes implementing [IMetric](#IMetric) interface. IMeasurable-implementing classes serve play the role of publishers and can be subscribed by number and types of metrics specified by the concrete measurable class. Internal implementation of the class may be connected with the Composite design pattern and thus delegate the metrics update to the contained sub-Measurable objects.
+
+Implementation:
+```cpp
+namespace mlCore::models
+{
+class IMeasurable;
+
+using IMeasurablePtr = std::shared_ptr<IMeasurable>;
+}
+```
+
+![IMeasurable interface](./res/IMeasurableInterface.drawio.png)
 
 ### IMetric
 
+An interface for classes following the Observer design pattern, performing a certain type of measuring process. Metrics can create statistical data based on the internal parameters and pointed objects and updates its state by the `notify` method called be the metric's owners.
+
+Metrics can be also notified using **MetricContext** objects holding content specified by the concrete implementation.
+
+Implementation:
+```cpp
+namespace mlCore::models
+{
+class MetricContext;
+
+class IMetric;
+
+using IMetricPtr = std::shared_ptr<IMetric>;
+using MetricContextPtr = std::shared_ptr<IMetric>;
+}
+```
+
+![IMetric interface](./res/IMetricInterface.drawio.png)
+
 ### IOptimizer
+
+An interface for classes updating models' weights ([Node](#Node)) with given gradient slices ([Tensor](#Tensor)) according to the internal parameters and the updating politics of a concrete implementation of the interface. 
+
+```cpp
+namespace mlCore::models
+{
+class IOptimizer;
+
+using IOptimizerPtr = std::shared_ptr<IOptimizer>;
+}
+```
+
+![IOptimizer interface](./res/IOptimizerInterface.drawio.png)
