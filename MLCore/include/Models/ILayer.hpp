@@ -30,11 +30,18 @@ public:
 	virtual Tensor compute() = 0;
 
 	/**
-      * @brief Gives the model's weights regardless of whether they are trainable or not.
+      * @brief Gives the layer's weights regardless of whether they are trainable or not.
       * 
-      * @return Model's weights.
+      * @return Layer's weights.
       */
-	virtual std::vector<autoDiff::NodePtr> getWeights() const = 0;
+	virtual std::vector<autoDiff::NodePtr> getAllWeights() const = 0;
+
+	/**
+       * @brief Gives the layer's weights that are supposed to be trained.
+       * 
+       * @return Layer's trainable weights.
+       */
+	virtual std::vector<autoDiff::NodePtr> getTrainableWeights() const = 0;
 
 	/**
       * @brief Compiles textual description of the layer based on its type and parameters.

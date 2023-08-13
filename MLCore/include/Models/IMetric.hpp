@@ -31,7 +31,7 @@ public:
      * 
      * @param context Object containing data for the metric.
      */
-	virtual void notify(MetricContextPtr context) = 0;
+	virtual void notify(MetricContextPtr context = nullptr) = 0;
 
 	virtual ~IMetric() = default;
 };
