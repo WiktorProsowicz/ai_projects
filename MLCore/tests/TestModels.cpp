@@ -34,7 +34,12 @@ public:
 		return mlCore::Tensor({}, 0);
 	}
 
-	std::vector<mlCore::autoDiff::NodePtr> getWeights() const override
+	std::vector<mlCore::autoDiff::NodePtr> getAllWeights() const override
+	{
+		return {};
+	}
+
+	std::vector<mlCore::autoDiff::NodePtr> getTrainableWeights() const override
 	{
 		return {};
 	}
