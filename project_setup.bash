@@ -56,11 +56,26 @@ function run_clang_tidy()
 
 function apply_clang_format()
 {
-    find "${PROJECT_HOME}" \
-    \( -name "*.cpp" -o -name "*.c" -o -name "*.cc" \) \
-    -not \( -path "${PROJECT_HOME}/ForeignModules/*" -prune \) \
-    -not \( -path "${PROJECT_HOME}/build/*" -prune \) \
-    -exec clang-format -i {} \;
+    local paths=$(find "${PROJECT_HOME}" \
+                \( -name "*.cpp" -o -name "*.c" -o -name "*.cc" -o -name "*.h" -o -name "*.hpp" \) \
+                -not \( -path "${PROJECT_HOME}/ForeignModules/*" -prune \) \
+                -not \( -path "${PROJECT_HOME}/build/*" -prune \) \
+                -print );
+
+    for path in $paths; do
+        
+        clang-format -n $path &> .clfor__
+
+        local output=$(cat .clfor__ | wc -l)
+
+        if [[ $output != 0 ]]
+        then
+            printf "Changed file \033[1;33m$path\033[0m\n"
+            clang-format -i $path
+        fi
+
+        rm .clfor__
+    done
 }
 
 function run_tests()
