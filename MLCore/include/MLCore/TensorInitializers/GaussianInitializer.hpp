@@ -19,10 +19,10 @@ public:
 		, engine_(std::random_device{}())
 	{ }
 
-	GaussianInitializer(const GaussianInitializer&) = default; // Copy constructor.
-	GaussianInitializer(GaussianInitializer&&) = default; // Move constructor.
+	GaussianInitializer(const GaussianInitializer&) = default;			  // Copy constructor.
+	GaussianInitializer(GaussianInitializer&&) = default;				  // Move constructor.
 	GaussianInitializer& operator=(const GaussianInitializer&) = default; // Copy assignment.
-	GaussianInitializer& operator=(GaussianInitializer&&) = default; // Move assignment.
+	GaussianInitializer& operator=(GaussianInitializer&&) = default;	  // Move assignment.
 
 	bool canYield() const override
 	{

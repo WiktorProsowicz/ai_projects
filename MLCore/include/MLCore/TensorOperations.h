@@ -11,8 +11,7 @@ template <typename ValueType>
 class BasicTensorOperations
 {
 public:
-	static BasicTensor<ValueType> power(const BasicTensor<ValueType>& lhs,
-										const BasicTensor<ValueType>& rhs);
+	static BasicTensor<ValueType> power(const BasicTensor<ValueType>& lhs, const BasicTensor<ValueType>& rhs);
 
 	static BasicTensor<ValueType> ln(const BasicTensor<ValueType>& arg);
 

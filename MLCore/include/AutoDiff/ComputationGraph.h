@@ -21,9 +21,9 @@ public:
 	ComputationGraph() = default;
 
 	ComputationGraph& operator=(const ComputationGraph&) = delete; // Copy assign
-	ComputationGraph& operator=(ComputationGraph&&) = delete; // Move assign
-	ComputationGraph(const ComputationGraph&) = delete; // Copy ctor
-	ComputationGraph(ComputationGraph&&) = delete; // Move ctor
+	ComputationGraph& operator=(ComputationGraph&&) = delete;	   // Move assign
+	ComputationGraph(const ComputationGraph&) = delete;			   // Copy ctor
+	ComputationGraph(ComputationGraph&&) = delete;				   // Move ctor
 
 	/**
 	 * @brief Gets status of the graph

@@ -14,16 +14,13 @@ public:
 	static void addTensorsInPlace(BasicTensor<ValueType>& lhs, const BasicTensor<ValueType>& rhs);
 
 	/// Multiplies left tensor by the right one
-	static void multiplyTensorsInPlace(BasicTensor<ValueType>& lhs,
-									   const BasicTensor<ValueType>& rhs);
+	static void multiplyTensorsInPlace(BasicTensor<ValueType>& lhs, const BasicTensor<ValueType>& rhs);
 
 	/// Subtracts right tensor from the left one
-	static void subtractTensorsInPlace(BasicTensor<ValueType>& lhs,
-									   const BasicTensor<ValueType>& rhs);
+	static void subtractTensorsInPlace(BasicTensor<ValueType>& lhs, const BasicTensor<ValueType>& rhs);
 
 	/// Divides left tensor by the right one
-	static void divideTensorsInPlace(BasicTensor<ValueType>& lhs,
-									 const BasicTensor<ValueType>& rhs);
+	static void divideTensorsInPlace(BasicTensor<ValueType>& lhs, const BasicTensor<ValueType>& rhs);
 
 	/// Computes left tensor to the power of right one
 	static void powerInPlace(BasicTensor<ValueType>& lhs, const BasicTensor<ValueType>& rhs);

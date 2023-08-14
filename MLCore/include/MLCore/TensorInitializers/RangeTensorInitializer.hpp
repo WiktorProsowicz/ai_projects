@@ -32,9 +32,9 @@ public:
 
 	{ }
 
-	RangeTensorInitializer(RangeTensorInitializer&&) = delete; // Move ctor
-	RangeTensorInitializer(const RangeTensorInitializer&) = delete; // Copy ctor
-	RangeTensorInitializer& operator=(RangeTensorInitializer&&) = delete; // Move assign
+	RangeTensorInitializer(RangeTensorInitializer&&) = delete;				   // Move ctor
+	RangeTensorInitializer(const RangeTensorInitializer&) = delete;			   // Copy ctor
+	RangeTensorInitializer& operator=(RangeTensorInitializer&&) = delete;	   // Move assign
 	RangeTensorInitializer& operator=(const RangeTensorInitializer&) = delete; // Copy assign
 
 	~RangeTensorInitializer() override = default;
