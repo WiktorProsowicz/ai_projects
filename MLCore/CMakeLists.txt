@@ -7,3 +7,5 @@ include("${CMAKE_SOURCE_DIR}/Common.cmake")
 install_library()
 
 target_link_libraries(${PROJECT_NAME} LoggingLib fmt)
+
+add_tests()

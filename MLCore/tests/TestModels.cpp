@@ -112,7 +112,7 @@ public:
 	TestMetric() = default;
 	~TestMetric() override = default;
 
-	void notify(mlCore::models::MetricContextPtr context) override
+	void notify(mlCore::models::MetricContextPtr) override
 	{
 		notified = true;
 	}

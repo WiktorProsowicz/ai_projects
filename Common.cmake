@@ -1,4 +1,6 @@
-# installs library
+# ***********************************************************************
+#  Collectes files in current directory and creates a library from them.
+# ***********************************************************************
 macro(install_library)
 
     # get all files for library
@@ -30,27 +32,65 @@ macro(install_library)
 
     install(TARGETS ${PROJECT_NAME} DESTINATION lib)
 
-    # get tests files
-    file(GLOB TEST_FILES tests/*.cpp)
-
-    # make test executables
-    foreach(TEST_FILE IN LISTS TEST_FILES)
-        get_filename_component(FILE_NAME "${TEST_FILE}" NAME_WLE)
-
-        add_executable("${FILE_NAME}" "${TEST_FILE}")
-        target_link_libraries("${FILE_NAME}" PUBLIC ${PROJECT_NAME} gtest gtest_main)
-
-        set_target_properties(${FILE_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/test/${PROJECT_NAME}/)
-
-        add_test(NAME "${FILE_NAME}" COMMAND $<TARGET_FILE:${FILE_NAME}>)
-
-        # set_tests_properties("${FILE_NAME}" PROPERTIES LABELS "ut;${FILE_NAME}")
-
-        # gtest_add_tests(TARGET "${FILE_NAME}" TEST_LIST "${FILE_NAME}")
-        gtest_discover_tests("${FILE_NAME}")
-
-    endforeach()
-
     target_compile_options(${PROJECT_NAME} PRIVATE ${COMMON_COMPILE_OPTIONS})
 
+    # adding executable
+    add_executable_for_lib()
+
+endmacro()
+
+    
+
+# ****************************************
+#  Creates an executable for the library.
+# ****************************************
+macro(add_executable_for_lib)
+    
+    file(GLOB_RECURSE ${PROJECT_NAME}_MAIN src/main.cpp)
+
+    if(${PROJECT_NAME}_MAIN)
+        add_executable(${PROJECT_NAME}Executable ${PROJECT_NAME}_MAIN)
+
+        target_link_libraries(${PROJECT_NAME}Executable PUBLIC ${PROJECT_NAME})
+
+        set_target_properties(${PROJECT_NAME}Executable PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/)
+                
+        target_compile_options(${PROJECT_NAME}Executable PRIVATE ${COMMON_COMPILE_OPTIONS})
+    endif()
+endmacro()
+
+
+# ********************************************************************
+#  Looks for tests files and creates an executable for each of them.
+#  Links given libraries to the tests.
+# ********************************************************************
+macro(add_tests)
+    if(${BUILD_TESTS})
+
+        # get tests files
+        file(GLOB TEST_FILES tests/*.cpp)
+
+        # make test executables
+        foreach(TEST_FILE IN LISTS TEST_FILES)
+            get_filename_component(TEST_NAME "${TEST_FILE}" NAME_WLE)
+
+            add_executable("${TEST_NAME}" "${TEST_FILE}")
+
+            target_link_libraries("${TEST_NAME}" PUBLIC ${PROJECT_NAME} gtest gtest_main)
+
+            if(${ARGV})
+                target_link_libraries("${TEST_NAME}" PUBLIC ${ARGV})
+            endif()
+
+            set_target_properties("${TEST_NAME}" PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/test/${PROJECT_NAME}/)
+            
+            target_compile_options("${TEST_NAME}" PRIVATE ${COMMON_COMPILE_OPTIONS})
+
+            add_test(NAME "${TEST_NAME}" COMMAND $<TARGET_FILE:${TEST_NAME}>)
+
+            gtest_discover_tests("${TEST_NAME}")
+
+        endforeach()
+
+    endif()
 endmacro()
