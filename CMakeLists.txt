@@ -9,13 +9,11 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(BUILD_SHARED_LIBS True)
 
-# set(CMAKE_C_COMPILER gcc)
-# set(CMAKE_CXX_COMPILER /usr/bin/gcc)
-
 enable_testing()
 
-include(GoogleTest)
+option(BUILD_TESTS "Build test executables." OFF)
 
+include(GoogleTest)
 
 set(COMMON_COMPILE_OPTIONS
     -Wall

@@ -45,9 +45,10 @@ class BinaryOperatorDecorator : public mlCore::autoDiff::binaryOperators::Binary
 public:
 	BinaryOperatorDecorator(const mlCore::autoDiff::binaryOperators::BinaryOperatorPtr oper,
 							const std::shared_ptr<std::map<WrapperLogChannel, std::vector<std::string>>> logs)
-		: oper_(oper)
+		: BinaryOperator(wrapNode(oper->getInputs().first, logs), wrapNode(oper->getInputs().second, logs))
+		, oper_(oper)
 		, logs_(logs)
-		, BinaryOperator(wrapNode(oper->getInputs().first, logs), wrapNode(oper->getInputs().second, logs))
+
 	{
 		setName(oper->getName());
 	}
@@ -89,9 +90,10 @@ class UnaryOperatorDecorator : public mlCore::autoDiff::unaryOperators::UnaryOpe
 public:
 	UnaryOperatorDecorator(const mlCore::autoDiff::unaryOperators::UnaryOperatorPtr oper,
 						   const std::shared_ptr<std::map<WrapperLogChannel, std::vector<std::string>>> logs)
-		: oper_(oper)
+		: UnaryOperator(wrapNode(oper->getInput(), logs))
+		, oper_(oper)
 		, logs_(logs)
-		, UnaryOperator(wrapNode(oper->getInput(), logs))
+
 	{
 		setName(oper->getName());
 	}
@@ -241,7 +243,7 @@ constructTree(const std::vector<std::pair<std::string, std::string>>& config)
 
 			while(std::getline(iss, shapeItem, ','))
 			{
-				shape.push_back(std::stoll(shapeItem));
+				shape.push_back(std::stoull(shapeItem));
 			}
 
 			mlCore::Tensor value(shape);
@@ -262,7 +264,7 @@ constructTree(const std::vector<std::pair<std::string, std::string>>& config)
 
 			while(std::getline(iss, shapeItem, ','))
 			{
-				shape.push_back(std::stoll(shapeItem));
+				shape.push_back(std::stoull(shapeItem));
 			}
 
 			auto node = std::make_shared<Placeholder>(shape);
@@ -659,7 +661,7 @@ TEST_F(TestComputationGraph, testGradientDescentSimulation)
 	std::set<NodePtr> trainableWeights;
 	PlaceholderPtr input;
 
-	for(const auto node : flattenTree(wrappedTree))
+	for(const auto& node : flattenTree(wrappedTree))
 	{
 		constexpr static std::array<const char*, 6> kTrainableNames = {"L1W", "L1B", "L2W", "L2B", "L3W", "L3B"};
 
