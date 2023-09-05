@@ -33,6 +33,11 @@ void Logger::logErrorOnChannel(const char* channelName, const char* logContent)
 
 void Logger::setDefaultStream(std::ostream& stream)
 {
+	setDefaultStream(std::make_shared<streamWrappers::BaseStreamWrapper>(stream));
+}
+
+void Logger::setDefaultStream(const streamWrappers::BaseStreamWrapperPtr stream)
+{
 	std::lock_guard lock(streamingMutex_);
 
 	defaultStream_ = stream;
@@ -40,9 +45,21 @@ void Logger::setDefaultStream(std::ostream& stream)
 
 void Logger::setNamedChannelStream(const std::string& name, std::ostream& stream)
 {
+	setNamedChannelStream(name, std::make_shared<streamWrappers::BaseStreamWrapper>(stream));
+}
+
+void Logger::setNamedChannelStream(const std::string& name, streamWrappers::BaseStreamWrapperPtr stream)
+{
 	std::lock_guard lock(streamingMutex_);
 
-	namedStreamsMap_.emplace(name, stream);
+	if(namedStreamsMap_.contains(name))
+	{
+		namedStreamsMap_.at(name) = stream;
+	}
+	else
+	{
+		namedStreamsMap_.emplace(name, stream);
+	}
 }
 
 void Logger::logOnChannel(LogType logType, const char* channelName, const char* logContent)
@@ -50,24 +67,24 @@ void Logger::logOnChannel(LogType logType, const char* channelName, const char* 
 	{
 		std::lock_guard lock(streamingMutex_);
 
-		std::ostream& chosenStream =
-			namedStreamsMap_.contains(channelName) ? namedStreamsMap_.at(channelName).get() : defaultStream_.get();
+		streamWrappers::BaseStreamWrapperPtr chosenStream =
+			namedStreamsMap_.contains(channelName) ? namedStreamsMap_.at(channelName) : defaultStream_;
 
 		const auto frame = colorfulFramesMap.at(logType);
 
-		chosenStream.write(frame, static_cast<int64_t>(std::strlen(frame)));
+		chosenStream->put(frame);
 
 		const auto preamble = preamblesMap.at(logType);
 
-		chosenStream.write(preamble, static_cast<int64_t>(std::strlen(preamble)));
+		chosenStream->put(preamble);
 
-		chosenStream.write(fmt::format("[{}] ", channelName).c_str(), static_cast<int64_t>(std::strlen(channelName) + 3));
+		chosenStream->put(fmt::format("[{}] ", channelName).c_str());
 
-		chosenStream.write(logContent, static_cast<int64_t>(std::strlen(logContent)));
+		chosenStream->put(logContent);
 
-		chosenStream.write("\033[0m\n", 4);
+		chosenStream->put("\033[0m\n");
 
-		chosenStream.flush();
+		chosenStream->getStream().flush();
 	}
 
 	if(logType == LogType::ERROR)
@@ -76,9 +93,9 @@ void Logger::logOnChannel(LogType logType, const char* channelName, const char* 
 	}
 }
 
-void Logger::resetLogger()
+void Logger::reset()
 {
-	defaultStream_ = std::cout;
+	setDefaultStream(std::cout);
 
 	namedStreamsMap_.clear();
 }

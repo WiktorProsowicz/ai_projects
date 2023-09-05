@@ -7,6 +7,9 @@
 #include <map>
 #include <mutex>
 
+// __Own software headers__
+#include <StreamWrappers/BaseStreamWrapper.hpp>
+
 namespace loggingLib
 {
 enum class LogType : uint8_t
@@ -68,6 +71,9 @@ public:
 	 */
 	void setDefaultStream(std::ostream& stream);
 
+	/// @overload
+	void setDefaultStream(streamWrappers::BaseStreamWrapperPtr stream);
+
 	/**
 	 * @brief Sets the stream associated to the name of a specific channel.
 	 * 
@@ -76,11 +82,14 @@ public:
 	 */
 	void setNamedChannelStream(const std::string& name, std::ostream& stream);
 
+	/// @overload
+	void setNamedChannelStream(const std::string& name, streamWrappers::BaseStreamWrapperPtr stream);
+
 	/**
 	 * @brief Cleans the internal logger's configuration, i.e. streams associated to channels, default stream etc.
 	 * 
 	 */
-	void resetLogger();
+	void reset();
 
 private:
 	/**
@@ -90,7 +99,7 @@ private:
      * 
      */
 	Logger()
-		: defaultStream_(std::cout)
+		: defaultStream_(std::make_shared<streamWrappers::BaseStreamWrapper>(std::cout))
 		, namedStreamsMap_()
 		, streamingMutex_()
 	{ }
@@ -107,12 +116,12 @@ private:
 	void logOnChannel(LogType logType, const char* channelName, const char* logContent);
 
 private:
-	std::reference_wrapper<std::ostream> defaultStream_;
-	std::map<std::string, std::reference_wrapper<std::ostream>> namedStreamsMap_;
+	streamWrappers::BaseStreamWrapperPtr defaultStream_;
+	std::map<std::string, streamWrappers::BaseStreamWrapperPtr> namedStreamsMap_;
 	std::mutex streamingMutex_;
 
 	const static inline std::map<LogType, const char*> colorfulFramesMap{
-		{LogType::INFO, "\033[34m]"}, {LogType::WARN, "\033[1;33m"}, {LogType::ERROR, "\033[1;31m"}};
+		{LogType::INFO, "\033[34m"}, {LogType::WARN, "\033[1;33m"}, {LogType::ERROR, "\033[1;31m"}};
 
 	const static inline std::map<LogType, const char*> preamblesMap{
 		{LogType::INFO, "[ INFO]"}, {LogType::WARN, "[ WARN]"}, {LogType::ERROR, "[ERROR]"}};
