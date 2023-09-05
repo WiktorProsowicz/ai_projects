@@ -70,11 +70,11 @@ void Logger::logOnChannel(LogType logType, const char* channelName, const char* 
 		streamWrappers::BaseStreamWrapperPtr chosenStream =
 			namedStreamsMap_.contains(channelName) ? namedStreamsMap_.at(channelName) : defaultStream_;
 
-		const auto frame = colorfulFramesMap.at(logType);
+		const auto* frame = colorfulFramesMap.at(logType);
 
 		chosenStream->put(frame);
 
-		const auto preamble = preamblesMap.at(logType);
+		const auto* preamble = preamblesMap.at(logType);
 
 		chosenStream->put(preamble);
 
