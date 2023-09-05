@@ -36,7 +36,7 @@ void Logger::setDefaultStream(std::ostream& stream)
 	setDefaultStream(std::make_shared<streamWrappers::BaseStreamWrapper>(stream));
 }
 
-void Logger::setDefaultStream(const streamWrappers::BaseStreamWrapperPtr stream)
+void Logger::setDefaultStream(const streamWrappers::IStreamWrapperPtr stream)
 {
 	std::lock_guard lock(streamingMutex_);
 
@@ -48,7 +48,7 @@ void Logger::setNamedChannelStream(const std::string& name, std::ostream& stream
 	setNamedChannelStream(name, std::make_shared<streamWrappers::BaseStreamWrapper>(stream));
 }
 
-void Logger::setNamedChannelStream(const std::string& name, streamWrappers::BaseStreamWrapperPtr stream)
+void Logger::setNamedChannelStream(const std::string& name, streamWrappers::IStreamWrapperPtr stream)
 {
 	std::lock_guard lock(streamingMutex_);
 
@@ -67,24 +67,22 @@ void Logger::logOnChannel(LogType logType, const char* channelName, const char* 
 	{
 		std::lock_guard lock(streamingMutex_);
 
-		streamWrappers::BaseStreamWrapperPtr chosenStream =
+		streamWrappers::IStreamWrapperPtr chosenStream =
 			namedStreamsMap_.contains(channelName) ? namedStreamsMap_.at(channelName) : defaultStream_;
 
 		const auto* frame = colorfulFramesMap.at(logType);
 
-		chosenStream->put(frame);
+		chosenStream->putCharString(frame);
 
 		const auto* preamble = preamblesMap.at(logType);
 
-		chosenStream->put(preamble);
+		chosenStream->putCharString(preamble);
 
-		chosenStream->put(fmt::format("[{}] ", channelName).c_str());
+		chosenStream->putCharString(fmt::format("[{}] ", channelName).c_str());
 
-		chosenStream->put(logContent);
+		chosenStream->putCharString(logContent);
 
-		chosenStream->put("\033[0m\n");
-
-		chosenStream->getStream().flush();
+		chosenStream->putCharString("\033[0m\n");
 	}
 
 	if(logType == LogType::ERROR)

@@ -2,8 +2,10 @@
 #define LOGGINGLIB_INCLUDE_STREAMWRAPPERS_BASESTREAMWRAPPER_HPP
 
 // __C++ standard headers__
-#include <memory>
 #include <ostream>
+
+// __Own software headers__
+#include <StreamWrappers/IStreamWrapper.hpp>
 
 namespace streamWrappers
 {
@@ -12,9 +14,22 @@ namespace streamWrappers
  * @brief Class providing template streaming algorithm that operates on wrapped std::ostream.
  * 
  */
-class BaseStreamWrapper
+class BaseStreamWrapper : public IStreamWrapper
 {
 public:
+	/**
+	 * @brief Creates a new stack of `stream` < BaseStreamWrapper < `WrapperType`. 
+	 * 
+	 * @tparam WrapperType Type of the most external wrapper.
+	 * @param stream std::ostream to be wrapped by the intermediate BaseStreamWrapper.
+	 * @return IStreamWrapper Pointer to the external wrapper.
+	 */
+	template <typename WrapperType>
+	static IStreamWrapperPtr spawnWrapped(std::ostream& stream) requires std::is_base_of_v<IStreamWrapper, WrapperType>
+	{
+		return std::make_shared<WrapperType>(std::make_shared<BaseStreamWrapper>(stream));
+	}
+
 	BaseStreamWrapper() = delete; /// Default constructor.
 
 	/**
@@ -26,30 +41,24 @@ public:
 		: stream_(stream)
 	{ }
 
-	virtual ~BaseStreamWrapper() = default; /// Default virtual destructor.
+	virtual ~BaseStreamWrapper() override = default; /// Default virtual destructor.
+
+	void putCharString(const char* charString) override
+	{
+		put(charString);
+	}
 
 	/**
      * @brief Streams the given `content` to the referenced std::ostream.
-     * Additionally performs two actions, both before and after streaming, whose effect depends on the class inheriting from the BaseStreamWrapper.
-     * The streamed content is changed in a way specified by the base/inheriting class.
      * 
      * @param content Content to stream into the underlying std::ostream.
      */
 	template <typename StreamedType>
 	void put(StreamedType&& content)
 	{
-		_beforeStream();
+		stream_ << content;
 
-		if constexpr(std::is_convertible_v<StreamedType, const char*>)
-		{
-			stream_ << _modifyCharInput(content);
-		}
-		else
-		{
-			stream_ << content;
-		}
-
-		_afterStream();
+		stream_.flush();
 	}
 
 	/**
@@ -62,35 +71,9 @@ public:
 		return stream_;
 	}
 
-protected:
-	/**
-     * @brief Performs a certain action before streaming any content to the underlying std::ostream.
-     * 
-     */
-	virtual void _beforeStream() { }
-
-	/**
-     * @brief Performs a certain action after streaming any content to the underlying std::ostream.
-     * 
-     */
-	virtual void _afterStream() { }
-
-	/**
-     * @brief Modifies the given input in a way specified by the class following the BaseStreamWrapper's interface.
-     * 
-     * @param input Content to be modify.
-     * @return StreamType&& Modified version of the input.
-     */
-	virtual std::string _modifyCharInput(const char* input)
-	{
-		return input;
-	}
-
 private:
 	std::ostream& stream_;
 };
-
-using BaseStreamWrapperPtr = std::shared_ptr<BaseStreamWrapper>;
 
 } // namespace streamWrappers
 

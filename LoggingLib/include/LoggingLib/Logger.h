@@ -72,7 +72,7 @@ public:
 	void setDefaultStream(std::ostream& stream);
 
 	/// @overload
-	void setDefaultStream(streamWrappers::BaseStreamWrapperPtr stream);
+	void setDefaultStream(streamWrappers::IStreamWrapperPtr stream);
 
 	/**
 	 * @brief Sets the stream associated to the name of a specific channel.
@@ -83,7 +83,7 @@ public:
 	void setNamedChannelStream(const std::string& name, std::ostream& stream);
 
 	/// @overload
-	void setNamedChannelStream(const std::string& name, streamWrappers::BaseStreamWrapperPtr stream);
+	void setNamedChannelStream(const std::string& name, streamWrappers::IStreamWrapperPtr stream);
 
 	/**
 	 * @brief Cleans the internal logger's configuration, i.e. streams associated to channels, default stream etc.
@@ -116,8 +116,8 @@ private:
 	void logOnChannel(LogType logType, const char* channelName, const char* logContent);
 
 private:
-	streamWrappers::BaseStreamWrapperPtr defaultStream_;
-	std::map<std::string, streamWrappers::BaseStreamWrapperPtr> namedStreamsMap_;
+	streamWrappers::IStreamWrapperPtr defaultStream_;
+	std::map<std::string, streamWrappers::IStreamWrapperPtr> namedStreamsMap_;
 	std::mutex streamingMutex_;
 
 	const static inline std::map<LogType, const char*> colorfulFramesMap{

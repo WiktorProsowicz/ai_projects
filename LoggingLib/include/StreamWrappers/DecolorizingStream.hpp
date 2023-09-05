@@ -1,13 +1,13 @@
 #ifndef LOGGINGLIB_INCLUDE_STREAMWRAPPERS_DECOLORIZINGSTREAM_HPP
 #define LOGGINGLIB_INCLUDE_STREAMWRAPPERS_DECOLORIZINGSTREAM_HPP
 
-// __Related headers__
-#include <StreamWrappers/BaseStreamWrapper.hpp>
-
 // __C++ standard headers__
 #include <regex>
 #include <cstring>
 #include <fstream>
+
+// __Own software headers__
+#include <StreamWrappers/IStreamWrapper.hpp>
 
 namespace streamWrappers
 {
@@ -15,7 +15,7 @@ namespace streamWrappers
  * @brief Class deleting all of color-controlling characters from the streamed content.
  * 
  */
-class DecolorizingStream : public BaseStreamWrapper
+class DecolorizingStream : public IStreamWrapper
 {
 public:
 	/**
@@ -23,20 +23,21 @@ public:
      * 
      * @param stream Stream to pass to the base stream wrapper.
      */
-	explicit DecolorizingStream(std::ostream& stream)
-		: BaseStreamWrapper(stream)
+	explicit DecolorizingStream(IStreamWrapperPtr wrappedStream)
+		: wrappedStream_(wrappedStream)
 	{ }
 
 	~DecolorizingStream() override = default; /// Default destructor.
 
-protected:
-	std::string _modifyCharInput(const char* input) override
+	void putCharString(const char* charString) override
 	{
-		return std::regex_replace(input, coloringRegex_, "");
+		wrappedStream_->putCharString(std::regex_replace(charString, coloringRegex_, "").c_str());
 	}
 
 private:
 	static inline const std::regex coloringRegex_{"\\\033\\[\\d+;?\\d*m"};
+
+	IStreamWrapperPtr wrappedStream_;
 };
 } // namespace streamWrappers
 
