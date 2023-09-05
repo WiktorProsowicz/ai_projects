@@ -15,6 +15,7 @@ LoggingLib is a module containing classes used to handle various kinds of logged
 
 - Introduced [Logger](#Logger)
 - Introduced [Stream Wrappers](#StreamWrappers)
+    - [IStreamWrapper](#IStreamWrapper)
     - [BaseStreamWrapper](#BaseStreamWrapper)
     - [DecolorizingStream](#DecolorizingStream)
 - Introduced new macros
@@ -67,31 +68,58 @@ logger.reset();
 
 ## Stream Wrappers
 
-Set of classes wrapping the `std::ostream` instance. Wrappers can perform a certain kind of action defined in concrete class before or after delegating further streaming to the wrapped object. Additionally the streamed content can be modified in a specific way.  
+Set of classes following the Decorator pattern. Wrappers can perform a certain kind of action defined in concrete class before or after delegating further streaming to the wrapped object. Additionally the streamed content can be modified in a specific way. 
 
-### BaseStreamWrapper
+### IStreamWrapper
 
-Base class for [Stream Wrappers](#Stream-Wrappers). Defines a public streaming method being a template-pattern algorithm which uses a couple of functions possible to be overridden.
+An interface for [Stream Wrappers](#Stream-Wrappers). Defines a public streaming method being a template-pattern algorithm which uses a couple of functions possible to be overridden. 
 
 Implementation:
 ```cpp
 namespace streamWrappers
 {
-    class BaseStreamWrapper;
+    class IStreamWrapper;
+
+    using IStreamWrapperPtr = std::shared_ptr<IStreamWrapper>;
 }
 ```
 
-Virtual functions can be overridden so that the flow of the streaming algorithm is different than the default one (default behavior is to simply pass the message further to the wrapped stream).
+![IStreamWrapper interface](./res/IStreamWrapperInterface.drawio.png)
+
+
+### BaseStreamWrapper
+
+Class implementing [IStreamWrapper](#IStreamWrapper) interface. Does not perform any modifications on the streamed content and serves as the intermediate object between `std::ostream` and other wrappers.
+
+Implementation:
+```cpp
+namespace streamWrappers
+{
+    class BaseStreamWrapper : public IStreamWrapper;
+}
+```
+
+BaseStreamWrapper defines a static factory function creating a stack of std::ostream -> BaseStreamWrapper -> Given type of wrapper.
+
+```cpp
+struct CustomWrapper
+{
+    CustomWrapper(IStreamWrapperPtr internal);
+};
+
+
+streamWrappers::BaseStreamWrapper::spawnWrapped<CustomWrapper>(std::cout);
+```
 
 ### DecolorizingStream
 
-Class inheriting from [BaseStreamWrapper](#BaseStreamWrapper). Deletes character sequences from streamed content, so that it no longer contains information about the message color.
+Class implementing [IStreamWrapper](#IStreamWrapper) interface. Deletes character sequences from streamed content, so that it no longer contains information about the message color.
 
 
 Implementation:
 ```cpp
 namespace streamWrappers
 {
-    class DecolorizingStream : public BaseStreamWrapper;
+    class DecolorizingStream : public IStreamWrapper;
 }
 ```
