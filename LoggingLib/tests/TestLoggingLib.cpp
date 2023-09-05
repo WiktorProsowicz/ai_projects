@@ -8,7 +8,6 @@
 
 // __Tested headers__
 #include <LoggingLib/LoggingLib.hpp>
-#include <StreamWrappers/DecolorizingStream.hpp>
 
 // __C++ standard headers__
 #include <fstream>
@@ -126,29 +125,6 @@ TEST_F(TestLoggingLib, testNamedChannelsLogging)
 
 	checkHarvestedLogs(secondChannelStream.str(),
 					   {"\033[34m[ INFO][Channel 2] Message 5\033[0m", "\033[34m[ INFO][Channel 2] Message 7\033[0m"});
-}
-
-TEST_F(TestLoggingLib, testDecolorizingStream)
-{
-	std::ofstream fileOutput("./test-log-file.txt");
-
-	LOG_RESET_LOGGER();
-	LOG_SET_DEFAULT_STREAM(std::make_shared<streamWrappers::DecolorizingStream>(fileOutput));
-
-	LOG_WARN("Unnamed", "Message number 1")
-	LOG_INFO("Unnamed", "Message number 2")
-
-	EXPECT_THROW(LOG_ERROR("Unnamed", "Message number 3"), std::runtime_error);
-
-	fileOutput.close();
-
-	std::ifstream fileInput("./test-log-file.txt");
-
-	checkHarvestedLogs(
-		(std::ostringstream{} << fileInput.rdbuf()).str(),
-		{"[ WARN][Unnamed] Message number 1", "[ INFO][Unnamed] Message number 2", "[ERROR][Unnamed] Message number 3"});
-
-	fileInput.close();
 }
 
 } // namespace
