@@ -11,7 +11,7 @@
 #include <numeric>
 #include <vector>
 
-#include <LoggingLib/LoggingLib.h>
+#include <LoggingLib/LoggingLib.hpp>
 #include <MLCore/Utilities.h>
 #include <MLCore/TensorInitializers/ITensorInitializer.hpp>
 #include <MLCore/TensorIterator.hpp>

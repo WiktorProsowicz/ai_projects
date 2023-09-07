@@ -31,12 +31,15 @@ function _run_clang_tidy()
 function run_clang_tidy()
 {
     local paths=$(find "${PROJECT_HOME}" \
-                \( -name "*.cpp" -o -name "*.c" -o -name "*.cc" \) \
+                \( -name "*.cpp" -o -name "*.c" -o -name "*.cc" -o -name "*.hpp" \) \
                 -not \( -path "${PROJECT_HOME}/ForeignModules/*" -prune \) \
                 -not \( -path "${PROJECT_HOME}/build/*" -prune \) \
                 -print );
 
     for path in $paths; do
+
+        [[ $# != 0 ]] && [[ ! "${path}" =~ $1 ]] && continue
+
         printf "\033[1;34m\nChecking path '$path':\n\033[0m"
 
         clang-tidy-14 -p "${PROJECT_HOME}/build" -config-file="${PROJECT_HOME}/.clang-tidy" -extra-arg=-std=c++20 -header-filter=".*" $path &> .cltid__
@@ -45,7 +48,7 @@ function run_clang_tidy()
 
         if [[ $output == 3 ]]
         then
-            printf "\033[1;32mOK\033[0m"
+            printf "\033[1;32mOK\033[0m\n"
         else
             cat .cltid__
         fi

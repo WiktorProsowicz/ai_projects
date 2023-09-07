@@ -13,7 +13,7 @@
 #include <gtest/gtest.h>
 #include <fmt/format.h>
 
-#include <LoggingLib/LoggingLib.h>
+#include <LoggingLib/LoggingLib.hpp>
 #include <MLCore/TensorInitializers/RangeTensorInitializer.hpp>
 
 namespace
