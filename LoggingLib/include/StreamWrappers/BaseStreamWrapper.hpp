@@ -41,7 +41,7 @@ public:
 		: stream_(stream)
 	{ }
 
-	virtual ~BaseStreamWrapper() override = default; /// Default virtual destructor.
+	~BaseStreamWrapper() override = default; /// Default virtual destructor.
 
 	void putCharString(const char* charString) override
 	{

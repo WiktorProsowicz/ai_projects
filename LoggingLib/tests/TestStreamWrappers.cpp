@@ -70,7 +70,7 @@ TEST_F(TestStreamWrappers, testBaseStreamWrapper)
 	baseWrapper->put("Message 2\n");
 	baseWrapper->put("Message 3\n");
 
-	checkHarvestedLogs(strStream.str().c_str(), {"Message 1", "Message 2", "Message 3"});
+	checkHarvestedLogs(strStream.str(), {"Message 1", "Message 2", "Message 3"});
 }
 
 TEST_F(TestStreamWrappers, testDecolorizingStream)
@@ -84,7 +84,7 @@ TEST_F(TestStreamWrappers, testDecolorizingStream)
 	decolorizingStream->putCharString("\033[33m[ERROR][Unnamed] Message number 3\033[0m\n");
 
 	checkHarvestedLogs(
-		strStream.str().c_str(),
+		strStream.str(),
 		{"[ WARN][Unnamed] Message number 1", "[ INFO][Unnamed] Message number 2", "[ERROR][Unnamed] Message number 3"});
 }
 
