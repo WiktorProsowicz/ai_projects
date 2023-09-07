@@ -78,7 +78,7 @@ macro(add_tests)
 
             target_link_libraries("${TEST_NAME}" PUBLIC ${PROJECT_NAME} gtest gtest_main)
 
-            if(${ARGV})
+            if(${ARGC} GREATER 0)
                 target_link_libraries("${TEST_NAME}" PUBLIC ${ARGV})
             endif()
 
