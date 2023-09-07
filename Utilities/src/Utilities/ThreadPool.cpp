@@ -82,15 +82,29 @@ void ThreadPool::_spawn(size_t workerId)
 
 		{
 			std::shared_lock<std::shared_mutex> flagsLock(flagsMutex_);
-			std::shared_lock<std::shared_mutex> stopFlagsLock(stopFlagsMutex_);
 
-			if(cancelled_ || (stopped_ && !obtainedATask) || (stopFlags_.at(workerId) && !obtainedATask))
+			// In case the whole pool has been cancelled - don't care about the following task
+			// In case the pool has been stopped - run tasks until there are any
+			if(cancelled_ || (stopped_ && !obtainedATask))
 			{
 				return;
 			}
 		}
 
-		runTask();
+		if(obtainedATask)
+		{
+			runTask();
+		}
+
+		{
+			std::shared_lock<std::shared_mutex> stopFlagsLock(stopFlagsMutex_);
+
+			// Closing the individual thread only after possible processing of the task
+			if(stopFlags_.at(workerId))
+			{
+				return;
+			}
+		}
 	}
 }
 
