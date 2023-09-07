@@ -1,7 +1,9 @@
 #ifndef UTILITIES_INCLUDE_UTILITIES_THREADSAFEQUEUE_HPP
 #define UTILITIES_INCLUDE_UTILITIES_THREADSAFEQUEUE_HPP
 
+// __C++ standard headers__
 #include <shared_mutex>
+#include <mutex>
 #include <queue>
 
 namespace utilities
@@ -55,6 +57,7 @@ public:
 	void clear()
 	{
 		std::unique_lock<std::shared_mutex> lock(mutex_);
+
 		while(!std::queue<T>::empty())
 		{
 			std::queue<T>::pop();
@@ -86,16 +89,15 @@ public:
 	bool tryPop(T& holder)
 	{
 		std::unique_lock<std::shared_mutex> lock(mutex_);
+
 		if(std::queue<T>::empty())
 		{
 			return false;
 		}
-		else
-		{
-			holder = std::move(std::queue<T>::front());
-			std::queue<T>::pop();
-			return true;
-		}
+
+		holder = std::move(std::queue<T>::front());
+		std::queue<T>::pop();
+		return true;
 	}
 
 private:

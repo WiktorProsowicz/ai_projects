@@ -1,5 +1,7 @@
+// __Related header__
 #include <Utilities/ThreadPool.h>
 
+// __C++ standard headers__
 #include <functional>
 
 namespace utilities
@@ -152,7 +154,8 @@ void ThreadPool::resize(size_t numThreads)
 		for(size_t threadNum = workers_.size(); threadNum < numThreads; threadNum++)
 		{
 			stopFlags_.emplace_back(false);
-			workers_.emplace_back(std::bind(&ThreadPool::_spawn, this, threadNum));
+
+			workers_.emplace_back([&threadNum, this]() { _spawn(threadNum); });
 		}
 	}
 }

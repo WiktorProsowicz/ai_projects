@@ -33,9 +33,9 @@ public:
 	using TimePoint = std::chrono::system_clock::time_point;
 
 	Task() = delete;
-	Task(size_t id, size_t waitingInterval = 1000)
+	Task(size_t taskId, size_t waitingInterval = 1000)
 		: waitingInterval_(waitingInterval)
-		, id_(id)
+		, id_(taskId)
 	{ }
 
 	void run()

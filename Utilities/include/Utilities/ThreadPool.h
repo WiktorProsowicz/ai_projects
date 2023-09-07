@@ -1,12 +1,14 @@
 #ifndef UTILITIES_INCLUDE_UTILITIES_THREADPOOL_HPP
 #define UTILITIES_INCLUDE_UTILITIES_THREADPOOL_HPP
 
+// __C++ standard headers__
 #include <vector>
 #include <future>
 #include <mutex>
 #include <condition_variable>
 #include <functional>
 
+// __Own software headers__
 #include <Utilities/ThreadSafeQueue.hpp>
 
 namespace utilities
@@ -107,9 +109,9 @@ public:
 	 * @return Future object connected with the created task.
 	 */
 	template <class F, class... Args>
-	auto addJob(F&& f, Args&&... args) const
+	auto addJob(F&& function, Args&&... args) const
 	{
-		using ReturnType = decltype(f(args...));
+		using ReturnType = decltype(function(args...));
 		using FutureType = std::future<ReturnType>;
 		using PackagedTask = std::packaged_task<ReturnType()>;
 
@@ -121,7 +123,9 @@ public:
 			}
 		}
 
-		auto boundFunction = std::bind(std::forward<F>(f), std::forward<Args>(args)...);
+		// NOLINTBEGIN
+		auto boundFunction = std::bind(std::forward<F>(function), std::forward<Args>(args)...);
+		// NOLINTEND
 
 		auto task = std::make_shared<PackagedTask>(std::move(boundFunction));
 
