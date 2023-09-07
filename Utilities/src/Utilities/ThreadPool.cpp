@@ -7,25 +7,18 @@ namespace utilities
 void ThreadPool::init(size_t numThreads)
 {
 	std::call_once(once_, [this, &numThreads] {
-		std::unique_lock<std::shared_mutex> lock(mainMutex_);
-
-		workers_.reserve(numThreads);
-
-		for(size_t threadNum = 0; threadNum < numThreads; threadNum++)
-		{
-			workers_.emplace_back(std::bind(&ThreadPool::_spawn, this));
-		}
-
 		initted_ = true;
+
+		resize(numThreads);
 	});
 }
 
 void ThreadPool::terminate()
 {
 	{
-		std::unique_lock<std::shared_mutex> lock(mainMutex_);
 		if(_isRunning())
 		{
+			std::unique_lock<std::shared_mutex> lock(flagsMutex_);
 			stopped_ = true;
 		}
 		else
@@ -63,9 +56,11 @@ void ThreadPool::cancel()
 	{
 		worker.join();
 	}
+
+	workers_.clear();
 }
 
-void ThreadPool::_spawn()
+void ThreadPool::_spawn(size_t workerId)
 {
 	while(true)
 	{
@@ -74,16 +69,77 @@ void ThreadPool::_spawn()
 
 		{
 			std::unique_lock<std::shared_mutex> lock(mainMutex_);
-			condition_.wait(lock, [this, &obtainedATask, &runTask] {
+
+			condition_.wait(lock, [this, &obtainedATask, &runTask, &workerId] {
 				obtainedATask = tasks_.tryPop(runTask);
-				return cancelled_ || stopped_ || obtainedATask;
+
+				std::shared_lock<std::shared_mutex> flagsLock(flagsMutex_);
+				std::shared_lock<std::shared_mutex> stopFlagsLock(stopFlagsMutex_);
+
+				return cancelled_ || stopped_ || obtainedATask || stopFlags_.at(workerId);
 			});
 		}
-		if(cancelled_ || (stopped_ && !obtainedATask))
+
 		{
-			return;
+			std::shared_lock<std::shared_mutex> flagsLock(flagsMutex_);
+			std::shared_lock<std::shared_mutex> stopFlagsLock(stopFlagsMutex_);
+
+			if(cancelled_ || (stopped_ && !obtainedATask) || (stopFlags_.at(workerId) && !obtainedATask))
+			{
+				return;
+			}
 		}
+
 		runTask();
+	}
+}
+
+void ThreadPool::resize(size_t numThreads)
+{
+	if(!_isRunning())
+	{
+		throw std::runtime_error("Cannot resize thread pool which is not running.");
+	}
+
+	if(numThreads < size())
+	{
+		{
+			std::unique_lock<std::shared_mutex> stopFlagsMutex(stopFlagsMutex_);
+
+			for(size_t threadNum = numThreads; threadNum < workers_.size(); threadNum++)
+			{
+				stopFlags_.at(threadNum) = true;
+			}
+		}
+
+		condition_.notify_all();
+
+		for(size_t threadNum = numThreads; threadNum < workers_.size(); threadNum++)
+		{
+			workers_.at(threadNum).join();
+		}
+
+		workers_.resize(numThreads);
+		stopFlags_.resize(numThreads);
+
+		return;
+	}
+
+	if(numThreads > size())
+	{
+		{
+			std::unique_lock<std::shared_mutex> lock(mainMutex_);
+			std::unique_lock<std::shared_mutex> stopFlagsMutex(stopFlagsMutex_);
+
+			workers_.reserve(numThreads);
+			stopFlags_.reserve(numThreads);
+		}
+
+		for(size_t threadNum = workers_.size(); threadNum < numThreads; threadNum++)
+		{
+			stopFlags_.emplace_back(false);
+			workers_.emplace_back(std::bind(&ThreadPool::_spawn, this, threadNum));
+		}
 	}
 }
 

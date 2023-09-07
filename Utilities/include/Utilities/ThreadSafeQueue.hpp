@@ -99,7 +99,7 @@ public:
 	}
 
 private:
-	mutable std::shared_mutex mutex_;
+	mutable std::shared_mutex mutex_{};
 };
 } // namespace utilities
 

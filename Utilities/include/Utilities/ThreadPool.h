@@ -14,7 +14,17 @@ namespace utilities
 class ThreadPool
 {
 public:
-	ThreadPool() = default;
+	ThreadPool() = default; /// Default constructor.
+
+	/**
+	 * @brief Creates a new thread pool and initializes it with `numThreads` of threads.
+	 * 
+	 * @param numThreads Initial number of working threads.
+	 */
+	ThreadPool(size_t numThreads)
+	{
+		init(numThreads);
+	}
 
 	ThreadPool(const ThreadPool&) = delete;			   // Copy constructor
 	ThreadPool(ThreadPool&&) = delete;				   // Move constructor
@@ -33,6 +43,13 @@ public:
 	 * @param numThreads Number of working threads created for the pool.
 	 */
 	void init(size_t numThreads);
+
+	/**
+	 * @brief Resizes the number of working threads. If the `numThreads` is smaller then size(), truncated threads shall bring their tasks to an end.
+	 * 
+	 * @param numThreads 
+	 */
+	void resize(size_t numThreads);
 
 	/**
 	 * @brief Joins the working threads and processes all of the available tasks.
@@ -66,7 +83,6 @@ public:
 	 */
 	bool isRunning() const
 	{
-		std::shared_lock<std::shared_mutex> lock(mainMutex_);
 		return _isRunning();
 	}
 
@@ -98,7 +114,7 @@ public:
 		using PackagedTask = std::packaged_task<ReturnType()>;
 
 		{
-			std::shared_lock<std::shared_mutex> lock(mainMutex_);
+			std::shared_lock<std::shared_mutex> lock(flagsMutex_);
 			if(stopped_ || cancelled_)
 			{
 				throw std::runtime_error("Cannot add a new job to thread pool that has been terminated.");
@@ -122,23 +138,29 @@ private:
 	/// Tells if the pool is active.
 	bool _isRunning() const
 	{
+		std::shared_lock<std::shared_mutex> lock(flagsMutex_);
 		return initted_ && !stopped_ && !cancelled_;
 	}
 
 	/// Creates new worker.
-	void _spawn();
+	void _spawn(size_t workerId);
 
 private:
-	std::vector<std::thread> workers_;
-	mutable ThreadSafeQueue<std::function<void()>> tasks_;
+	mutable std::shared_mutex mainMutex_{};
+	std::vector<std::thread> workers_{};
 
+	std::shared_mutex stopFlagsMutex_{};
+	std::vector<bool> stopFlags_{};
+
+	mutable ThreadSafeQueue<std::function<void()>> tasks_{};
+
+	mutable std::shared_mutex flagsMutex_{};
 	bool initted_ = false;
 	bool cancelled_ = false;
 	bool stopped_ = false;
 
-	mutable std::shared_mutex mainMutex_;
-	std::once_flag once_;
-	mutable std::condition_variable_any condition_;
+	std::once_flag once_{};
+	mutable std::condition_variable_any condition_{};
 };
 } // namespace utilities
 
