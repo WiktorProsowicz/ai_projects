@@ -86,8 +86,6 @@ macro(add_tests)
             
             target_compile_options("${TEST_NAME}" PRIVATE ${COMMON_COMPILE_OPTIONS})
 
-            add_test(NAME "${TEST_NAME}" COMMAND $<TARGET_FILE:${TEST_NAME}>)
-
             gtest_discover_tests("${TEST_NAME}")
 
         endforeach()
