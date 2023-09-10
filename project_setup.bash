@@ -7,7 +7,8 @@ function build_project()
     cmake -S "${PROJECT_HOME}" -B "${PROJECT_HOME}/build" "$@";
     cd "${PROJECT_HOME}/build" || return;
     make -j $(( $(grep -c ^processor /proc/cpuinfo) / 2 ));
-    cd ..;    
+    cd ..;
+    
 }
 
 function run_cppcheck()
@@ -23,9 +24,13 @@ function rebuild_project()
     build_project "$@";
 }
 
-function _run_clang_tidy()
+function rebuild_python_environment()
 {
-    echo "Checking file $($1)"
+    rm -rf "${PROJECT_HOME}/venv"
+    python3 -m venv venv
+    source "$PROJECT_HOME/venv/bin/activate"
+    python3 -m pip install -r $PROJECT_HOME/requirements.txt
+    deactivate
 }
 
 function run_clang_tidy()
