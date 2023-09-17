@@ -37,6 +37,9 @@ class AudioSignal:
         Args:
             data: An array of signal's data.
             meta_data: Struct holding additional info about the signal.
+
+        Raises:
+            AudioError: If the given data or meta-data is invalid.
         """
 
         if not self._is_data_valid(data, meta_data):
@@ -61,12 +64,12 @@ class AudioSignal:
             AudioError: If the channel number `channel_number` is not present.
         """
 
-        if 0 <= channel_number < self._meta_data.channels:
+        if 0 > channel_number or channel_number >= self._meta_data.channels:
             raise AudioError(
                 f"Channel number {channel_number} is not present in the signal."
             )
 
-        self._data = np.delete(self._data, self._data[0, :])
+        self._data = np.delete(self._data, channel_number, 0)
         self._meta_data.channels -= 1
 
     def duplicate_channel(self, channel_number: int, position: int):
@@ -81,28 +84,34 @@ class AudioSignal:
             AudioError: If the `position`' is not available..
         """
 
-        if 0 <= channel_number < self._meta_data.channels:
+        if 0 > channel_number or channel_number >= self._meta_data.channels:
             raise AudioError(
                 f"Channel number {channel_number} is not present in the signal."
             )
 
-        if 0 <= position <= self._meta_data.channels:
+        if 0 > position or position > self._meta_data.channels:
             raise AudioError(
                 f"Position {position} is not available to insert the duplicated channel."
             )
 
         if 0 < position < self.meta_data.channels:
             self._data = np.concatenate(
-                self._data[:position, :],
-                self._data[channel_number, :],
-                self._data[position:, :],
+                (
+                    self._data[:position, :],
+                    self._data[channel_number : channel_number + 1, :],
+                    self._data[position:, :],
+                )
             )
 
         elif position == 0:
-            self._data = np.concatenate(self._data[channel_number, :], self._data[:])
+            self._data = np.concatenate(
+                (self._data[channel_number : channel_number + 1, :], self._data[:])
+            )
 
         else:
-            self._data = np.concatenate(self._data[:], self._data[channel_number, :])
+            self._data = np.concatenate(
+                (self._data[:], self._data[channel_number : channel_number + 1, :])
+            )
 
         self._meta_data.channels += 1
 
