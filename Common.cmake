@@ -49,7 +49,7 @@ macro(add_executable_for_lib)
     file(GLOB_RECURSE ${PROJECT_NAME}_MAIN src/main.cpp)
 
     if(${PROJECT_NAME}_MAIN)
-        add_executable(${PROJECT_NAME}Executable ${PROJECT_NAME}_MAIN)
+        add_executable(${PROJECT_NAME}Executable ${${PROJECT_NAME}_MAIN})
 
         target_link_libraries(${PROJECT_NAME}Executable PUBLIC ${PROJECT_NAME})
 

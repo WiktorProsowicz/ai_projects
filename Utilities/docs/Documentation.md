@@ -9,6 +9,10 @@ Utilities lib contain project-wide classes and functions helping at development.
 
 - Introduced [ThreadPool](#ThreadPool) and [ThreadSafeQueue](#ThreadSafeQueue)
 
+## 1.1.0
+
+- Introduced [SerializationPack](#SerializationPack) and basic object-to-byte algorithms (Numerics, Vectors, C-strings, Cpp-strings) 
+
 # Components
 
 ## ThreadPool
@@ -70,3 +74,38 @@ namespace utilities
     class ThreadSafeQueue : protected std::queue<T>;
 }
 ```
+
+## SerializationPack
+
+Class used to enclose arguments of various types and store them in type-erased form. When streamed via `<<` operator, the objects are unpacked and casted to initial types and serialized into bytes form using custom mechanics of converting elements into binary form. For example `std::string` instance is represented as its internal char-string rather than the direct memory of the instance.
+
+Implementation:
+
+```cpp
+namespace utilities
+{
+    template <typename... ArgTypes>
+    class SerializationPack;
+}
+```
+
+SerializationPack can be streamed:
+
+```cpp
+std::stringstream ss;
+
+ss << utilities::SerializationPack(
+    "abcd",
+    uint32_t(0),
+    std::vector<std::string>{"ab", "def"}
+);
+
+// ss contains: 0x61 0x62 0x63 0x64 0x00 0x00 0x00 0x00 0x61 0x62 0x64 0x65 0x66
+```
+
+
+Currently supported types for conversion:
+- Numeric built-in types (`uint32_t`, `int64_t`, `double`, etc).
+- C-style strings.
+- `std::string` instances.
+- `std::vector` instances holding any other convertible type.
