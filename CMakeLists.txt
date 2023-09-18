@@ -38,6 +38,7 @@ set(COMMON_COMPILE_OPTIONS
     -Wmissing-include-dirs 
     -Wmisleading-indentation 
     -Wmissing-format-attribute 
+    -Wno-deprecated
 )
 
 add_subdirectory(LoggingLib)
