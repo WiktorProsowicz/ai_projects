@@ -28,7 +28,7 @@ class WAVDecoder(ser_int.IAudioDecoder):
     _WAVE_FORMAT_EXTENSIBLE = b"\170\255"
 
     @dataclasses.dataclass
-    class FmtChunkInfo:
+    class _FmtChunkInfo:
         """Represents the data obtained from PCM-type fmt chunk."""
 
         num_channels: int
@@ -51,24 +51,24 @@ class WAVDecoder(ser_int.IAudioDecoder):
         WAVDecoder._validate_file(file_path)
 
         with open(file_path, "rb") as input_file:
-            input_file.seek(12)
+            input_file.seek(12, 1)
 
             _, fmt_chunk_size = WAVDecoder._get_chunk_info(input_file)
             fmt_info = WAVDecoder._get_fmt_chunk_info(input_file)
 
-            input_file.seek(8 + fmt_chunk_size, input_file.tell())
+            input_file.seek(8 + fmt_chunk_size, 1)
 
             _, data_chunk_size = WAVDecoder._get_chunk_info(input_file)
 
-            input_file.seek(8, input_file.tell())
+            input_file.seek(8, 1)
 
             total_num_samples = (
                 data_chunk_size // fmt_info.block_align * fmt_info.num_channels
             )
 
             samples = np.frombuffer(
-                input_file,
-                np.dtype(f"<u{fmt_info.bits_per_sample // 8}"),
+                input_file.read(data_chunk_size),
+                np.dtype(f"<i{fmt_info.bits_per_sample // 8}"),
                 total_num_samples,
             )
 
@@ -113,7 +113,7 @@ class WAVDecoder(ser_int.IAudioDecoder):
         with open(file_path, "rb") as input_file:
             WAVDecoder._validate_header_chunk(input_file, left_stream_size)
 
-            input_file.seek(12)
+            input_file.seek(12, 1)
             left_stream_size -= 12
 
             WAVDecoder._validate_fmt_chunk(input_file, left_stream_size)
@@ -121,7 +121,7 @@ class WAVDecoder(ser_int.IAudioDecoder):
             _, fmt_chunk_size = WAVDecoder._get_chunk_info(input_file)
             fmt_info = WAVDecoder._get_fmt_chunk_info(input_file)
 
-            input_file.seek(8 + fmt_chunk_size)
+            input_file.seek(8 + fmt_chunk_size, 1)
             left_stream_size -= 8 + fmt_chunk_size
 
             WAVDecoder._validate_data_chunk(input_file, left_stream_size, fmt_info)
@@ -167,7 +167,7 @@ class WAVDecoder(ser_int.IAudioDecoder):
         chunk_type = buffer.read(4)
         chunk_length = int.from_bytes(buffer.read(4), byteorder="little")
 
-        buffer.seek(-8, buffer.tell())
+        buffer.seek(-8, 1)
 
         return (chunk_type, chunk_length)
 
@@ -202,10 +202,12 @@ class WAVDecoder(ser_int.IAudioDecoder):
                 "Declared header chunk's length is smaller than the file buffer allows."
             )
 
+        buffer.seek(8, 1)
+
         if chunk_length < 4 or buffer.read(4) != b"WAVE":
             raise WAVDecoderError("Missing 'WAVE' format specifier.")
 
-        buffer.seek(-12, buffer.tell())
+        buffer.seek(-12, 1)
 
     @staticmethod
     def _validate_fmt_chunk(buffer: IO[bytes], buffer_left_size: int):
@@ -233,10 +235,12 @@ class WAVDecoder(ser_int.IAudioDecoder):
                 f"Unexpected header chunk's type. Expected b'fmt ', got {chunk_type}."
             )
 
-        if chunk_length != buffer_left_size - 8:
+        if chunk_length > buffer_left_size - 8:
             raise WAVDecoderError(
                 "Declared 'fmt' chunk's length is smaller than the file buffer allows."
             )
+
+        buffer.seek(8, 1)
 
         audio_format = buffer.read(2)
 
@@ -251,17 +255,17 @@ class WAVDecoder(ser_int.IAudioDecoder):
                 "Wrong fmt chunk length for PCM audio format (should be 16)."
             )
 
-        buffer.seek(-10, buffer.tell())
+        buffer.seek(-10, 1)
 
         fmt_data = WAVDecoder._get_fmt_chunk_info(buffer)
 
         if fmt_data.bits_per_sample % 8 != 0:
             raise WAVDecoderError(
-                f"Incorrect number of bytes per sample: {fmt_data.bits_per_sample}. \
-                Expected multiple of 8."
+                f"Incorrect number of bytes per sample: {fmt_data.bits_per_sample}."
+                "Expected multiple of 8."
             )
 
-        expected_block_align = fmt_data.num_channels * fmt_data.num_channels / 8
+        expected_block_align = fmt_data.num_channels * fmt_data.bits_per_sample / 8
 
         if expected_block_align != fmt_data.block_align:
             raise WAVDecoderError(
@@ -277,7 +281,7 @@ class WAVDecoder(ser_int.IAudioDecoder):
 
     @staticmethod
     def _validate_data_chunk(
-        buffer: IO[bytes], buffer_left_size: int, fmt_info: FmtChunkInfo
+        buffer: IO[bytes], buffer_left_size: int, fmt_info: _FmtChunkInfo
     ):
         """Checks if the data chunk is correct.
 
@@ -314,7 +318,7 @@ class WAVDecoder(ser_int.IAudioDecoder):
             )
 
     @staticmethod
-    def _get_fmt_chunk_info(buffer: IO[bytes]) -> FmtChunkInfo:
+    def _get_fmt_chunk_info(buffer: IO[bytes]) -> _FmtChunkInfo:
         """Harvests data from fmt chunk.
 
         The `buffer` is reset after collecting.
@@ -326,14 +330,16 @@ class WAVDecoder(ser_int.IAudioDecoder):
             FmtChunkInfo: Info collected from the chunk.
         """
 
+        buffer.seek(10, 1)
+
         num_channels = int.from_bytes(buffer.read(2), byteorder="little")
         sample_rate = int.from_bytes(buffer.read(4), byteorder="little")
         byte_rate = int.from_bytes(buffer.read(4), byteorder="little")
         block_align = int.from_bytes(buffer.read(2), byteorder="little")
         bits_per_sample = int.from_bytes(buffer.read(2), byteorder="little")
 
-        buffer.seek(-14, buffer.tell())
+        buffer.seek(-24, 1)
 
-        return WAVDecoder.FmtChunkInfo(
+        return WAVDecoder._FmtChunkInfo(
             num_channels, sample_rate, byte_rate, block_align, bits_per_sample
         )
