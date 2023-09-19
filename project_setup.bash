@@ -91,6 +91,19 @@ function run_tests()
     ctest --test-dir "${PROJECT_HOME}/build" --output-on-failure
 }
 
+function run_python_tests()
+{
+    cd "${PROJECT_HOME}" || return
+
+    [ ! -d "${PROJECT_HOME}/venv" ] && rebuild_python_environment
+
+    source ${PROJECT_HOME}/venv/bin/activate
+
+    (export PYTHONPATH="${PROJECT_HOME}/sound_processing/src" && python3 -m pytest --import-mode=prepend sound_processing/tests)
+
+    deactivate
+}
+
 function download_dependencies
 {
     cd "${PROJECT_HOME}"/ForeignModules || return

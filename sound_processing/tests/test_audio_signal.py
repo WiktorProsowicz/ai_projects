@@ -4,7 +4,7 @@
 import numpy as np
 import pytest
 
-from src.time_domain import audio_signal
+from time_domain import audio_signal
 
 # pylint: disable=W0621
 

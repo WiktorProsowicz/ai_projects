@@ -3,7 +3,7 @@
 
 from abc import ABC, abstractmethod
 
-from sound_processing.src.time_domain import audio_signal
+from time_domain import audio_signal
 
 
 class AudioDecoderError(Exception):

@@ -10,9 +10,8 @@ from typing import Tuple, IO
 
 import numpy as np
 
-from sound_processing.src.time_domain import audio_signal
-
-from . import serializers_interfaces as ser_int
+from time_domain import audio_signal
+from time_domain.serialization import serializers_interfaces as ser_int
 
 
 class WAVDecoderError(Exception):
