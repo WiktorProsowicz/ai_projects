@@ -155,7 +155,7 @@ void ThreadPool::resize(size_t numThreads)
 		{
 			stopFlags_.emplace_back(false);
 
-			workers_.emplace_back([&threadNum, this]() { _spawn(threadNum); });
+			workers_.emplace_back([threadNum, this]() { _spawn(threadNum); });
 		}
 	}
 }
