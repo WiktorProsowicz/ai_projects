@@ -1,7 +1,13 @@
+// __Related headers__
 #include "MLCore/BasicTensor.h"
 
+// __C++ standard headers__
+#include <iomanip>
+
+// __External software headers__
 #include <fmt/format.h>
 
+// __Own software headers__
 #include <MLCore/TensorOperationsImpl.h>
 
 namespace mlCore
@@ -586,7 +592,7 @@ std::ostream& operator<<(std::ostream& out, const BasicTensor<TensorValueType>& 
 
 	if(tensor.nDimensions() == 0)
 	{
-		out << "[\n " << *tensor.begin() << "\n]";
+		out << "\n" << *tensor.begin();
 		return out;
 	}
 
