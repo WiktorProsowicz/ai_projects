@@ -1,9 +1,14 @@
+// __Related headers__
 #include <AutoDiff/ComputationGraph.h>
 
+// __C++ standard headers__
 #include <set>
+#include <assert.h>
 
+// __Own software headers__
 #include <AutoDiff/BinaryOperators/BinaryOperator.h>
 #include <AutoDiff/UnaryOperators/UnaryOperator.h>
+#include <AutoDiff/MultipleOperators/MultipleOperator.h>
 
 namespace mlCore::autoDiff
 {
@@ -146,14 +151,17 @@ void ComputationGraph::computeGradients(const NodePtr root)
 
 	// traverses the nodes tree and computes gradient in regard of every node
 	backPropagate = [&backPropagate, this](const NodePtr node, const Tensor& cumulatedGradient) {
-		if(this->gradients_.find(node) == this->gradients_.end())
+		if(std::find(nodes_.cbegin(), nodes_.cend(), node) != nodes_.cend())
 		{
-			this->gradients_.emplace(node, cumulatedGradient);
-		}
-		else
-		{
-			auto& grad = this->gradients_.at(node);
-			grad = grad + cumulatedGradient;
+			if(this->gradients_.find(node) == this->gradients_.end())
+			{
+				this->gradients_.emplace(node, cumulatedGradient);
+			}
+			else
+			{
+				auto& grad = this->gradients_.at(node);
+				grad = grad + cumulatedGradient;
+			}
 		}
 
 		if(const auto castedUnary = std::dynamic_pointer_cast<unaryOperators::UnaryOperator>(node))
@@ -169,6 +177,21 @@ void ComputationGraph::computeGradients(const NodePtr root)
 
 			backPropagate(lInput, lDerivative);
 			backPropagate(rInput, rDerivative);
+		}
+		else if(const auto castedMultiple = std::dynamic_pointer_cast<multipleOperators::MultipleOperator>(node))
+		{
+			const auto inputs = castedMultiple->getInputs();
+			const auto derivatives = castedMultiple->computeDerivative(cumulatedGradient);
+
+			assert(inputs.size() == derivatives.size());
+
+			auto inputIt = inputs.cbegin();
+			auto derivativeIt = derivatives.cbegin();
+
+			for(; (inputIt < inputs.cend()) && (derivativeIt < derivatives.cend()); inputIt++, derivativeIt++)
+			{
+				backPropagate(*inputIt, *derivativeIt);
+			}
 		}
 	};
 
