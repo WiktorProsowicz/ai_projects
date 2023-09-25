@@ -16,6 +16,11 @@
 
 namespace mlCore
 {
+namespace detail
+{
+template <typename ValueType>
+class TensorOperationsImpl;
+}
 /**
  * @brief Class implements a concept of tensor, support basic operation, transposition etc.
  * 
@@ -28,7 +33,7 @@ class BasicTensor
 	friend class BasicTensorOperations;
 
 	template <typename OperationsImplType>
-	friend class TensorOperationsImpl;
+	friend class detail::TensorOperationsImpl;
 
 public:
 	/**

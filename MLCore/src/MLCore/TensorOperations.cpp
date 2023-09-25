@@ -16,7 +16,7 @@ BasicTensor<ValueType> BasicTensorOperations<ValueType>::power(const BasicTensor
 															   const BasicTensor<ValueType>& rhs)
 {
 	auto ret = lhs;
-	TensorOperationsImpl<ValueType>::powerInPlace(ret, rhs);
+	detail::TensorOperationsImpl<ValueType>::powerInPlace(ret, rhs);
 	return ret;
 }
 

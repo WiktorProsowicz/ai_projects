@@ -5,6 +5,7 @@
 #include <fmt/format.h>
 
 #include <MLCore/Utilities.h>
+#include <MLCore/BasicTensor.h>
 
 // NOLINTBEGIN
 
@@ -106,7 +107,7 @@
                                                                                                                                  \
 	lhs = std::move(ret);
 
-namespace mlCore
+namespace mlCore::detail
 {
 namespace
 {
@@ -207,6 +208,6 @@ void TensorOperationsImpl<ValueType>::powerInPlace(BasicTensor<ValueType>& lhs, 
 	BROADCASTED_TENSOR_OPERATION(lhs, rhs, std::pow)
 }
 
-} // namespace mlCore
+} // namespace mlCore::detail
 
 // NOLINTEND

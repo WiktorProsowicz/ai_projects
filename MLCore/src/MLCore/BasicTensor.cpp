@@ -264,7 +264,7 @@ template <typename ValueType>
 BasicTensor<ValueType> BasicTensor<ValueType>::operator*(const BasicTensor& other) const
 {
 	auto ret = *this;
-	TensorOperationsImpl<double>::multiplyTensorsInPlace(ret, other);
+	detail::TensorOperationsImpl<double>::multiplyTensorsInPlace(ret, other);
 	return ret;
 }
 
@@ -272,7 +272,7 @@ template <typename ValueType>
 BasicTensor<ValueType> BasicTensor<ValueType>::operator-(const BasicTensor& other) const
 {
 	auto ret = *this;
-	TensorOperationsImpl<double>::subtractTensorsInPlace(ret, other);
+	detail::TensorOperationsImpl<double>::subtractTensorsInPlace(ret, other);
 	return ret;
 }
 
@@ -280,7 +280,7 @@ template <typename ValueType>
 BasicTensor<ValueType> BasicTensor<ValueType>::operator+(const BasicTensor& other) const
 {
 	auto ret = *this;
-	TensorOperationsImpl<double>::addTensorsInPlace(ret, other);
+	detail::TensorOperationsImpl<double>::addTensorsInPlace(ret, other);
 	return ret;
 }
 
@@ -288,35 +288,35 @@ template <typename ValueType>
 BasicTensor<ValueType> BasicTensor<ValueType>::operator/(const BasicTensor& other) const
 {
 	auto ret = *this;
-	TensorOperationsImpl<double>::divideTensorsInPlace(ret, other);
+	detail::TensorOperationsImpl<double>::divideTensorsInPlace(ret, other);
 	return ret;
 }
 
 template <typename ValueType>
 BasicTensor<ValueType>& BasicTensor<ValueType>::operator+=(const BasicTensor& other)
 {
-	TensorOperationsImpl<double>::addTensorsInPlace(*this, other);
+	detail::TensorOperationsImpl<double>::addTensorsInPlace(*this, other);
 	return *this;
 }
 
 template <typename ValueType>
 BasicTensor<ValueType>& BasicTensor<ValueType>::operator-=(const BasicTensor& other)
 {
-	TensorOperationsImpl<double>::subtractTensorsInPlace(*this, other);
+	detail::TensorOperationsImpl<double>::subtractTensorsInPlace(*this, other);
 	return *this;
 }
 
 template <typename ValueType>
 BasicTensor<ValueType>& BasicTensor<ValueType>::operator*=(const BasicTensor& other)
 {
-	TensorOperationsImpl<double>::multiplyTensorsInPlace(*this, other);
+	detail::TensorOperationsImpl<double>::multiplyTensorsInPlace(*this, other);
 	return *this;
 }
 
 template <typename ValueType>
 BasicTensor<ValueType>& BasicTensor<ValueType>::operator/=(const BasicTensor& other)
 {
-	TensorOperationsImpl<double>::divideTensorsInPlace(*this, other);
+	detail::TensorOperationsImpl<double>::divideTensorsInPlace(*this, other);
 	return *this;
 }
 
