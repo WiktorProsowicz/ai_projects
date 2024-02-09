@@ -35,6 +35,9 @@ class BasicTensor
 	template <typename OperationsImplType>
 	friend class detail::TensorOperationsImpl;
 
+	template <typename BasicTensorSliceType>
+	friend class BasicTensorSlice;
+
 public:
 	/**
 	 * @brief Constructs a new scalar-type tensor.
