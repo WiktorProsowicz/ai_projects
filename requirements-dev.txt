@@ -1,0 +1,9 @@
+# ----------------------------------------------------------------------
+# Contains libraries crucial for the project development, in particular:
+# - CI workflow related libs
+# - Testing tools
+# - Linting and static analysis tools to be integrated with IDE 
+# ----------------------------------------------------------------------
+
+pre-commit
+cpplint
