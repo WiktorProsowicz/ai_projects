@@ -14,6 +14,31 @@
 		}                                                                                                                        \
 	}
 
+#define OPERATION_WITH_ARRAY_RHS(op)                                                                                             \
+	const auto chunkLength = _computeChunkLength();                                                                              \
+                                                                                                                                 \
+	if((chunkLength % data.size()) != 0)                                                                                         \
+	{                                                                                                                            \
+		throw std::invalid_argument("Cannot align provided elements with the slice's spanned data.");                            \
+	}                                                                                                                            \
+                                                                                                                                 \
+	auto dataPtr = data.data();                                                                                                  \
+                                                                                                                                 \
+	for(auto* tensorDataPtr : _computeDataPointers())                                                                            \
+	{                                                                                                                            \
+		for(size_t dataIdx = 0; dataIdx < chunkLength; dataIdx++)                                                                \
+		{                                                                                                                        \
+			tensorDataPtr[dataIdx] op dataPtr[dataIdx];                                                                          \
+		}                                                                                                                        \
+                                                                                                                                 \
+		dataPtr += chunkLength;                                                                                                  \
+                                                                                                                                 \
+		if(dataPtr == (data.data() + data.size()))                                                                               \
+		{                                                                                                                        \
+			dataPtr = data.data();                                                                                               \
+		}                                                                                                                        \
+	}
+
 namespace
 {
 /**
@@ -93,10 +118,7 @@ std::vector<size_t> BasicTensorSlice<ValueType>::_computeSliceShape() const
 	{
 		const auto indicesDifference = indices_.at(indicesIdx).second - indices_.at(indicesIdx).first;
 
-		if(indicesDifference != 0)
-		{
-			collectedShapeDims.push_back(indicesDifference);
-		}
+		collectedShapeDims.push_back(indicesDifference);
 	}
 
 	for(size_t shapeIdx = pivotElement; shapeIdx < tensor_.get().shape_.size(); shapeIdx++)
@@ -155,34 +177,254 @@ size_t BasicTensorSlice<ValueType>::_computeChunkLength() const
 
 	return chunkLength;
 }
+
 template <typename ValueType>
-void BasicTensorSlice<ValueType>::assign(ValueType value)
+void BasicTensorSlice<ValueType>::assign(const std::span<ValueType>& data)
 {
-	OPERATION_WITH_SCALAR_RHS(=, value);
+	if(data.size() == 1)
+	{
+		OPERATION_WITH_SCALAR_RHS(=, data[0]);
+	}
+	else
+	{
+		OPERATION_WITH_ARRAY_RHS(=);
+	}
 }
 
 template <typename ValueType>
-void BasicTensorSlice<ValueType>::assignAdd(ValueType value)
+void BasicTensorSlice<ValueType>::assignAdd(const std::span<ValueType>& data)
 {
-	OPERATION_WITH_SCALAR_RHS(+=, value);
+	if(data.size() == 1)
+	{
+		OPERATION_WITH_SCALAR_RHS(+=, data[0]);
+	}
+	else
+	{
+		OPERATION_WITH_ARRAY_RHS(+=);
+	}
 }
 
 template <typename ValueType>
-void BasicTensorSlice<ValueType>::assignSubtract(ValueType value)
+void BasicTensorSlice<ValueType>::assignSubtract(const std::span<ValueType>& data)
 {
-	OPERATION_WITH_SCALAR_RHS(-=, value);
+	if(data.size() == 1)
+	{
+		OPERATION_WITH_SCALAR_RHS(-=, data[0]);
+	}
+	else
+	{
+		OPERATION_WITH_ARRAY_RHS(-=);
+	}
 }
 
 template <typename ValueType>
-void BasicTensorSlice<ValueType>::assignDivide(ValueType value)
+void BasicTensorSlice<ValueType>::assignMultiply(const std::span<ValueType>& data)
 {
-	OPERATION_WITH_SCALAR_RHS(/=, value);
+	if(data.size() == 1)
+	{
+		OPERATION_WITH_SCALAR_RHS(*=, data[0]);
+	}
+	else
+	{
+		OPERATION_WITH_ARRAY_RHS(*=);
+	}
 }
 
 template <typename ValueType>
-void BasicTensorSlice<ValueType>::assignMultiply(ValueType value)
+void BasicTensorSlice<ValueType>::assignDivide(const std::span<ValueType>& data)
 {
-	OPERATION_WITH_SCALAR_RHS(*=, value);
+	if(data.size() == 1)
+	{
+		OPERATION_WITH_SCALAR_RHS(/=, data[0]);
+	}
+	else
+	{
+		OPERATION_WITH_ARRAY_RHS(/=);
+	}
+}
+
+#define OPERATION_WITH_SLICE_AS_RHS(op)                                                                                          \
+	const auto zippedDataPointers = _determineBroadcastedDataPointers(other);                                                    \
+                                                                                                                                 \
+	const auto oChunkLength = other._computeChunkLength();                                                                       \
+	const auto tChunkLength = _computeChunkLength();                                                                             \
+                                                                                                                                 \
+	for(const auto& [thisDataPtr, otherDataPtr] : zippedDataPointers)                                                            \
+	{                                                                                                                            \
+		if(oChunkLength == tChunkLength)                                                                                         \
+		{                                                                                                                        \
+			for(size_t dataIdx = 0; dataIdx < tChunkLength; dataIdx++)                                                           \
+			{                                                                                                                    \
+				thisDataPtr[dataIdx] op otherDataPtr[dataIdx];                                                                   \
+			}                                                                                                                    \
+		}                                                                                                                        \
+		else                                                                                                                     \
+		{                                                                                                                        \
+			for(size_t dataIdx = 0; dataIdx < tChunkLength; dataIdx++)                                                           \
+			{                                                                                                                    \
+				thisDataPtr[dataIdx] op* otherDataPtr;                                                                           \
+			}                                                                                                                    \
+		}                                                                                                                        \
+	}
+
+template <typename ValueType>
+void BasicTensorSlice<ValueType>::assign(const BasicTensorSlice& other)
+{
+	OPERATION_WITH_SLICE_AS_RHS(=);
+}
+
+template <typename ValueType>
+void BasicTensorSlice<ValueType>::assignAdd(const BasicTensorSlice& other)
+{
+	OPERATION_WITH_SLICE_AS_RHS(+=);
+}
+
+template <typename ValueType>
+void BasicTensorSlice<ValueType>::assignSubtract(const BasicTensorSlice& other)
+{
+	OPERATION_WITH_SLICE_AS_RHS(-=);
+}
+
+template <typename ValueType>
+void BasicTensorSlice<ValueType>::assignMultiply(const BasicTensorSlice& other)
+{
+	OPERATION_WITH_SLICE_AS_RHS(*=);
+}
+
+template <typename ValueType>
+void BasicTensorSlice<ValueType>::assignDivide(const BasicTensorSlice& other)
+{
+	OPERATION_WITH_SLICE_AS_RHS(/=);
+}
+
+namespace
+{
+/// Tells whether the `shapeFrom` can be broadcasted to the `shapeTo`.
+bool isShapeBroadcastable(const std::vector<size_t>& shapeFrom, const std::vector<size_t>& shapeTo)
+{
+	if(shapeTo.size() != shapeFrom.size())
+	{
+		return false;
+	}
+
+	for(size_t shapeIdx = 0; shapeIdx < shapeFrom.size(); shapeIdx++)
+	{
+		if((shapeFrom.at(shapeIdx) != shapeTo.at(shapeIdx)) && (shapeFrom.at(shapeIdx) != 1))
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+/// Modifies the `shape` so that the indices after the `pivotElement` are merged into a single dimension.
+std::vector<size_t> mergeShape(const std::vector<size_t> shape, const size_t pivotElement, const size_t chunkLength)
+{
+	if(pivotElement == shape.size())
+	{
+		return shape;
+	}
+
+	std::vector<size_t> mergedShape;
+
+	for(size_t shapeIdx = 0; shapeIdx < pivotElement; shapeIdx++)
+	{
+		mergedShape.push_back(shape.at(shapeIdx));
+	}
+
+	mergedShape.push_back(chunkLength);
+
+	return mergedShape;
+}
+
+std::vector<size_t> truncateShape(const std::vector<size_t>& shape, const size_t pivotElement)
+{
+	std::vector<size_t> truncatedShape;
+
+	for(size_t shapeIdx = 0; shapeIdx < pivotElement; shapeIdx++)
+	{
+		truncatedShape.push_back(shape.at(shapeIdx));
+	}
+
+	return truncatedShape;
+}
+
+size_t getFlattenedIndex(const std::vector<size_t>& shape, const std::vector<size_t>& indices)
+{
+	size_t offset = 1;
+	size_t flattenedIndex = 0;
+
+	for(int64_t shapeIdx = shape.size() - 1; shapeIdx >= 0; shapeIdx--)
+	{
+		flattenedIndex += indices.at(shapeIdx) * offset;
+		offset *= shape.at(shapeIdx);
+	}
+
+	return flattenedIndex;
+}
+
+size_t computeNElementsInShape(const std::vector<size_t>& shape)
+{
+	return std::accumulate(shape.cbegin(), shape.cend(), 1, std::multiplies<size_t>());
+}
+} // namespace
+
+template <typename ValueType>
+std::vector<std::pair<ValueType*, ValueType*>>
+BasicTensorSlice<ValueType>::_determineBroadcastedDataPointers(const BasicTensorSlice& other) const
+{
+	const auto& tShape = tensor_.get().shape_;
+	const auto& oShape = other.tensor_.get().shape_;
+
+	const auto pivotElement = getPivotShapeElement(tShape, indices_);
+	const auto oPivotElement = getPivotShapeElement(oShape, other.indices_);
+
+	const auto mergedShapeThis = mergeShape(_computeSliceShape(), pivotElement, _computeChunkLength());
+	const auto mergedShapeOther = mergeShape(other._computeSliceShape(), oPivotElement, other._computeChunkLength());
+
+	if(!isShapeBroadcastable(mergedShapeOther, mergedShapeThis))
+	{
+		throw std::invalid_argument("Unable to broadcast the rhs slice.");
+	}
+
+	const auto truncatedShapeThis = truncateShape(mergedShapeThis, pivotElement);
+
+	std::vector<std::pair<ValueType*, ValueType*>> zippedDataPointers;
+
+	const auto dataPointersThis = _computeDataPointers();
+	const auto dataPointersOther = other._computeDataPointers();
+
+	std::vector<size_t> indicesPathThis(mergedShapeThis.size(), 0);
+	std::vector<size_t> indicesPathOther(mergedShapeOther.size(), 0);
+
+	for(size_t iteration = 0; iteration < computeNElementsInShape(truncatedShapeThis); iteration++)
+	{
+		const auto flattenedIndexThis = getFlattenedIndex(mergedShapeThis, indicesPathThis);
+		const auto flattenedIndexOther = getFlattenedIndex(mergedShapeOther, indicesPathOther);
+
+		zippedDataPointers.push_back({dataPointersThis.at(flattenedIndexThis), dataPointersOther.at(flattenedIndexOther)});
+
+		for(int64_t shapeIdx = indicesPathThis.size() - 1; shapeIdx >= 0; shapeIdx--)
+		{
+			indicesPathThis.at(shapeIdx)++;
+
+			if(mergedShapeOther.at(shapeIdx) != 1)
+			{
+				indicesPathOther.at(shapeIdx)++;
+			}
+
+			if(indicesPathThis.at(shapeIdx) < mergedShapeThis.at(shapeIdx))
+			{
+				break;
+			}
+
+			indicesPathThis.at(shapeIdx) = 0;
+			indicesPathOther.at(shapeIdx) = 0;
+		}
+	}
+
+	return zippedDataPointers;
 }
 
 } // namespace mlCore
