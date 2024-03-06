@@ -6,6 +6,7 @@
 #include <cstdio>
 #include <functional>
 #include <span>
+#include <ostream>
 
 namespace mlCore
 {
@@ -93,6 +94,9 @@ public:
 	/// @see BasicTensorSlice::assign(const std::span<ValueType>&)
 	void assignMultiply(const std::span<ValueType>& data);
 
+	template <typename SliceValueType>
+	friend std::ostream& operator<<(std::ostream& os, const BasicTensorSlice<SliceValueType>& slice);
+
 private:
 	/**
 	 * @brief Constructs the slice linking it to the tensor and providing referenced span with indices.
@@ -121,6 +125,9 @@ private:
 };
 
 using TensorSlice = BasicTensorSlice<double>;
+
+template <typename ValueType>
+std::ostream& operator<<(std::ostream& out, const BasicTensorSlice<ValueType>& slice);
 
 } // namespace mlCore
 
