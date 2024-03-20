@@ -1,12 +1,15 @@
 // __Related headers__
 #include <MLCore/BasicTensorSlice.h>
 
+// __Standard library headers__
+#include <iomanip>
+
 // __Own software headers__
 #include <MLCore/BasicTensor.h>
 
 #define OPERATION_WITH_SCALAR_RHS(op, rhs)                                                                                       \
 	const auto chunkLength = _computeChunkLength();                                                                              \
-	for(auto* dataPtr : _computeDataPointers())                                                                                  \
+	for(auto* dataPtr : *dataChunks_)                                                                                            \
 	{                                                                                                                            \
 		for(size_t dataIdx = 0; dataIdx < chunkLength; dataIdx++)                                                                \
 		{                                                                                                                        \
@@ -16,26 +19,21 @@
 
 #define OPERATION_WITH_ARRAY_RHS(op)                                                                                             \
 	const auto chunkLength = _computeChunkLength();                                                                              \
+	const auto sliceSize = _computeSliceSize();                                                                                  \
                                                                                                                                  \
-	if((chunkLength % data.size()) != 0)                                                                                         \
+	if((sliceSize < data.size()) || (sliceSize % data.size()) != 0)                                                              \
 	{                                                                                                                            \
 		throw std::invalid_argument("Cannot align provided elements with the slice's spanned data.");                            \
 	}                                                                                                                            \
                                                                                                                                  \
 	auto dataPtr = data.data();                                                                                                  \
+	size_t dataIdx = 0;                                                                                                          \
                                                                                                                                  \
-	for(auto* tensorDataPtr : _computeDataPointers())                                                                            \
+	for(auto* tensorDataPtr : *dataChunks_)                                                                                      \
 	{                                                                                                                            \
-		for(size_t dataIdx = 0; dataIdx < chunkLength; dataIdx++)                                                                \
+		for(size_t chunkIdx = 0; chunkIdx < chunkLength; ++chunkIdx, dataIdx = (dataIdx + 1) % data.size())                      \
 		{                                                                                                                        \
-			tensorDataPtr[dataIdx] op dataPtr[dataIdx];                                                                          \
-		}                                                                                                                        \
-                                                                                                                                 \
-		dataPtr += chunkLength;                                                                                                  \
-                                                                                                                                 \
-		if(dataPtr == (data.data() + data.size()))                                                                               \
-		{                                                                                                                        \
-			dataPtr = data.data();                                                                                               \
+			tensorDataPtr[chunkIdx] op dataPtr[dataIdx];                                                                         \
 		}                                                                                                                        \
 	}
 
@@ -61,14 +59,9 @@ size_t getPivotShapeElement(const std::vector<size_t>& shape, const std::vector<
 
 	for(; shapeIndex >= 0; shapeIndex--)
 	{
-		if(static_cast<uint64_t>(shapeIndex) >= indices.size())
+		if((indices.at(shapeIndex).first != 0) || (indices.at(shapeIndex).second != shape.at(shapeIndex)))
 		{
-			continue;
-		}
-
-		if((indices.at(shapeIndex).first == 0) && (indices.at(shapeIndex).second == shape.at(shapeIndex)))
-		{
-			continue;
+			break;
 		}
 	}
 
@@ -88,6 +81,7 @@ template <typename ValueType>
 BasicTensorSlice<ValueType>::BasicTensorSlice(const BasicTensorSlice<ValueType>& other)
 	: tensor_(other.tensor_)
 	, indices_(other.indices_)
+	, dataChunks_(std::make_unique<std::vector<ValueType*>>(*other.dataChunks_))
 { }
 
 template <typename ValueType>
@@ -107,26 +101,17 @@ BasicTensorSlice<ValueType>::BasicTensorSlice(BasicTensor<ValueType>& associated
 											  const std::vector<std::pair<size_t, size_t>>& indices)
 	: tensor_(associatedTensor)
 	, indices_(indices)
+	, dataChunks_(std::make_unique<std::vector<ValueType*>>(_computeDataPointers()))
 { }
 
 template <typename ValueType>
 std::vector<size_t> BasicTensorSlice<ValueType>::_computeSliceShape() const
 {
-	const auto pivotElement = getPivotShapeElement(tensor_.get().shape_, indices_);
+	std::vector<size_t> collectedShapeDims(indices_.size(), 0);
 
-	std::vector<size_t> collectedShapeDims;
-
-	for(size_t indicesIdx = 0; indicesIdx < pivotElement; indicesIdx++)
-	{
-		const auto indicesDifference = indices_.at(indicesIdx).second - indices_.at(indicesIdx).first;
-
-		collectedShapeDims.push_back(indicesDifference);
-	}
-
-	for(size_t shapeIdx = pivotElement; shapeIdx < tensor_.get().shape_.size(); shapeIdx++)
-	{
-		collectedShapeDims.push_back(tensor_.get().shape_.at(shapeIdx));
-	}
+	std::transform(indices_.cbegin(), indices_.cend(), collectedShapeDims.begin(), [](const auto& indexPair) {
+		return indexPair.second - indexPair.first;
+	});
 
 	return collectedShapeDims;
 }
@@ -179,9 +164,16 @@ size_t BasicTensorSlice<ValueType>::_computeChunkLength() const
 
 	return chunkLength;
 }
+template <typename ValueType>
+size_t BasicTensorSlice<ValueType>::_computeSliceSize() const
+{
+	const auto shape = _computeSliceShape();
+
+	return std::accumulate(shape.begin(), shape.end(), 1, std::multiplies<size_t>());
+}
 
 template <typename ValueType>
-void BasicTensorSlice<ValueType>::assign(const std::span<ValueType>& data)
+void BasicTensorSlice<ValueType>::_assign(const std::span<const ValueType>& data)
 {
 	if(data.size() == 1)
 	{
@@ -194,7 +186,7 @@ void BasicTensorSlice<ValueType>::assign(const std::span<ValueType>& data)
 }
 
 template <typename ValueType>
-void BasicTensorSlice<ValueType>::assignAdd(const std::span<ValueType>& data)
+void BasicTensorSlice<ValueType>::_assignAdd(const std::span<ValueType>& data)
 {
 	if(data.size() == 1)
 	{
@@ -207,7 +199,7 @@ void BasicTensorSlice<ValueType>::assignAdd(const std::span<ValueType>& data)
 }
 
 template <typename ValueType>
-void BasicTensorSlice<ValueType>::assignSubtract(const std::span<ValueType>& data)
+void BasicTensorSlice<ValueType>::_assignSubtract(const std::span<ValueType>& data)
 {
 	if(data.size() == 1)
 	{
@@ -220,7 +212,7 @@ void BasicTensorSlice<ValueType>::assignSubtract(const std::span<ValueType>& dat
 }
 
 template <typename ValueType>
-void BasicTensorSlice<ValueType>::assignMultiply(const std::span<ValueType>& data)
+void BasicTensorSlice<ValueType>::_assignMultiply(const std::span<ValueType>& data)
 {
 	if(data.size() == 1)
 	{
@@ -233,7 +225,7 @@ void BasicTensorSlice<ValueType>::assignMultiply(const std::span<ValueType>& dat
 }
 
 template <typename ValueType>
-void BasicTensorSlice<ValueType>::assignDivide(const std::span<ValueType>& data)
+void BasicTensorSlice<ValueType>::_assignDivide(const std::span<ValueType>& data)
 {
 	if(data.size() == 1)
 	{
@@ -373,6 +365,33 @@ size_t computeNElementsInShape(const std::span<const size_t>& shape)
 } // namespace
 
 template <typename ValueType>
+SlicedTensorIterator<ValueType> BasicTensorSlice<ValueType>::begin() const
+{
+	std::vector<size_t> firstElementPath(indices_.size());
+
+	std::transform(
+		indices_.cbegin(), indices_.cend(), firstElementPath.begin(), [](const auto& indices) { return indices.first; });
+
+	auto* startDataPtr = tensor_.get().data_ + getFlattenedIndex(tensor_.get().shape_, firstElementPath);
+
+	return SlicedTensorIterator<ValueType>(startDataPtr, *dataChunks_, _computeChunkLength(), 0);
+}
+
+template <typename ValueType>
+SlicedTensorIterator<ValueType> BasicTensorSlice<ValueType>::end() const
+{
+	std::vector<size_t> lastElementPath(indices_.size());
+
+	std::transform(
+		indices_.cbegin(), indices_.cend(), lastElementPath.begin(), [](const auto& indices) { return indices.second - 1; });
+
+	auto* endDataPtr = tensor_.get().data_ + getFlattenedIndex(tensor_.get().shape_, lastElementPath) + 1;
+
+	return SlicedTensorIterator<ValueType>(
+		endDataPtr, *dataChunks_, _computeChunkLength(), (dataChunks_->size() * _computeChunkLength()));
+}
+
+template <typename ValueType>
 std::vector<std::pair<ValueType*, ValueType*>>
 BasicTensorSlice<ValueType>::_determineBroadcastedDataPointers(const BasicTensorSlice& other) const
 {
@@ -394,8 +413,8 @@ BasicTensorSlice<ValueType>::_determineBroadcastedDataPointers(const BasicTensor
 
 	std::vector<std::pair<ValueType*, ValueType*>> zippedDataPointers;
 
-	const auto dataPointersThis = _computeDataPointers();
-	const auto dataPointersOther = other._computeDataPointers();
+	const auto& dataPointersThis = *dataChunks_;
+	const auto& dataPointersOther = *(other.dataChunks_);
 
 	std::vector<size_t> indicesPathThis(mergedShapeThis.size(), 0);
 	std::vector<size_t> indicesPathOther(mergedShapeOther.size(), 0);
@@ -413,7 +432,7 @@ BasicTensorSlice<ValueType>::_determineBroadcastedDataPointers(const BasicTensor
 		{
 			indicesPathThis.at(shapeIdx)++;
 
-			if(mergedShapeOther.at(shapeIdx) != 1)
+			if((mergedShapeOther.at(shapeIdx) != 1) && (static_cast<uint64_t>(shapeIdx) != (indicesPathThis.size() - 1)))
 			{
 				indicesPathOther.at(shapeIdx)++;
 			}
@@ -436,7 +455,8 @@ template <typename ValueType>
 void serializeContiguousMemory(std::ostream& out,
 							   const std::span<ValueType>& data,
 							   const std::string& preamble,
-							   const std::span<size_t>& shape)
+							   const std::span<size_t>& shape,
+							   const int blockLength)
 {
 	std::function<void(std::span<size_t>::iterator,
 					   typename std::span<ValueType>::iterator,
@@ -444,20 +464,28 @@ void serializeContiguousMemory(std::ostream& out,
 					   const std::string&)>
 		recurseSerialize;
 
-	recurseSerialize = [&recurseSerialize, &out, &data, &shape](const std::span<size_t>::iterator shapeIter,
-																std::span<ValueType>::iterator dataBeg,
-																std::span<ValueType>::iterator dataEnd,
-																const std::string& preamble) {
+	recurseSerialize = [&recurseSerialize, &out, &data, &shape, blockLength](const std::span<size_t>::iterator shapeIter,
+																			 std::span<ValueType>::iterator dataBeg,
+																			 std::span<ValueType>::iterator dataEnd,
+																			 const std::string& preamble) {
 		if(shapeIter == std::prev(shape.end()))
 		{
-			out << preamble << fmt::format("[{}]", fmt::join(dataBeg, dataEnd, ", "));
+			out << "\n" << preamble << "[";
+
+			for(auto dataIter = dataBeg; dataIter != dataEnd - 1; dataIter++)
+			{
+				out << std::setw(blockLength) << *dataIter << ", ";
+			}
+
+			out << std::setw(blockLength) << *(dataEnd - 1);
+
+			out << "]";
 		}
 		else
 		{
-
 			const auto offset = std::distance(dataBeg, dataEnd) / *shapeIter;
 
-			out << preamble << "[\n";
+			out << "\n" << preamble << "[";
 
 			for(size_t dimIdx = 0; dimIdx < *shapeIter; dimIdx++)
 			{
@@ -470,6 +498,22 @@ void serializeContiguousMemory(std::ostream& out,
 
 	recurseSerialize(shape.begin(), data.begin(), data.end(), preamble);
 }
+
+template <typename ValueType>
+int getBlockSize(const std::vector<ValueType*>& dataPtrs, const size_t& chunkLength)
+{
+	return std::accumulate(
+		dataPtrs.cbegin(), dataPtrs.cend(), int{0}, [chunkLength](const size_t& acc, const ValueType* dataPtr) {
+			const auto maxForChunk =
+				std::max_element(dataPtr, dataPtr + chunkLength, [](const ValueType& lhs, const ValueType& rhs) {
+					return (std::ostringstream{} << lhs).str().size() < (std::ostringstream{} << rhs).str().size();
+				});
+
+			const auto maxSizeForChunk = (std::ostringstream{} << *maxForChunk).str().size();
+
+			return std::max(acc, maxSizeForChunk);
+		});
+}
 } // namespace
 
 template <typename SliceValueType>
@@ -478,34 +522,37 @@ std::ostream& operator<<(std::ostream& out, const BasicTensorSlice<SliceValueTyp
 	out << "<BasicTensorSlice dtype=" << typeid(SliceValueType).name() << " shape=" << stringifyVector(slice._computeSliceShape())
 		<< ">";
 
-	auto dataPtrs = slice._computeDataPointers();
+	const auto& dataPtrs = *(slice.dataChunks_);
 	auto tShape = slice._computeSliceShape();
+	const auto chunkLength = slice._computeChunkLength();
+	const auto blockLength = getBlockSize(dataPtrs, chunkLength);
 
-	auto mergedShape =
-		mergeShape(tShape, getPivotShapeElement(slice.tensor_.get().shape(), slice.indices_), slice._computeChunkLength());
+	auto mergedShape = mergeShape(tShape, getPivotShapeElement(slice.tensor_.get().shape(), slice.indices_), chunkLength);
 
 	std::function<void(std::vector<size_t>::iterator,
-					   typename std::vector<SliceValueType*>::iterator,
-					   typename std::vector<SliceValueType*>::iterator,
+					   typename std::vector<SliceValueType*>::const_iterator,
+					   typename std::vector<SliceValueType*>::const_iterator,
 					   const std::string&)>
 		recursePrint;
 
-	recursePrint = [&recursePrint, &out, &dataPtrs, &tShape, &mergedShape](std::vector<size_t>::iterator shapeIter,
-																		   std::vector<SliceValueType*>::iterator dataBeg,
-																		   std::vector<SliceValueType*>::iterator dataEnd,
-																		   const std::string& preamble) {
+	recursePrint = [&recursePrint, &out, &dataPtrs, &tShape, &mergedShape, &chunkLength, &blockLength](
+					   std::vector<size_t>::iterator shapeIter,
+					   std::vector<SliceValueType*>::const_iterator dataBeg,
+					   std::vector<SliceValueType*>::const_iterator dataEnd,
+					   const std::string& preamble) {
 		if(shapeIter == std::prev(mergedShape.end()))
 		{
 			serializeContiguousMemory(out,
-									  std::span(*dataBeg, std::distance(dataBeg, dataEnd)),
+									  std::span(*dataBeg, chunkLength),
 									  preamble,
-									  std::span(tShape.begin() + mergedShape.size(), tShape.size() - mergedShape.size()));
+									  std::span(tShape.begin() + mergedShape.size() - 1, tShape.size() - mergedShape.size() + 1),
+									  blockLength);
 		}
 		else
 		{
 			const auto offset = std::distance(dataBeg, dataEnd) / *shapeIter;
 
-			out << preamble << "[\n";
+			out << "\n" << preamble << "[";
 
 			for(size_t dimIdx = 0; dimIdx < *shapeIter; dimIdx++)
 			{
@@ -516,7 +563,7 @@ std::ostream& operator<<(std::ostream& out, const BasicTensorSlice<SliceValueTyp
 		}
 	};
 
-	recursePrint(mergedShape.begin(), dataPtrs.begin(), dataPtrs.end(), "");
+	recursePrint(mergedShape.begin(), dataPtrs.cbegin(), dataPtrs.cend(), "");
 
 	return out;
 }

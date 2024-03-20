@@ -8,10 +8,22 @@
 #include <span>
 #include <ostream>
 
+#include "MLCore/SlicedTensorIterator.hpp"
+
 namespace mlCore
 {
 template <typename ValueType>
 class BasicTensor;
+
+namespace detail
+{
+template <typename T>
+concept SizedRange = requires(T t) {
+	requires std::ranges::range<T>;
+	t.size();
+};
+
+} // namespace detail
 
 /**
  * @brief Represents part of the tensor taken by providing ranges of indices.
@@ -75,24 +87,47 @@ public:
 	/// @see BasicTensorSlice::assign(const BasicTensorSlice&)
 	void assignMultiply(const BasicTensorSlice& other);
 
+	template <detail::SizedRange Range>
+	void assign(const Range& values)
+	{
+		_assign(std::span(values.begin(), values.size()));
+	}
+
+	template <detail::SizedRange Range>
+	void assignAdd(const Range& values)
+	{
+		_assignAdd(std::span(values.begin(), values.size()));
+	}
+
+	template <detail::SizedRange Range>
+	void assignSubtract(const Range& values)
+	{
+		_assignSubtract(std::span(values.begin(), values.size()));
+	}
+
+	template <detail::SizedRange Range>
+	void assignDivide(const Range& values)
+	{
+		_assignDivide(std::span(values.begin(), values.size()));
+	}
+
+	template <detail::SizedRange Range>
+	void assignMultiply(const Range& values)
+	{
+		_assignMultiply(std::span(values.begin(), values.size()));
+	}
+
 	/**
-	 * @brief Assigns the data from the span to the elements spanned by the slice.
+	 * @brief Returns iterator pointing to the beginning of the slice.
 	 * 
-	 * @param data View over the data to be assigned.
 	 */
-	void assign(const std::span<ValueType>& data);
+	SlicedTensorIterator<ValueType> begin() const;
 
-	/// @see BasicTensorSlice::assign(const std::span<ValueType>&)
-	void assignAdd(const std::span<ValueType>& data);
-
-	/// @see BasicTensorSlice::assign(const std::span<ValueType>&)
-	void assignSubtract(const std::span<ValueType>& data);
-
-	/// @see BasicTensorSlice::assign(const std::span<ValueType>&)
-	void assignDivide(const std::span<ValueType>& data);
-
-	/// @see BasicTensorSlice::assign(const std::span<ValueType>&)
-	void assignMultiply(const std::span<ValueType>& data);
+	/**
+	 * @brief Returns interator pointing to the end of the slice.
+	 * 
+	 */
+	SlicedTensorIterator<ValueType> end() const;
 
 	template <typename SliceValueType>
 	friend std::ostream& operator<<(std::ostream& os, const BasicTensorSlice<SliceValueType>& slice);
@@ -106,7 +141,26 @@ private:
      * as the length of the source tensor's shape. Each pair of indices should be a range rather than a single index,
 	 * i.e. (2, 3) instead of (2, 2).
 	 */
-	BasicTensorSlice(BasicTensor<ValueType>& associatedTensor, const std::vector<std::pair<size_t, size_t>>& indices);
+	explicit BasicTensorSlice(BasicTensor<ValueType>& associatedTensor, const std::vector<std::pair<size_t, size_t>>& indices);
+
+	/**
+	 * @brief Assigns the data from the span to the elements spanned by the slice.
+	 * 
+	 * @param data View over the data to be assigned.
+	 */
+	void _assign(const std::span<const ValueType>& data);
+
+	/// @see BasicTensorSlice::_assign(const std::span<ValueType>&)
+	void _assignAdd(const std::span<ValueType>& data);
+
+	/// @see BasicTensorSlice::_assign(const std::span<ValueType>&)
+	void _assignSubtract(const std::span<ValueType>& data);
+
+	/// @see BasicTensorSlice::_assign(const std::span<ValueType>&)
+	void _assignDivide(const std::span<ValueType>& data);
+
+	/// @see BasicTensorSlice::_assign(const std::span<ValueType>&)
+	void _assignMultiply(const std::span<ValueType>& data);
 
 	/// Computes the slice's shape based on its indices and the shape of the associated tensor.
 	std::vector<size_t> _computeSliceShape() const;
@@ -120,8 +174,14 @@ private:
 	/// Determines pairs of pointers to arrays of data that shall be aligned together after broadcasting.
 	std::vector<std::pair<ValueType*, ValueType*>> _determineBroadcastedDataPointers(const BasicTensorSlice& other) const;
 
+	/// Computes number off all data items spanned by the slice.
+	size_t _computeSliceSize() const;
+
+	/// Reference to the tensor spanned by the slice.
 	std::reference_wrapper<mlCore::BasicTensor<ValueType>> tensor_;
-	std::vector<std::pair<size_t, size_t>> indices_;
+	SliceIndices indices_;
+	/// Contiguous data chunks spanned by the slice. Each chunk has size determined by the indices.
+	std::unique_ptr<std::vector<ValueType*>> dataChunks_;
 };
 
 using TensorSlice = BasicTensorSlice<double>;
