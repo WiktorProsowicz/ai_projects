@@ -13,6 +13,7 @@
 #include <MLCore/Utilities.h>
 #include <MLCore/TensorInitializers/ITensorInitializer.hpp>
 #include <MLCore/TensorIterator.hpp>
+#include <MLCore/BasicTensorSlice.h>
 
 namespace mlCore
 {
@@ -21,6 +22,7 @@ namespace detail
 template <typename ValueType>
 class TensorOperationsImpl;
 }
+
 /**
  * @brief Class implements a concept of tensor, support basic operation, transposition etc.
  * 
@@ -261,6 +263,13 @@ public:
 		}
 	}
 
+	/**
+	 * @brief Creates a view over the tensor's data. The spanned data is determined by the provided indices.
+	 * 
+	 * @param indices Set of ranges through each axis that will be taken into account while creating the slice.
+	 */
+	BasicTensorSlice<ValueType> slice(const std::vector<std::pair<size_t, size_t>>& indices);
+
 	template <typename TensorValueType>
 	friend std::ostream& operator<<(std::ostream& out, const BasicTensor<TensorValueType>& tensor);
 
@@ -268,8 +277,8 @@ private:
 	/// Traverses list of indices and checks ranges correctness. Correct indices specify tensor slice that can be modified via value assignment.
 	/// Throws std::out_of_range if upper[i] > shape[i] or 0 > indices.size() > shape_.size().
 	/// Indices is a list of pairs of min-max indices from axis zero i.e for tensor([[1, 2], [3, 4]]) -> list{{0, 1}} -> [1, 2].
-	void _checkIndicesList(std::initializer_list<std::pair<size_t, size_t>>::const_iterator beg,
-						   std::initializer_list<std::pair<size_t, size_t>>::const_iterator end) const;
+	template <typename IndicesIter>
+	void _checkIndicesList(IndicesIter beg, IndicesIter end) const;
 
 	/// Checks if all of the `shape`'s elements are positive i.e. eligible to be present in the shape.
 	static void _checkShapeElementsPositive(const std::vector<size_t>& shape);

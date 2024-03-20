@@ -227,20 +227,20 @@ void BasicTensor<ValueType>::_checkShapeCompatible(const std::vector<size_t>& sh
 }
 
 template <typename ValueType>
-void BasicTensor<ValueType>::_checkIndicesList(const std::initializer_list<std::pair<size_t, size_t>>::const_iterator _beg,
-											   const std::initializer_list<std::pair<size_t, size_t>>::const_iterator _end) const
+template <typename IndicesIter>
+void BasicTensor<ValueType>::_checkIndicesList(IndicesIter beg, IndicesIter end) const
 {
-	if(_beg == _end)
+	if(beg == end)
 	{
 		throw std::out_of_range("Indices list must have minimum length of 1.");
 	}
 
-	if(static_cast<size_t>(std::distance(_beg, _end)) > shape_.size())
+	if(static_cast<size_t>(std::distance(beg, end)) > shape_.size())
 	{
 		throw std::out_of_range("Indices list cannot be longer than tensor's shape.");
 	}
 
-	for(auto [indicesIt, shapeIt] = std::tuple{_beg, size_t(0)}; indicesIt < _end; ++indicesIt, ++shapeIt)
+	for(auto [indicesIt, shapeIt] = std::tuple{beg, size_t(0)}; indicesIt < end; ++indicesIt, ++shapeIt)
 	{
 		const auto& [lower, upper] = *indicesIt;
 
@@ -582,6 +582,26 @@ template <typename ValueType>
 void BasicTensor<ValueType>::fill(std::initializer_list<ValueType> newData, const bool wrapData)
 {
 	fill(newData.begin(), newData.end(), wrapData);
+}
+
+template <typename ValueType>
+BasicTensorSlice<ValueType> BasicTensor<ValueType>::slice(const std::vector<std::pair<size_t, size_t>>& indices)
+{
+	_checkIndicesList(indices.begin(), indices.end());
+
+	if(indices.size() == shape_.size())
+	{
+		return BasicTensorSlice<ValueType>(*this, indices);
+	}
+
+	std::vector<std::pair<size_t, size_t>> paddedIndices = indices;
+
+	std::transform(std::next(shape_.cbegin(), static_cast<ptrdiff_t>(indices.size())),
+				   shape_.cend(),
+				   std::back_inserter(paddedIndices),
+				   [](const auto& dim) { return std::pair<size_t, size_t>(0, dim); });
+
+	return BasicTensorSlice<ValueType>(*this, paddedIndices);
 }
 
 template <typename TensorValueType>
