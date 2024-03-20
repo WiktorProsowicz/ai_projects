@@ -10,6 +10,7 @@
 
 // __External software headers__
 #include <fmt/format.h>
+#include <fmt/ranges.h>
 
 namespace mlCore
 {
@@ -54,7 +55,7 @@ public:
  * 
  * @example
  * 
- * stringifyVector(std::vector<uint32_t>{0, 1, 2, 3}, '[', ']') -> (0, 1, 2, 3)
+ * stringifyVector(std::vector<uint32_t>{0, 1, 2, 3}, '(', ')') -> (0, 1, 2, 3)
  */
 template <typename T>
 std::string stringifyVector(const std::vector<T>& vect, const char* const openSign = "(", const char* const closeSign = ")")
@@ -67,6 +68,14 @@ using TensorForm = detail::RawTensorForm<BaseType>;
 
 template <typename BaseType>
 using TensorArr = detail::RawTensorInitList<BaseType>;
+
+/**
+ * @brief Represents a part of the tensor spanned by a tensor slice.
+ * 
+ * Each pair of indices indicates a part of a specific dimension in tensor's shape.
+ * 
+ */
+using SliceIndices = std::vector<std::pair<size_t, size_t>>;
 
 } // namespace mlCore
 
