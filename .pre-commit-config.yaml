@@ -37,9 +37,10 @@ repos:
 
   # Ensures Python files are formatted using autopep8 formatter
   - repo: https://github.com/hhatto/autopep8
-    rev: v2.0.4
+    rev: v2.1.0
     hooks:
       - id: autopep8
+        args: [--in-place, --aggressive, --max-line-length=100]
 
   # Used for python type checking
   - repo: https://github.com/pre-commit/mirrors-mypy
@@ -60,7 +61,8 @@ repos:
       - id: reorder-python-imports
 
   # Ensures python files pass pylint checks
-  - repo: local
+  - repo: https://github.com/pycqa/pylint
+    rev: v3.1.0
     hooks:
       - id: pylint
         name: pylint
