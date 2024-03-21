@@ -149,13 +149,15 @@ TEST_F(TestBasicTensor, testFillingTensor)
 
 TEST_F(TestBasicTensor, testDisplayingTensor)
 {
-	constexpr uint8_t nTestCases = 2;
+	constexpr uint8_t nTestCases = 4;
 
-	const std::vector<std::vector<size_t>> shapes{{2, 2, 3}, {3, 3, 3, 1}};
+	const std::vector<std::vector<size_t>> shapes{{2, 2, 3}, {3, 3, 3, 1}, {}, {5}};
 
 	const std::vector<std::vector<double>> tensorsValues{{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12},
 														 {.1,  .2,	.3,	 .4,  .5,  .6,	.7,	 .8,  .9,  .10, .11, .12, .13, .14,
-														  .15, .16, .17, .18, .19, .20, .21, .22, .23, .24, .25, .26, .27}};
+														  .15, .16, .17, .18, .19, .20, .21, .22, .23, .24, .25, .26, .27},
+														 {10},
+														 {1, 2, 3, 4, 5}};
 
 	// clang-format off
 	const std::vector<std::string> reprs{
@@ -224,7 +226,14 @@ R"(<BasicTensor dtype=d shape=(3, 3, 3, 1)>
    [0.27]
   ]
  ]
-])"};
+])",
+
+R"(<BasicTensor dtype=d shape=()>
+10)",
+
+R"(<BasicTensor dtype=d shape=(5)>
+[1, 2, 3, 4, 5])"
+};
 	// clang-format on
 
 	for(uint8_t i = 0; i < nTestCases; i++)
@@ -417,11 +426,11 @@ TEST_F(TestBasicTensor, testOperationsWithScalarTensor)
 	mlCore::Tensor tensor(shape);
 	tensor.fill(mlCore::tensorInitializers::RangeTensorInitializer<double>(0.0));
 
-	std::cout << tensor << std::endl;
+	// std::cout << tensor << std::endl;
 
 	tensor += 3.0;
 
-	std::cout << tensor << std::endl;
+	// std::cout << tensor << std::endl;
 
 	ASSERT_EQ(tensor.shape(), shape);
 

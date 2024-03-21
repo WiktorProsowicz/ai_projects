@@ -1,9 +1,15 @@
 #ifndef MLCORE_SRC_INCLUDE_MLCORE_TENSOROPERATIONSIMPL_H
 #define MLCORE_SRC_INCLUDE_MLCORE_TENSOROPERATIONSIMPL_H
 
-#include <MLCore/BasicTensor.h>
+// #include <MLCore/BasicTensor.h>
 
 namespace mlCore
+{
+
+template <typename ValueType>
+class BasicTensor;
+
+namespace detail
 {
 
 template <typename ValueType>
@@ -25,6 +31,7 @@ public:
 	/// Computes left tensor to the power of right one
 	static void powerInPlace(BasicTensor<ValueType>& lhs, const BasicTensor<ValueType>& rhs);
 };
+} // namespace detail
 } // namespace mlCore
 
 #endif
