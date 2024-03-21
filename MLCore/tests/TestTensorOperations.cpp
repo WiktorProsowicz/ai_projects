@@ -162,4 +162,75 @@ TEST_F(TestTensorOperations, testPower)
 	performBinaryOperationAndCompare(params, mlCore::TensorOperations::power);
 }
 
+TEST_F(TestTensorOperations, testMakeTensor)
+{
+	using Arr = mlCore::TensorArr<double>;
+
+	// clang-format off
+
+	const auto createdTensor = mlCore::TensorOperations::makeTensor(
+		Arr{
+			Arr{
+				Arr{0.0, 1.0, 2.0, 3.0},
+				Arr{4.0, 5.0, 6.0, 7.0},
+				Arr{8.0, 9.0, 10.0, 11.0}},
+			Arr{
+				Arr{12.0, 13.0, 14.0, 15.0},
+				Arr{16.0, 17.0, 18.0, 19.0},
+				Arr{20.0, 21.0, 22.0, 23.0}}});
+
+	// clang-format on
+
+	mlCore::Tensor expectedTensor({2, 3, 4});
+	expectedTensor.fill(mlCore::tensorInitializers::RangeTensorInitializer<double>(0.0, 1.0));
+
+	compareTensors(createdTensor, expectedTensor);
+}
+
+TEST_F(TestTensorOperations, testMakeTensorWithInconsistentShape)
+{
+	using Arr = mlCore::TensorArr<double>;
+
+	// clang-format off
+
+	EXPECT_THROW(
+
+	const auto createdTensor = mlCore::TensorOperations::makeTensor(
+		Arr{
+			Arr{
+				Arr{0.0, 1.0, 2.0, 3.0},},
+			Arr{
+				Arr{12.0, 13.0, 14.0, 15.0},
+				Arr{16.0, 17.0, 18.0, 19.0},
+				Arr{20.0, 21.0}}});
+
+	, std::runtime_error);
+
+	// clang-format on
+}
+
+TEST_F(TestTensorOperations, testMakeTensorWithEmptyComponent)
+{
+	using Arr = mlCore::TensorArr<double>;
+
+	// clang-format off
+
+	EXPECT_THROW(
+
+	const auto createdTensor = mlCore::TensorOperations::makeTensor(
+		Arr{
+			Arr{
+				Arr{},
+				Arr{4.0, 5.0, 6.0, 7.0},
+				Arr{8.0, 9.0, 10.0, 11.0}},
+			Arr{
+				Arr{12.0, 13.0, 14.0, 15.0},
+				Arr{16.0, 17.0, 18.0, 19.0},
+				Arr{20.0, 21.0, 22.0, 23.0}}});
+
+	, std::runtime_error);
+
+	// clang-format on
+}
+
 } // namespace

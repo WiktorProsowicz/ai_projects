@@ -13,11 +13,11 @@ LoggingLib is a module containing classes used to handle various kinds of logged
 
 ## 1.0.0
 
-- Introduced [Logger](#Logger)
-- Introduced [Stream Wrappers](#StreamWrappers)
-    - [IStreamWrapper](#IStreamWrapper)
-    - [BaseStreamWrapper](#BaseStreamWrapper)
-    - [DecolorizingStream](#DecolorizingStream)
+- Introduced [Logger](#logger)
+- Introduced [Stream Wrappers](#stream-wrappers)
+    - [IStreamWrapper](#istreamwrapper)
+    - [BaseStreamWrapper](#basestreamwrapper)
+    - [DecolorizingStream](#decolorizingstream)
 - Introduced new macros
     - `LOG_RESET_LOGGER`
     - `LOG_SET_DEFAULT_STREAM`
@@ -72,7 +72,7 @@ Set of classes following the Decorator pattern. Wrappers can perform a certain k
 
 ### IStreamWrapper
 
-An interface for [Stream Wrappers](#Stream-Wrappers). Defines a public streaming method being a template-pattern algorithm which uses a couple of functions possible to be overridden. 
+An interface for [Stream Wrappers](#stream-wrappers). Defines a public streaming method being a template-pattern algorithm which uses a couple of functions possible to be overridden. 
 
 Implementation:
 ```cpp
@@ -89,7 +89,7 @@ namespace streamWrappers
 
 ### BaseStreamWrapper
 
-Class implementing [IStreamWrapper](#IStreamWrapper) interface. Does not perform any modifications on the streamed content and serves as the intermediate object between `std::ostream` and other wrappers.
+Class implementing [IStreamWrapper](#istreamwrapper) interface. Does not perform any modifications on the streamed content and serves as the intermediate object between `std::ostream` and other wrappers.
 
 Implementation:
 ```cpp
@@ -113,7 +113,7 @@ streamWrappers::BaseStreamWrapper::spawnWrapped<CustomWrapper>(std::cout);
 
 ### DecolorizingStream
 
-Class implementing [IStreamWrapper](#IStreamWrapper) interface. Deletes character sequences from streamed content, so that it no longer contains information about the message color.
+Class implementing [IStreamWrapper](#istreamwrapper) interface. Deletes character sequences from streamed content, so that it no longer contains information about the message color.
 
 
 Implementation:

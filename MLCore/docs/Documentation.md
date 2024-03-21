@@ -6,37 +6,37 @@ MLCore is a module containing the core components for other data processing / ma
 
 ## 1.0.0
 
-- Introduced [BasicTensor](#BasicTensor)
-- Introduced [TensorIterator](#TensorIterator)
+- Introduced [BasicTensor](#basictensor)
+- Introduced [TensorIterator](#tensoriterator)
 - Introduced [ITensorInitializer](#itensorinitializer) interface
-- Added new [TensorInitializers](#TensorInitializers)
-    - [RangeTensorInitializer](#RangeTensorInitializer)
-    - [GaussianTensorInitializer](#GaussianTensorInitializer)
-- Introduced base [GraphNodes](#GraphNodes) interface ([Node](#Node)) 
-- Added new [GraphNodes](#GraphNodes)
+- Added new [TensorInitializers](#tensorinitializers)
+    - [RangeTensorInitializer](#rangetensorinitializer)
+    - [GaussianTensorInitializer](#gaussiantensorinitializer)
+- Introduced base [GraphNodes](#graphnodes) interface ([Node](#node)) 
+- Added new [GraphNodes](#graphnodes)
     - [Variable](#variable)
-    - [Constant](#Constant)
-    - [Placeholder](#Placeholder)
-- Introduced base [UnaryOperators](#UnaryOperators) interface ([UnaryOperator](#UnaryOperator))
-- Added new [UnaryOperators](#UnaryOperators)
+    - [Constant](#constant)
+    - [Placeholder](#placeholder)
+- Introduced base [UnaryOperators](#unaryoperators) interface ([UnaryOperator](#unaryoperator))
+- Added new [UnaryOperators](#unaryoperators)
     - [ReluOperator](#reluoperator)
-    - [SigmoidOperator](#SigmoidOperator)
-- Introduced base [BinaryOperators](#BinaryOperators) interface ([BinaryOperator](#BinaryOperator))
-- Added new [BinaryOperators](#BinaryOperators):
-    - [AddOperator](#AddOperator)
-    - [SubtractOperator](#SubtractOperator)
-    - [DivideOperator](#DivideOperator)
-    - [MultiplyOperator](#MultiplyOperator)
-    - [MatmulOperator](#MatmulOperator)
-    - [PowerOperator](#PowerOperator)
-- Introduced [ComputationGraph](#ComputationGraph)
-- Introduced [TensorOperations](#TensorOperations)
-- Introduced [Models](#Models) interfaces:
-    - [ILayer](#ILayer)
-    - [Callback](#Callback)
-    - [IMeasurable](#IMeasurable)
-    - [IMetric](#Imetric)
-    - [IOptimizer](#IOptimizer)
+    - [SigmoidOperator](#sigmoidoperator)
+- Introduced base [BinaryOperators](#binaryoperators) interface ([BinaryOperator](#binaryoperator))
+- Added new [BinaryOperators](#binaryoperator):
+    - [AddOperator](#addoperator)
+    - [SubtractOperator](#subtractoperator)
+    - [DivideOperator](#divideoperator)
+    - [MultiplyOperator](#multiplyoperator)
+    - [MatmulOperator](#matmuloperator)
+    - [PowerOperator](#poweroperator)
+- Introduced [ComputationGraph](#computationgraph)
+- Introduced [TensorOperations](#tensoroperations)
+- Introduced [Models](#models) interfaces:
+    - [ILayer](#ilayer)
+    - [Callback](#callback)
+    - [IMeasurable](#imeasurable)
+    - [IMetric](#imetric)
+    - [IOptimizer](#ioptimizer)
 
 # Components
 
@@ -66,7 +66,7 @@ mlCore::BasicTensor<double> shapedTensorWithDefaultValue({3, 4}, 0);
 mlCore::BasicTensor<double> shapedTensorWithInitValues({2, 2}, {1, 2, 3, 4});
 ```
 
-Assigning values for specific parts of the tensor can be performed with use of a couple of methods, one of which uses [TensorInitializers](#TensorInitializers). 
+Assigning values for specific parts of the tensor can be performed with use of a couple of methods, one of which uses [TensorInitializers](#tensorinitializers). 
 
 ```cpp
 // 0 0 0
@@ -94,7 +94,7 @@ tensor.fill(initializer);
 tensor.assign({{0, 2}, {1, 3}}, {11, 22, 33, 44});
 ```
 
-BasicTensor can serve as a range via iterators ([TensorIterator](#TensorIterator)). 
+BasicTensor can serve as a range via iterators ([TensorIterator](#tensoriterator)). 
 
 ```cpp
 mlCore::BasicTensor<double> tensor(std::vector<size_t>{2, 3});
@@ -205,7 +205,7 @@ namespace mlCore::tensorInitializers
 
 ### RangeTensorInitializer
 
-Class implementing [ITensorInitializer](#ITensorInitializer) interface. 
+Class implementing [ITensorInitializer](#itensorinitializer) interface. 
 
 Implementation:
 ```cpp
@@ -234,7 +234,7 @@ while(initializer.canYield())
 
 ### GaussianTensorInitializer
 
-Class implementing [ITensorInitializer](#ITensorInitializer) interface. 
+Class implementing [ITensorInitializer](#itensorinitializer) interface. 
 
 Implementation:
 ```cpp
@@ -262,7 +262,7 @@ while(initializer.canYield())
 
 ## GraphNodes
 
-Group of classes in form of [BasicTensor](#BasicTensor) wrappers with associated functionality and semantics depending on the concrete subclass. GraphNodes make up a huge part of automatic differentiation functionality. They are used as the components of tree structures used by [ComputationGraph](#ComputationGraph).
+Group of classes in form of [BasicTensor](#basictensor) wrappers with associated functionality and semantics depending on the concrete subclass. GraphNodes make up a huge part of automatic differentiation functionality. They are used as the components of tree structures used by [ComputationGraph](#computationgraph).
 
 ![GraphNodes hierarchy](./res/GraphNodeshierarchy.drawio.png)
 
@@ -279,7 +279,7 @@ namespace mlCore::autoDiff
 }
 ```
 
-Node class operates on a specific type of [BasicTensor](#BasicTensor) with `double` underlying data type.
+Node class operates on a specific type of [BasicTensor](#basictensor) with `double` underlying data type.
 
 ```cpp
 namespace mlCore
@@ -311,7 +311,7 @@ using NodePtr = std::shared_ptr<Node>;
 
 ### Variable
 
-Class derived from [Node](#Node) providing semantics for nodes designed to change hold internal tensor and share it for changes (for example weight matrix for dense layers).
+Class derived from [Node](#node) providing semantics for nodes designed to change hold internal tensor and share it for changes (for example weight matrix for dense layers).
 
 Implementation:
 
@@ -330,7 +330,7 @@ using VariablePtr = std::shared_ptr<Variable>;
 
 ### Constant
 
-Class derived from [Node](#Node) providing semantics for nodes designed to keep their values unchanged (for example positional encoding in transformer input). 
+Class derived from [Node](#node) providing semantics for nodes designed to keep their values unchanged (for example positional encoding in transformer input). 
 
 Implementation:
 
@@ -349,7 +349,7 @@ using ConstantPtr = std::shared_ptr<Constant>;
 
 ### Placeholder
 
-Class derived from [Node](#Node) providing semantics for nodes designed to dynamically change their underlying tensors (for example as components inside model's input layer). Placeholders play also role in [ComputationGraph](#ComputationGraph) as the targets for feed dictionary used in forward graph traversing.
+Class derived from [Node](#node) providing semantics for nodes designed to dynamically change their underlying tensors (for example as components inside model's input layer). Placeholders play also role in [ComputationGraph](#computationgraph) as the targets for feed dictionary used in forward graph traversing.
 
 Implementation:
 
@@ -368,11 +368,11 @@ using PlaceholderPtr = std::shared_ptr<Placeholder>;
 
 ## UnaryOperators
 
-Group of classes forming a branch inside the [GraphNodes](#GraphNodes) hierarchy. UnaryOperators are an important part of the automatic differentiation mechanics. They provide semantics for components performing certain operation on the single input node.
+Group of classes forming a branch inside the [GraphNodes](#graphnodes) hierarchy. UnaryOperators are an important part of the automatic differentiation mechanics. They provide semantics for components performing certain operation on the single input node.
 
 ### UnaryOperator
 
-Base class for unary operator nodes, inherits from [Node](#Node). Defines methods for computing output value based on a single input node. 
+Base class for unary operator nodes, inherits from [Node](#node). Defines methods for computing output value based on a single input node. 
 
 Implementation:
 ```cpp
@@ -410,15 +410,15 @@ std::cout << oper->getInput()->getValue();
 
 ### ReluOperator
 
-A subclass of [UnaryOperator](#UnaryOperator). Performs REctangular Linear Unit activation operation, clamping the input to <0, inf) range.
+A subclass of [UnaryOperator](#unaryoperator). Performs REctangular Linear Unit activation operation, clamping the input to <0, inf) range.
 
 ### SigmoidOperator
 
-A subclass of [UnaryOperator](#UnaryOperator). Performs sigmoid operation, clamping the input to (0, 1) range.
+A subclass of [UnaryOperator](#unaryoperator). Performs sigmoid operation, clamping the input to (0, 1) range.
 
 ## BinaryOperators
 
-Group of classes forming a branch inside the [GraphNodes](#GraphNodes) hierarchy. BinaryOperators are an important part of the automatic differentiation mechanics. They provide semantics for components performing certain operation on two input nodes.
+Group of classes forming a branch inside the [GraphNodes](#graphnodes) hierarchy. BinaryOperators are an important part of the automatic differentiation mechanics. They provide semantics for components performing certain operation on two input nodes.
 
 ### BinaryOperator
 
@@ -465,31 +465,31 @@ std::cout << op->getValue();
 
 ### AddOperator
 
-A subclass of [BinaryOperator](#BinaryOperator). Performs basic adding operation between input nodes. Wraps [BasicTensor](#BasicTensor)'s `operator+`.
+A subclass of [BinaryOperator](#binaryoperator). Performs basic adding operation between input nodes. Wraps [BasicTensor](#basictensor)'s `operator+`.
 
 ### DivideOperator
 
-A subclass of [BinaryOperator](#BinaryOperator). Performs basic dividing operation between input nodes. Wraps [BasicTensor](#BasicTensor)'s `operator/`.
+A subclass of [BinaryOperator](#binaryoperator). Performs basic dividing operation between input nodes. Wraps [BasicTensor](#basictensor)'s `operator/`.
 
 ### MatmulOperator
 
-A subclass of [BinaryOperator](#BinaryOperator). Performs matrix multiplication between input nodes. Wraps [BasicTensor](#BasicTensor)'s `matmul` method.
+A subclass of [BinaryOperator](#binaryoperator). Performs matrix multiplication between input nodes. Wraps [BasicTensor](#basictensor)'s `matmul` method.
 
 ### MultiplyOperator
 
-A subclass of [BinaryOperator](#BinaryOperator). Performs basic multiplication between input nodes. Wraps [BasicTensor](#BasicTensor)'s `operator*` method.
+A subclass of [BinaryOperator](#binaryoperator). Performs basic multiplication between input nodes. Wraps [BasicTensor](#basictensor)'s `operator*` method.
 
 ### PowerOperator
 
-A subclass of [BinaryOperator](#BinaryOperator). Performs basic power operation between input nodes. Wraps [TensorOperations](#TensorOperations)'s `power` function.
+A subclass of [BinaryOperator](#binaryoperator). Performs basic power operation between input nodes. Wraps [TensorOperations](#tensoroperations)'s `power` function.
 
 ### SubtractOperator
 
-A subclass of [BinaryOperator](#BinaryOperator). Performs basic subtraction between input nodes. Wraps [BasicTensor](#BasicTensor)'s `operator-` method.
+A subclass of [BinaryOperator](#binaryoperator). Performs basic subtraction between input nodes. Wraps [BasicTensor](#basictensor)'s `operator-` method.
 
 ## GraphOperations
 
-Set of groups of functions performing operations between [GraphNodes](#GraphNodes) instances. GraphOperations define methods creating various types of nodes, connecting them to the inputs. 
+Set of groups of functions performing operations between [GraphNodes](#graphnodes) instances. GraphOperations define methods creating various types of nodes, connecting them to the inputs. 
 
 ### UnaryOperations
 
@@ -505,7 +505,7 @@ Set of activation functions performing certain operations on input node. They cr
 
 ## ComputationGraph
 
-Class responsible for storing [GraphNodes](#GRaphNodes) instances and performing operations on whole tree structure. It can collect nodes belonging to different trees creating computation forest. ComputationGraph makes for one of the main parts of automatic differentiation tools. 
+Class responsible for storing [GraphNodes](#graphnodes) instances and performing operations on whole tree structure. It can collect nodes belonging to different trees creating computation forest. ComputationGraph makes for one of the main parts of automatic differentiation tools. 
 
 Basic workflow of the graph can be described as:
 1. Graph is activated, allowing to add more nodes.
@@ -570,7 +570,7 @@ graph.clearGradients();
 
 ## TensorOperations
 
-Set of functions performing either binary or unary operations on [BasicTensor](#BasicTensor) instances. The functions can be used to avoid duplicate tensor-modifying code.
+Set of functions performing either binary or unary operations on [BasicTensor](#basictensor) instances. The functions can be used to avoid duplicate tensor-modifying code.
 
 Implementation:
 ```cpp
@@ -625,7 +625,7 @@ using ILayerPtr = std::shared_ptr<ILayer>;
 
 ### IMeasurable
 
-An interface for classes following the Observer design pattern, prone to be measured by classes implementing [IMetric](#IMetric) interface. IMeasurable-implementing classes serve play the role of publishers and can be subscribed by number and types of metrics specified by the concrete measurable class. Internal implementation of the class may be connected with the Composite design pattern and thus delegate the metrics update to the contained sub-Measurable objects.
+An interface for classes following the Observer design pattern, prone to be measured by classes implementing [IMetric](#imetric) interface. IMeasurable-implementing classes serve play the role of publishers and can be subscribed by number and types of metrics specified by the concrete measurable class. Internal implementation of the class may be connected with the Composite design pattern and thus delegate the metrics update to the contained sub-Measurable objects.
 
 Implementation:
 ```cpp
@@ -662,7 +662,7 @@ using MetricContextPtr = std::shared_ptr<IMetric>;
 
 ### IOptimizer
 
-An interface for classes updating models' weights ([Node](#Node)) with given gradient slices ([Tensor](#Tensor)) according to the internal parameters and the updating politics of a concrete implementation of the interface. 
+An interface for classes updating models' weights ([Node](#node)) with given gradient slices ([Tensor](#basictensor)) according to the internal parameters and the updating politics of a concrete implementation of the interface. 
 
 ```cpp
 namespace mlCore::models

@@ -1,3 +1,7 @@
+#ifndef MLCORE_INCLUDE_MLCORE_TENSORITERATOR_HPP
+#define MLCORE_INCLUDE_MLCORE_TENSORITERATOR_HPP
+
+#include <iterator>
 
 namespace mlCore
 {
@@ -6,7 +10,7 @@ template <typename ValueType>
 class TensorIterator
 {
 public:
-	using iterator_category = std::forward_iterator_tag;
+	using iterator_category = std::random_access_iterator_tag;
 	using value_type = ValueType;
 	using difference_type = std::ptrdiff_t;
 	using pointer = ValueType*;
@@ -66,6 +70,23 @@ public:
 	}
 	// NOLINTEND
 
+	TensorIterator& operator+=(difference_type n)
+	{
+		currPtr_ += n;
+		return *this;
+	}
+
+	TensorIterator& operator-=(difference_type n)
+	{
+		currPtr_ -= n;
+		return *this;
+	}
+
+	difference_type operator-(const TensorIterator& other) const
+	{
+		return currPtr_ - other.currPtr_;
+	}
+
 	/**
 	 * @brief Compares two operators.
 	 * 
@@ -106,3 +127,5 @@ private:
 	pointer currPtr_;
 };
 } // namespace mlCore
+
+#endif

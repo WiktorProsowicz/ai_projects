@@ -7,17 +7,17 @@ Utilities lib contain project-wide classes and functions helping at development.
 
 ## 1.0.0
 
-- Introduced [ThreadPool](#ThreadPool) and [ThreadSafeQueue](#ThreadSafeQueue)
+- Introduced [ThreadPool](#threadpool) and [ThreadSafeQueue](#threadsafequeue)
 
 ## 1.1.0
 
-- Introduced [SerializationPack](#SerializationPack) and basic object-to-byte algorithms (Numerics, Vectors, C-strings, Cpp-strings) 
+- Introduced [SerializationPack](#serializationpack) and basic object-to-byte algorithms (Numerics, Vectors, C-strings, Cpp-strings) 
 
 # Components
 
 ## ThreadPool
 
-Class responsible for managing threads and assigning tasks to them, ensuring safety while calling its methods. ThreadPool uses [ThreadSafeQueue](#ThreadSafeQueue) for the main safety-check for the storing/obtaining assigned tasks. Each of the worker threads is put to sleep in case there are no available tasks at the moment. Additionally the pool is capable of cancelling individual threads at request.
+Class responsible for managing threads and assigning tasks to them, ensuring safety while calling its methods. ThreadPool uses [ThreadSafeQueue](#threadsafequeue) for the main safety-check for the storing/obtaining assigned tasks. Each of the worker threads is put to sleep in case there are no available tasks at the moment. Additionally the pool is capable of cancelling individual threads at request.
 
 Implementation
 ```cpp

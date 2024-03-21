@@ -29,7 +29,7 @@ set(COMMON_COMPILE_OPTIONS
     -Wuseless-cast
     -Wold-style-cast 
     -Wredundant-decls 
-    -Wsign-conversion 
+    # -Wsign-conversion 
     -Wduplicated-cond 
     -Wnull-dereference 
     -Wnon-virtual-dtor 
