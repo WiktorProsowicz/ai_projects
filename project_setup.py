@@ -8,8 +8,10 @@ import argparse
 import logging
 import os
 import pathlib
+import subprocess
 import venv
 from os import path
+from typing import List
 
 HOME_PATH = pathlib.Path(__file__).absolute().parent.as_posix()
 
@@ -41,12 +43,35 @@ def setup_venv() -> None:
     logging.info("Then type 'deactivate' to deactivate the environment.")
 
 
+def build_project(*args) -> None:
+    """Compiles C++ files from the repository.
+
+    The compiled binaries are linked to each other and in form of libraries and executables
+    are moved to `build` directory.
+
+    Args:
+        *args: Arguments passed to cmake while compiling.
+            For supported arguments see CMakeLists.txt -> options definitions.
+    """
+
+    build_path = os.path.join(HOME_PATH, 'build')
+
+    try:
+        subprocess.run(['cmake', '-S', HOME_PATH, '-B',
+                       build_path, *args], check=True)
+
+        subprocess.run(['make', '-C', build_path, '-j'], check=True)
+
+    except subprocess.CalledProcessError as proc_error:
+        logging.critical('Building project failed: %s', proc_error)
+
+
 def _get_arg_parser() -> argparse.ArgumentParser:
     """Returns an argument parser for the script."""
 
     functions_descriptions = "\n".join(
         [f"{func.__name__}: {func.__doc__.splitlines()[0]}" for func in [
-            setup_venv]]
+            setup_venv, build_project]]
     )
 
     program_desc = (
@@ -75,7 +100,7 @@ def main(function: str, *args) -> None:
         function (str): Name of the function to be called.
     """
 
-    for available_func in [setup_venv]:
+    for available_func in [setup_venv, build_project]:
         if available_func.__name__ == function:
             available_func(*args)  # type: ignore
             return

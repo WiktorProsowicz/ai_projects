@@ -42,7 +42,6 @@ set(COMMON_COMPILE_OPTIONS
 )
 
 add_subdirectory(LoggingLib)
-add_subdirectory(ForeignModules)
 
 add_subdirectory(MLCore)
 add_subdirectory(Utilities)
