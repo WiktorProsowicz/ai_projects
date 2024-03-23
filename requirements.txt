@@ -2,3 +2,5 @@
 # Contains libraries crucial for running the main project functionalities.
 # -------------------------------------------------------------------------
 
+cmake
+conan

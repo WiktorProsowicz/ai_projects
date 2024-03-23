@@ -66,12 +66,50 @@ def build_project(*args) -> None:
         logging.critical('Building project failed: %s', proc_error)
 
 
+def clean_project() -> None:
+    """Clears generated CMake configuration files.
+
+    The project after having been cleaned is prepared to be rebuilt.
+    """
+
+    build_path = os.path.join(HOME_PATH, 'build')
+
+    try:
+        subprocess.run(
+            ['rm', '-rf', f'{build_path}/CMakeFiles', f'{build_path}/CMakeCache.txt'], check=True)
+
+    except subprocess.CalledProcessError as proc_error:
+        logging.critical('Cleaning project failed: %s', proc_error)
+
+
+def install_dependencies() -> None:
+    """Downloads and builds external libraries.
+
+    The used libraries are specified by the `conanfile.py`.
+    """
+
+    build_path = os.path.join(HOME_PATH, 'build')
+
+    default_args = (
+        f'--output-folder={build_path}/ConanFiles',
+        '--build=missing',
+        '--profile=./setuputils/conan_release_prof.ini'
+    )
+
+    try:
+        subprocess.run(['conan', 'install', *default_args, '.'], check=True)
+
+    except subprocess.CalledProcessError as proc_error:
+        logging.critical(
+            'Setting up external dependencies failed: %s', proc_error)
+
+
 def _get_arg_parser() -> argparse.ArgumentParser:
     """Returns an argument parser for the script."""
 
     functions_descriptions = "\n".join(
         [f"{func.__name__}: {func.__doc__.splitlines()[0]}" for func in [
-            setup_venv, build_project]]
+            setup_venv, build_project, clean_project, install_dependencies]]
     )
 
     program_desc = (
@@ -100,7 +138,7 @@ def main(function: str, *args) -> None:
         function (str): Name of the function to be called.
     """
 
-    for available_func in [setup_venv, build_project]:
+    for available_func in [setup_venv, build_project, clean_project, install_dependencies]:
         if available_func.__name__ == function:
             available_func(*args)  # type: ignore
             return
@@ -111,6 +149,6 @@ def main(function: str, *args) -> None:
 if __name__ == "__main__":
 
     parser = _get_arg_parser()
-    arguments = parser.parse_args()
+    arguments, left_args = parser.parse_known_args()
 
-    main(arguments.function_name, *arguments.args)
+    main(arguments.function_name, *(arguments.args + left_args))
