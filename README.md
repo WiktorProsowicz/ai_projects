@@ -17,22 +17,29 @@ To use the project's functionalities one should follow this guide:
 
 ```bash
 python3.12 project_setup.py setup_venv
+source venv/bin/activate
 ```
 
-- install python dependencies
+- install primary dependencies for either python scripts or project management
 
 ```bash
-source venv/bin/activate
+
 pip install -r requirements.txt
+```
+
+- install external C++ dependencies
+
+```bash
+python project_setup.py install_dependencies
 ```
 
 - build C++ libs
 
 ```bash
-python project_setup.py build
+# optionally clean the project in order to change the build configuration
+python project_setup.py clean_project
 
-# alternatively clean + build
-python project_setup.py rebuild
+python project_setup.py build_project [cmake_args]
 ```
 
 ### Developer
