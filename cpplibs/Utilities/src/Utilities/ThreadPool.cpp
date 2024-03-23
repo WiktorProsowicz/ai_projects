@@ -8,11 +8,13 @@ namespace utilities
 {
 void ThreadPool::init(size_t numThreads)
 {
-	std::call_once(once_, [this, &numThreads] {
-		initted_ = true;
+	std::call_once(once_,
+				   [this, &numThreads]
+				   {
+					   initted_ = true;
 
-		resize(numThreads);
-	});
+					   resize(numThreads);
+				   });
 }
 
 void ThreadPool::terminate()
@@ -72,14 +74,16 @@ void ThreadPool::_spawn(size_t workerId)
 		{
 			std::unique_lock<std::shared_mutex> lock(mainMutex_);
 
-			condition_.wait(lock, [this, &obtainedATask, &runTask, &workerId] {
-				obtainedATask = tasks_.tryPop(runTask);
+			condition_.wait(lock,
+							[this, &obtainedATask, &runTask, &workerId]
+							{
+								obtainedATask = tasks_.tryPop(runTask);
 
-				std::shared_lock<std::shared_mutex> flagsLock(flagsMutex_);
-				std::shared_lock<std::shared_mutex> stopFlagsLock(stopFlagsMutex_);
+								std::shared_lock<std::shared_mutex> flagsLock(flagsMutex_);
+								std::shared_lock<std::shared_mutex> stopFlagsLock(stopFlagsMutex_);
 
-				return cancelled_ || stopped_ || obtainedATask || stopFlags_.at(workerId);
-			});
+								return cancelled_ || stopped_ || obtainedATask || stopFlags_.at(workerId);
+							});
 		}
 
 		{

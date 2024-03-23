@@ -40,7 +40,8 @@ std::string makeBytes(const std::vector<VectorItemType>& object)
 } // namespace detail
 
 /**
- * @brief Class sued to wrap objects of various types. It defines means of conversion of the objects to the pre-defined binary forms.
+ * @brief Class sued to wrap objects of various types. It defines means of conversion of the objects to the
+ * pre-defined binary forms.
  *
  */
 template <typename... ArgTypes>
@@ -54,13 +55,14 @@ public:
 	SerializationPack& operator=(SerializationPack&&) = delete;		 // Move assignment.
 
 	/**
-	 * @brief Constructs the SerializationPack from given arguments and initializes the internal objects pack, adjusting types if needed.
+	 * @brief Constructs the SerializationPack from given arguments and initializes the internal objects pack,
+	 * adjusting types if needed.
 	 *
 	 * @param args Object to pack.
 	 */
 	SerializationPack(const ArgTypes&... args)
 		: args_(std::list<std::any, std::allocator<std::any>>{std::decay_t<ArgTypes>(args)...})
-	{ }
+	{}
 
 	template <typename... PackArgTypes>
 	friend std::ostream& operator<<(std::ostream& out, const SerializationPack<PackArgTypes...>& pack);

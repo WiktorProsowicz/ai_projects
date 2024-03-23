@@ -10,23 +10,26 @@ namespace mlCore::autoDiff
 
 bool ComputationGraph::hasGradient(const size_t& nodeId) const
 {
-	return std::find_if(gradients_.begin(), gradients_.end(), [&nodeId](const std::pair<NodePtr, Tensor>& nodeGrad) {
-			   return nodeGrad.first->getIndex() == nodeId;
-		   }) == gradients_.end();
+	return std::find_if(gradients_.begin(),
+						gradients_.end(),
+						[&nodeId](const std::pair<NodePtr, Tensor>& nodeGrad)
+						{ return nodeGrad.first->getIndex() == nodeId; }) == gradients_.end();
 }
 
 bool ComputationGraph::hasGradient(const std::string& nodeName) const
 {
-	return std::find_if(gradients_.begin(), gradients_.end(), [&nodeName](const std::pair<NodePtr, Tensor>& nodeGrad) {
-			   return nodeGrad.first->getName() == nodeName;
-		   }) == gradients_.end();
+	return std::find_if(gradients_.begin(),
+						gradients_.end(),
+						[&nodeName](const std::pair<NodePtr, Tensor>& nodeGrad)
+						{ return nodeGrad.first->getName() == nodeName; }) == gradients_.end();
 }
 
 const Tensor& ComputationGraph::getGradientByNodeId(const size_t& nodeId) const
 {
 	return std::find_if(gradients_.begin(),
 						gradients_.end(),
-						[&nodeId](const std::pair<NodePtr, Tensor>& nodeGrad) { return nodeGrad.first->getIndex() == nodeId; })
+						[&nodeId](const std::pair<NodePtr, Tensor>& nodeGrad)
+						{ return nodeGrad.first->getIndex() == nodeId; })
 		->second;
 }
 
@@ -34,7 +37,8 @@ const Tensor& ComputationGraph::getGradientByNodeName(const std::string& nodeNam
 {
 	return std::find_if(gradients_.begin(),
 						gradients_.end(),
-						[&nodeName](const std::pair<NodePtr, Tensor>& nodeGrad) { return nodeGrad.first->getName() == nodeName; })
+						[&nodeName](const std::pair<NodePtr, Tensor>& nodeGrad)
+						{ return nodeGrad.first->getName() == nodeName; })
 		->second;
 }
 
@@ -80,9 +84,11 @@ void ComputationGraph::_sortNodes()
 
 	std::vector<NodePtr> newNodes;
 
-	// recursively goes down the tree in a DFS manner and adds nodes to newNodes so that all inputs can be assigned before the operators
+	// recursively goes down the tree in a DFS manner and adds nodes to newNodes so that all inputs can be
+	// assigned before the operators
 	std::function<void(const NodePtr)> traverseTree;
-	traverseTree = [&traverseTree, &newNodes](const NodePtr node) {
+	traverseTree = [&traverseTree, &newNodes](const NodePtr node)
+	{
 		if(const auto castedBinaryOp = std::dynamic_pointer_cast<binaryOperators::BinaryOperator>(node))
 		{
 			const auto& [lhs, rhs] = castedBinaryOp->getInputs();
@@ -145,7 +151,8 @@ void ComputationGraph::computeGradients(const NodePtr root)
 	std::function<void(const NodePtr, const Tensor&)> backPropagate;
 
 	// traverses the nodes tree and computes gradient in regard of every node
-	backPropagate = [&backPropagate, this](const NodePtr node, const Tensor& cumulatedGradient) {
+	backPropagate = [&backPropagate, this](const NodePtr node, const Tensor& cumulatedGradient)
+	{
 		if(this->gradients_.find(node) == this->gradients_.end())
 		{
 			this->gradients_.emplace(node, cumulatedGradient);

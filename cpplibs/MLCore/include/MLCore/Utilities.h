@@ -46,7 +46,8 @@ public:
 } // namespace detail
 
 /**
- * @brief Creates a human-readable serialized form of the vector. Can be used for displaying tensors' shapes etc.
+ * @brief Creates a human-readable serialized form of the vector. Can be used for displaying tensors' shapes
+ * etc.
  *
  * @param vect Vector to be serialized.
  * @param openSign Character serving as the beginning for the result sequence.
@@ -58,7 +59,9 @@ public:
  * stringifyVector(std::vector<uint32_t>{0, 1, 2, 3}, '(', ')') -> (0, 1, 2, 3)
  */
 template <typename T>
-std::string stringifyVector(const std::vector<T>& vect, const char* const openSign = "(", const char* const closeSign = ")")
+std::string stringifyVector(const std::vector<T>& vect,
+							const char* const openSign = "(",
+							const char* const closeSign = ")")
 {
 	return fmt::format("{}{}{}", openSign, fmt::join(vect, ", "), closeSign);
 }

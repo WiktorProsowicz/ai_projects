@@ -12,4 +12,4 @@
 #include <Utilities/BinarySerialization.h>
 #include <Utilities/ThreadPool.h>
 
-int main([[maybe_unused]] int argc, [[maybe_unused]] const char* const* const argv) { }
+int main([[maybe_unused]] int argc, [[maybe_unused]] const char* const* const argv) {}

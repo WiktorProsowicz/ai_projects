@@ -33,10 +33,11 @@ public:
 	using TimePoint = std::chrono::system_clock::time_point;
 
 	Task() = delete;
+
 	Task(size_t taskId, size_t waitingInterval = 1000)
 		: waitingInterval_(waitingInterval)
 		, id_(taskId)
-	{ }
+	{}
 
 	void run()
 	{
@@ -51,7 +52,8 @@ public:
 		// 					 id_,
 		// 					 std::chrono::duration_cast<std::chrono::milliseconds>(startTime_.time_since_epoch()).count(),
 		// 					 std::chrono::duration_cast<std::chrono::milliseconds>(endTime_.time_since_epoch()).count(),
-		// 					 std::chrono::duration_cast<std::chrono::milliseconds>(endTime_ - startTime_).count()));
+		// 					 std::chrono::duration_cast<std::chrono::milliseconds>(endTime_ -
+		// startTime_).count()));
 
 		hasBeenRun_ = true;
 	}
@@ -120,15 +122,21 @@ protected:
 	 */
 	static auto getDuration(const std::vector<Task>& tasks)
 	{
-		auto minTime = std::min_element(tasks.cbegin(), tasks.cend(), [](const auto& task1, const auto& task2) {
-			return task1.getStart().time_since_epoch() < task2.getStart().time_since_epoch();
-		});
+		auto minTime = std::min_element(
+			tasks.cbegin(),
+			tasks.cend(),
+			[](const auto& task1, const auto& task2)
+			{ return task1.getStart().time_since_epoch() < task2.getStart().time_since_epoch(); });
 
-		auto maxTime = std::max_element(tasks.cbegin(), tasks.cend(), [](const auto& task1, const auto& task2) {
-			return task1.getEnd().time_since_epoch() < task2.getEnd().time_since_epoch();
-		});
+		auto maxTime =
+			std::max_element(tasks.cbegin(),
+							 tasks.cend(),
+							 [](const auto& task1, const auto& task2) {
+								 return task1.getEnd().time_since_epoch() < task2.getEnd().time_since_epoch();
+							 });
 
-		return std::chrono::duration_cast<std::chrono::milliseconds>(maxTime->getEnd() - minTime->getStart()).count();
+		return std::chrono::duration_cast<std::chrono::milliseconds>(maxTime->getEnd() - minTime->getStart())
+			.count();
 	}
 };
 } // namespace
@@ -176,11 +184,11 @@ TEST_F(TestThreadPool, testTasksProcessing)
 							 getDuration(asynchronousTasks),
 							 getDuration(synchronousTasks)));
 
-		ASSERT_LT(getDuration(asynchronousTasks), getDuration(synchronousTasks))
-			<< fmt::format("While comparing the run of the {} tasks, each {}ms long, synchronous tasks unexpectedly "
-						   "took less time than asynchronous ones.",
-						   nTasks,
-						   interval);
+		ASSERT_LT(getDuration(asynchronousTasks), getDuration(synchronousTasks)) << fmt::format(
+			"While comparing the run of the {} tasks, each {}ms long, synchronous tasks unexpectedly "
+			"took less time than asynchronous ones.",
+			nTasks,
+			interval);
 	}
 }
 

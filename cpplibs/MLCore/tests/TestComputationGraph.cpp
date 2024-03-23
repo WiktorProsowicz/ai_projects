@@ -29,8 +29,9 @@ class BinaryOperatorDecorator;
 class UnaryOperatorDecorator;
 enum class WrapperLogChannel : uint8_t;
 
-mlCore::autoDiff::NodePtr wrapNode(mlCore::autoDiff::NodePtr node,
-								   std::shared_ptr<std::map<WrapperLogChannel, std::vector<std::string>>> logs);
+mlCore::autoDiff::NodePtr
+wrapNode(mlCore::autoDiff::NodePtr node,
+		 std::shared_ptr<std::map<WrapperLogChannel, std::vector<std::string>>> logs);
 
 // Enum specifying type of log made by computation graph node wrappers.
 enum class WrapperLogChannel : uint8_t
@@ -64,7 +65,8 @@ public:
 		(*logs_)[WrapperLogChannel::UPDATE_VALUE].push_back(rhs->getName() + " -> " + getName());
 	}
 
-	std::pair<mlCore::Tensor, mlCore::Tensor> computeDerivative(const mlCore::Tensor& outerDerivative) const override
+	std::pair<mlCore::Tensor, mlCore::Tensor>
+	computeDerivative(const mlCore::Tensor& outerDerivative) const override
 	{
 
 		const auto& [lhs, rhs] = getInputs();
@@ -137,8 +139,9 @@ struct BackPropagationConfig
  *****************************/
 
 /// Decorates input `node` or returns it if it is not of operator type.
-mlCore::autoDiff::NodePtr wrapNode(mlCore::autoDiff::NodePtr node,
-								   std::shared_ptr<std::map<WrapperLogChannel, std::vector<std::string>>> logs)
+mlCore::autoDiff::NodePtr
+wrapNode(mlCore::autoDiff::NodePtr node,
+		 std::shared_ptr<std::map<WrapperLogChannel, std::vector<std::string>>> logs)
 {
 	using namespace mlCore::autoDiff;
 
@@ -155,7 +158,8 @@ mlCore::autoDiff::NodePtr wrapNode(mlCore::autoDiff::NodePtr node,
 	return node;
 }
 
-mlCore::autoDiff::NodePtr getUnaryOperationByDesc(const std::string& description, const mlCore::autoDiff::NodePtr& input)
+mlCore::autoDiff::NodePtr getUnaryOperationByDesc(const std::string& description,
+												  const mlCore::autoDiff::NodePtr& input)
 {
 	using namespace mlCore::autoDiff;
 
@@ -227,7 +231,8 @@ constructTree(const std::vector<std::pair<std::string, std::string>>& config)
 	std::set<std::pair<uint64_t, uint64_t>> relations;
 	std::map<std::string, NodePtr> nodes;
 
-	auto createNode = [&nodes, &relations](const std::string& name, const std::string& recipeStr) -> NodePtr {
+	auto createNode = [&nodes, &relations](const std::string& name, const std::string& recipeStr) -> NodePtr
+	{
 		auto recipe = recipeStr;
 
 		const auto oper = recipe.substr(0, recipe.find('_'));
@@ -337,11 +342,11 @@ protected:
 	}
 
 	/**
-     * @brief Traverses tree and returns all unique nodes.
-     *
-     * @param root Root node of the traversed tree.
-     * @return All of the nodes present in the tree.
-     */
+	 * @brief Traverses tree and returns all unique nodes.
+	 *
+	 * @param root Root node of the traversed tree.
+	 * @return All of the nodes present in the tree.
+	 */
 	static std::set<mlCore::autoDiff::NodePtr> flattenTree(const mlCore::autoDiff::NodePtr root)
 	{
 		using namespace mlCore::autoDiff;
@@ -350,7 +355,8 @@ protected:
 
 		std::function<void(const NodePtr)> flattenTree;
 
-		flattenTree = [&nodes, &flattenTree](const NodePtr node) {
+		flattenTree = [&nodes, &flattenTree](const NodePtr node)
+		{
 			nodes.insert(node);
 
 			if(const auto casted = std::dynamic_pointer_cast<unaryOperators::UnaryOperator>(node))
@@ -398,11 +404,12 @@ protected:
 	}
 
 	/**
-     * @brief Traverses the graph and checks whether the nodes are connected as expected.
-     *
-     * @param expectedRelations Set of (parent, child) pairs containing ids of graph nodes from root perspective.
-     * @param root Node from whose perspective the relations are collected.
-     */
+	 * @brief Traverses the graph and checks whether the nodes are connected as expected.
+	 *
+	 * @param expectedRelations Set of (parent, child) pairs containing ids of graph nodes from root
+	 * perspective.
+	 * @param root Node from whose perspective the relations are collected.
+	 */
 	static void checkNodesRelationships(const std::set<std::pair<uint64_t, uint64_t>>& expectedRelations,
 										mlCore::autoDiff::NodePtr root)
 	{
@@ -412,7 +419,8 @@ protected:
 
 		std::function<void(const NodePtr)> traverseTree;
 
-		traverseTree = [&traverseTree, &collectedRelations](const NodePtr node) {
+		traverseTree = [&traverseTree, &collectedRelations](const NodePtr node)
+		{
 			if(const auto casted = std::dynamic_pointer_cast<unaryOperators::UnaryOperator>(node))
 			{
 				collectedRelations.emplace(casted->getIndex(), casted->getInput()->getIndex());
@@ -444,11 +452,11 @@ protected:
 	}
 
 	/**
-     * @brief Constructs an instance of ComputationGraph and runs it in both directions, collecting gradients and checking whether all of the value-updating
-     * and derivative-computing operations are run.
-     *
-     * @param tree Root node of the tree to construct the graph from.
-     */
+	 * @brief Constructs an instance of ComputationGraph and runs it in both directions, collecting gradients
+	 * and checking whether all of the value-updating and derivative-computing operations are run.
+	 *
+	 * @param tree Root node of the tree to construct the graph from.
+	 */
 	void checkBackPropagation(const BackPropagationConfig& config)
 	{
 		using namespace mlCore::autoDiff;
@@ -569,64 +577,67 @@ TEST_F(TestComputationGraph, testBackPropagation)
 {
 	using namespace mlCore::autoDiff;
 
-	const std::vector<std::pair<std::string, std::string>> treeConstructionConfig{{"Input", "PLACEHOLDER_(256,1)"},
-																				  {"L1W", "NODE_(200,256)"},
-																				  {"L1B", "NODE_(200,1)"},
-																				  {"Layer1", "MATMUL_L1W_Input"},
-																				  {"Layer1biased", "ADD_Layer1_L1B"},
-																				  {"Layer1Act", "RELU_Layer1biased"},
-																				  {"L2W", "NODE_(200,200)"},
-																				  {"L2B", "NODE_(200,1)"},
-																				  {"Layer2", "MATMUL_L2W_Layer1Act"},
-																				  {"Layer2biased", "ADD_Layer2_L2B"},
-																				  {"Layer2Act", "SIGMOID_Layer2biased"},
-																				  {"L3W", "NODE_(1,200)"},
-																				  {"L3B", "NODE_(1,1)"},
-																				  {"Layer3", "MATMUL_L3W_Layer2Act"},
-																				  {"Layer3biased", "ADD_Layer3_L3B"},
-																				  {"Layer3Act", "SIGMOID_Layer3biased"},
-																				  {"OutputLayer", "LN_Layer3Act"}};
+	const std::vector<std::pair<std::string, std::string>> treeConstructionConfig{
+		{"Input", "PLACEHOLDER_(256,1)"},
+		{"L1W", "NODE_(200,256)"},
+		{"L1B", "NODE_(200,1)"},
+		{"Layer1", "MATMUL_L1W_Input"},
+		{"Layer1biased", "ADD_Layer1_L1B"},
+		{"Layer1Act", "RELU_Layer1biased"},
+		{"L2W", "NODE_(200,200)"},
+		{"L2B", "NODE_(200,1)"},
+		{"Layer2", "MATMUL_L2W_Layer1Act"},
+		{"Layer2biased", "ADD_Layer2_L2B"},
+		{"Layer2Act", "SIGMOID_Layer2biased"},
+		{"L3W", "NODE_(1,200)"},
+		{"L3B", "NODE_(1,1)"},
+		{"Layer3", "MATMUL_L3W_Layer2Act"},
+		{"Layer3biased", "ADD_Layer3_L3B"},
+		{"Layer3Act", "SIGMOID_Layer3biased"},
+		{"OutputLayer", "LN_Layer3Act"}};
 
 	auto [tree, relations] = constructTree(treeConstructionConfig);
 
 	auto wrappersLogs = std::make_shared<std::map<WrapperLogChannel, std::vector<std::string>>>();
 
-	const std::map<WrapperLogChannel, std::vector<std::string>> expectedLogs{{WrapperLogChannel::UPDATE_VALUE,
-																			  {"L1W -> Layer1",
-																			   "Input -> Layer1",
-																			   "Layer1 -> Layer1biased",
-																			   "L1B -> Layer1biased",
-																			   "Layer1biased -> Layer1Act",
-																			   "L2W -> Layer2",
-																			   "Layer1Act -> Layer2",
-																			   "Layer2 -> Layer2biased",
-																			   "L2B -> Layer2biased",
-																			   "Layer2biased -> Layer2Act",
-																			   "L3W -> Layer3",
-																			   "Layer2Act -> Layer3",
-																			   "Layer3 -> Layer3biased",
-																			   "L3B -> Layer3biased",
-																			   "Layer3biased -> Layer3Act",
-																			   "Layer3Act -> OutputLayer"}},
-																			 {WrapperLogChannel::COMPUTE_DERIVATIVE,
-																			  {"Layer3Act <- OutputLayer",
-																			   "Layer3biased <- Layer3Act",
-																			   "Layer3 <- Layer3biased",
-																			   "L3B <- Layer3biased",
-																			   "L3W <- Layer3",
-																			   "Layer2Act <- Layer3",
-																			   "Layer2biased <- Layer2Act",
-																			   "Layer2 <- Layer2biased",
-																			   "L2B <- Layer2biased",
-																			   "L2W <- Layer2",
-																			   "Layer1Act <- Layer2",
-																			   "Layer1biased <- Layer1Act",
-																			   "Layer1 <- Layer1biased",
-																			   "L1B <- Layer1biased",
-																			   "L1W <- Layer1",
-																			   "Input <- Layer1"}}};
+	const std::map<WrapperLogChannel, std::vector<std::string>> expectedLogs{
+		{WrapperLogChannel::UPDATE_VALUE,
+		 {"L1W -> Layer1",
+		  "Input -> Layer1",
+		  "Layer1 -> Layer1biased",
+		  "L1B -> Layer1biased",
+		  "Layer1biased -> Layer1Act",
+		  "L2W -> Layer2",
+		  "Layer1Act -> Layer2",
+		  "Layer2 -> Layer2biased",
+		  "L2B -> Layer2biased",
+		  "Layer2biased -> Layer2Act",
+		  "L3W -> Layer3",
+		  "Layer2Act -> Layer3",
+		  "Layer3 -> Layer3biased",
+		  "L3B -> Layer3biased",
+		  "Layer3biased -> Layer3Act",
+		  "Layer3Act -> OutputLayer"}},
+		{WrapperLogChannel::COMPUTE_DERIVATIVE,
+		 {"Layer3Act <- OutputLayer",
+		  "Layer3biased <- Layer3Act",
+		  "Layer3 <- Layer3biased",
+		  "L3B <- Layer3biased",
+		  "L3W <- Layer3",
+		  "Layer2Act <- Layer3",
+		  "Layer2biased <- Layer2Act",
+		  "Layer2 <- Layer2biased",
+		  "L2B <- Layer2biased",
+		  "L2W <- Layer2",
+		  "Layer1Act <- Layer2",
+		  "Layer1biased <- Layer1Act",
+		  "Layer1 <- Layer1biased",
+		  "L1B <- Layer1biased",
+		  "L1W <- Layer1",
+		  "Input <- Layer1"}}};
 
-	BackPropagationConfig config{.tree = wrapNode(tree, wrappersLogs), .expectedLogs = expectedLogs, .sharedLogs = wrappersLogs};
+	BackPropagationConfig config{
+		.tree = wrapNode(tree, wrappersLogs), .expectedLogs = expectedLogs, .sharedLogs = wrappersLogs};
 
 	checkBackPropagation(config);
 }
@@ -663,9 +674,11 @@ TEST_F(TestComputationGraph, testGradientDescentSimulation)
 
 	for(const auto& node : flattenTree(wrappedTree))
 	{
-		constexpr static std::array<const char*, 6> kTrainableNames = {"L1W", "L1B", "L2W", "L2B", "L3W", "L3B"};
+		constexpr static std::array<const char*, 6> kTrainableNames = {
+			"L1W", "L1B", "L2W", "L2B", "L3W", "L3B"};
 
-		if(std::find(kTrainableNames.cbegin(), kTrainableNames.cend(), node->getName()) != kTrainableNames.cend())
+		if(std::find(kTrainableNames.cbegin(), kTrainableNames.cend(), node->getName()) !=
+		   kTrainableNames.cend())
 		{
 			trainableWeights.insert(node);
 		}

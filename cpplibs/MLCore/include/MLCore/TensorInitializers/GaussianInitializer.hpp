@@ -17,7 +17,7 @@ public:
 	explicit GaussianInitializer(ValueType mean = 0, ValueType stddev = 1)
 		: distribution_(mean, stddev)
 		, engine_(std::random_device{}())
-	{ }
+	{}
 
 	GaussianInitializer(const GaussianInitializer&) = default;			  // Copy constructor.
 	GaussianInitializer(GaussianInitializer&&) = default;				  // Move constructor.

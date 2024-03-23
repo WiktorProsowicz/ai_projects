@@ -9,8 +9,8 @@
 namespace utilities
 {
 /**
- * @brief Class serving as a FIFO data structure, delegating the getting/setting requests to the underlying standard queue and protecting the
- * contained objects by multiple-thread access.
+ * @brief Class serving as a FIFO data structure, delegating the getting/setting requests to the underlying
+ * standard queue and protecting the contained objects by multiple-thread access.
  *
  * @tparam T Type of the stored objects.
  */
@@ -19,9 +19,9 @@ class ThreadSafeQueue : protected std::queue<T>
 {
 public:
 	/**
-    * @brief Creates a new empty queue.
-    *
-    */
+	 * @brief Creates a new empty queue.
+	 *
+	 */
 	ThreadSafeQueue() = default;
 
 	ThreadSafeQueue(const ThreadSafeQueue&) = delete;			 // Copy constructor
@@ -30,9 +30,9 @@ public:
 	ThreadSafeQueue& operator=(ThreadSafeQueue&&) = delete;		 // Move assignment
 
 	/**
-     * @brief Destroys the queue, deleting all of the contained objects.
-     *
-     */
+	 * @brief Destroys the queue, deleting all of the contained objects.
+	 *
+	 */
 	~ThreadSafeQueue()
 	{
 		clear();

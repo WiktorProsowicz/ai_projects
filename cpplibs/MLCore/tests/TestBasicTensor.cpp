@@ -94,7 +94,8 @@ TEST_F(TestBasicTensor, testConstructorWithShape)
 {
 
 	constexpr uint8_t nTestCases = 5;
-	const std::vector<std::vector<uint64_t>> shapes{{1, 1, 2, 3, 4}, {50, 2, 50}, {3, 5, 3, 1, 3, 5, 6, 7, 5, 3, 2}, {1}, {}};
+	const std::vector<std::vector<uint64_t>> shapes{
+		{1, 1, 2, 3, 4}, {50, 2, 50}, {3, 5, 3, 1, 3, 5, 6, 7, 5, 3, 2}, {1}, {}};
 	const std::vector<uint64_t> sizes{24, 5000, 850500, 1, 1};
 
 	for(uint8_t i = 0; i < nTestCases; i++)
@@ -129,7 +130,8 @@ TEST_F(TestBasicTensor, testFillingTensor)
 {
 	// properly filled tensor
 	mlCore::Tensor tensorProperlyFilled(std::vector<size_t>{1, 2, 3, 4});
-	const std::vector<double> values{{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}};
+	const std::vector<double> values{
+		{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}};
 	tensorProperlyFilled.fill(values.begin(), values.end());
 
 	checkTensorValues(tensorProperlyFilled, values);
@@ -154,8 +156,9 @@ TEST_F(TestBasicTensor, testDisplayingTensor)
 	const std::vector<std::vector<size_t>> shapes{{2, 2, 3}, {3, 3, 3, 1}, {}, {5}};
 
 	const std::vector<std::vector<double>> tensorsValues{{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12},
-														 {.1,  .2,	.3,	 .4,  .5,  .6,	.7,	 .8,  .9,  .10, .11, .12, .13, .14,
-														  .15, .16, .17, .18, .19, .20, .21, .22, .23, .24, .25, .26, .27},
+														 {.1,  .2,	.3,	 .4,  .5,  .6,	.7,	 .8,  .9,
+														  .10, .11, .12, .13, .14, .15, .16, .17, .18,
+														  .19, .20, .21, .22, .23, .24, .25, .26, .27},
 														 {10},
 														 {1, 2, 3, 4, 5}};
 
@@ -302,7 +305,8 @@ TEST_F(TestBasicTensor, testAssignFunction)
 	const std::vector<std::vector<size_t>> shapes{{2, 3}, {5, 2}};
 	const std::vector<std::vector<double>> initialValues{{1, 1, 1, 1, 1, 1}, {10, 9, 8, 7, 6, 5, 4, 3, 2, 1}};
 
-	const std::vector<std::vector<double>> endValues{{10, 11, 12, 13, 14, 15}, {10, 9, 8, 7, 0, 5, 0, 3, 2, 1}};
+	const std::vector<std::vector<double>> endValues{{10, 11, 12, 13, 14, 15},
+													 {10, 9, 8, 7, 0, 5, 0, 3, 2, 1}};
 
 	mlCore::Tensor tensor1(shapes[0]);
 	tensor1.fill(initialValues[0].begin(), initialValues[0].end());
@@ -391,8 +395,9 @@ TEST_F(TestBasicTensor, testOperatorsWithBroadcasting)
 	mlCore::Tensor resTensor = tensor1 + tensor2;
 
 	ASSERT_EQ(resTensor.shape(), resShape);
-	const std::vector<double> resValues{2, 3,  4,  5,  6,  7,  8,  3,  4,  5,  6,  7,  8,  9,  4,  5,  6,  7,  8,  9,  10,
-										9, 10, 11, 12, 13, 14, 15, 10, 11, 12, 13, 14, 15, 16, 11, 12, 13, 14, 15, 16, 17};
+	const std::vector<double> resValues{2,	3,	4,	5,	6,	7,	8,	3,	4,	5,	6,	7,	8,	9,
+										4,	5,	6,	7,	8,	9,	10, 9,	10, 11, 12, 13, 14, 15,
+										10, 11, 12, 13, 14, 15, 16, 11, 12, 13, 14, 15, 16, 17};
 
 	checkTensorValues(resTensor, resValues);
 }
@@ -413,8 +418,9 @@ TEST_F(TestBasicTensor, testOperatorsWithBroadcastingInPlace)
 	tensor1 += tensor2;
 
 	ASSERT_EQ(tensor1.shape(), resShape);
-	const std::vector<double> resValues{2, 3,  4,  5,  6,  7,  8,  3,  4,  5,  6,  7,  8,  9,  4,  5,  6,  7,  8,  9,  10,
-										9, 10, 11, 12, 13, 14, 15, 10, 11, 12, 13, 14, 15, 16, 11, 12, 13, 14, 15, 16, 17};
+	const std::vector<double> resValues{2,	3,	4,	5,	6,	7,	8,	3,	4,	5,	6,	7,	8,	9,
+										4,	5,	6,	7,	8,	9,	10, 9,	10, 11, 12, 13, 14, 15,
+										10, 11, 12, 13, 14, 15, 16, 11, 12, 13, 14, 15, 16, 17};
 
 	checkTensorValues(tensor1, resValues);
 }
@@ -468,9 +474,9 @@ TEST_F(TestBasicTensor, testMatrixMultiplicationExtended)
 
 	auto result = firstTensor.matmul(secondTensor);
 
-	const std::vector<double> expectedValues{13,  16,  19, 22,	25,	 27,  34,  41,	48,	 55,  41,  52, 63,	74,
-											 85,  55,  70, 85,	100, 115, 69,  88,	107, 126, 145, 83, 106, 129,
-											 152, 175, 97, 124, 151, 178, 205, 111, 142, 173, 204, 235};
+	const std::vector<double> expectedValues{
+		13, 16, 19,	 22,  25,  27, 34,	41,	 48,  55,  41, 52,	63,	 74,  85,  55,	70,	 85,  100, 115,
+		69, 88, 107, 126, 145, 83, 106, 129, 152, 175, 97, 124, 151, 178, 205, 111, 142, 173, 204, 235};
 
 	checkTensorValues(result, expectedValues);
 }
@@ -492,7 +498,8 @@ TEST_F(TestBasicTensor, testTransposition)
 	// 2  7  12  17
 	// 3  8  13  18
 	// 4  9  14  19
-	const std::vector<double> expectedValues{0, 5, 10, 15, 1, 6, 11, 16, 2, 7, 12, 17, 3, 8, 13, 18, 4, 9, 14, 19};
+	const std::vector<double> expectedValues{0,	 5,	 10, 15, 1,	 6,	 11, 16, 2,	 7,
+											 12, 17, 3,	 8,	 13, 18, 4,	 9,	 14, 19};
 
 	checkTensorValues(tensor.transposed(), expectedValues);
 }

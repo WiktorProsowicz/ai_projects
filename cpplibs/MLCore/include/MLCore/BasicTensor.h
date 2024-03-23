@@ -158,9 +158,11 @@ public:
 	/**
 	 * @brief Assigns new values to tensor in places specified by axes ranges.
 	 *
-	 * @param indices List of ranges through each axis that will be taken into account while assigning new data.
+	 * @param indices List of ranges through each axis that will be taken into account while assigning new
+	 * data.
 	 * @param newData List of values to assign.
-	 * @param wrapData Whether the values should be repeated to fit. If false and there are to few values, an exception will be raised.
+	 * @param wrapData Whether the values should be repeated to fit. If false and there are to few values, an
+	 * exception will be raised.
 	 */
 	void assign(std::initializer_list<std::pair<size_t, size_t>> indices,
 				std::initializer_list<ValueType> newData,
@@ -229,7 +231,8 @@ public:
 	 * @tparam InputIter Type of iterator to take data from.
 	 * @param first Beginning iterator of values collection.
 	 * @param last Ending iterator.
-	 * @param wrapData Whether the values should be repeated to fit. If false and there are to few values, an exception will be raised.
+	 * @param wrapData Whether the values should be repeated to fit. If false and there are to few values, an
+	 * exception will be raised.
 	 */
 	template <typename InputIter>
 	void fill(InputIter first, InputIter last, const bool wrapData = false)
@@ -266,7 +269,8 @@ public:
 	/**
 	 * @brief Creates a view over the tensor's data. The spanned data is determined by the provided indices.
 	 *
-	 * @param indices Set of ranges through each axis that will be taken into account while creating the slice.
+	 * @param indices Set of ranges through each axis that will be taken into account while creating the
+	 * slice.
 	 */
 	BasicTensorSlice<ValueType> slice(const std::vector<std::pair<size_t, size_t>>& indices);
 
@@ -274,9 +278,10 @@ public:
 	friend std::ostream& operator<<(std::ostream& out, const BasicTensor<TensorValueType>& tensor);
 
 private:
-	/// Traverses list of indices and checks ranges correctness. Correct indices specify tensor slice that can be modified via value assignment.
-	/// Throws std::out_of_range if upper[i] > shape[i] or 0 > indices.size() > shape_.size().
-	/// Indices is a list of pairs of min-max indices from axis zero i.e for tensor([[1, 2], [3, 4]]) -> list{{0, 1}} -> [1, 2].
+	/// Traverses list of indices and checks ranges correctness. Correct indices specify tensor slice that can
+	/// be modified via value assignment. Throws std::out_of_range if upper[i] > shape[i] or 0 >
+	/// indices.size() > shape_.size(). Indices is a list of pairs of min-max indices from axis zero i.e for
+	/// tensor([[1, 2], [3, 4]]) -> list{{0, 1}} -> [1, 2].
 	template <typename IndicesIter>
 	void _checkIndicesList(IndicesIter beg, IndicesIter end) const;
 

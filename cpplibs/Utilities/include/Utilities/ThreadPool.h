@@ -47,7 +47,8 @@ public:
 	void init(size_t numThreads);
 
 	/**
-	 * @brief Resizes the number of working threads. If the `numThreads` is smaller then size(), truncated threads shall bring their tasks to an end.
+	 * @brief Resizes the number of working threads. If the `numThreads` is smaller then size(), truncated
+	 * threads shall bring their tasks to an end.
 	 *
 	 * @param numThreads
 	 */

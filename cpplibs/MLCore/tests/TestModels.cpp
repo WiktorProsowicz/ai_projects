@@ -77,7 +77,9 @@ public:
 
 	void unregisterMetric(mlCore::models::IMetricPtr metric) override
 	{
-		metrics_.erase(std::remove_if(metrics_.begin(), metrics_.end(), [&metric](const auto met) { return met == metric; }),
+		metrics_.erase(std::remove_if(metrics_.begin(),
+									  metrics_.end(),
+									  [&metric](const auto met) { return met == metric; }),
 					   metrics_.end());
 	}
 
@@ -127,7 +129,7 @@ public:
 	TestCallback() = default;
 	~TestCallback() override = default;
 
-	void call() override { }
+	void call() override {}
 };
 
 /*************

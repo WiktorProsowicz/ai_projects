@@ -76,7 +76,8 @@ public:
 		}
 		else if(containerValue.size() != collectedShapeIndices_.at(currentLevel))
 		{
-			LOG_ERROR("TensorOperations", fmt::format("Inconsistent elements number at axis {}.", currentLevel));
+			LOG_ERROR("TensorOperations",
+					  fmt::format("Inconsistent elements number at axis {}.", currentLevel));
 		}
 
 		std::vector<std::vector<TensorDataType>> collectedValueSets;
@@ -93,7 +94,8 @@ public:
 
 		if(collectedValueSets.empty())
 		{
-			LOG_ERROR("TensorOperations", "Encountered empty initializer list at a certain level of raw tensor form.");
+			LOG_ERROR("TensorOperations",
+					  "Encountered empty initializer list at a certain level of raw tensor form.");
 		}
 
 		const auto nElementsInSubValue = collectedValueSets.cbegin()->size();
@@ -105,8 +107,9 @@ public:
 		{
 			if(valueSet.size() != nElementsInSubValue)
 			{
-				LOG_ERROR("TensorOperations",
-						  "Encountered not-constant number of subelements at a certain level of raw tensor form.");
+				LOG_ERROR(
+					"TensorOperations",
+					"Encountered not-constant number of subelements at a certain level of raw tensor form.");
 			}
 
 			for(const auto& value : valueSet)

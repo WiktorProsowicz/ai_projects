@@ -15,11 +15,11 @@ class IOptimizer
 {
 public:
 	/**
-     * @brief Modifies the weight with respect to the derivative.
-     *
-     * @param weight Weight to be modified.
-     * @param derivative Derivative matched to the weight.
-     */
+	 * @brief Modifies the weight with respect to the derivative.
+	 *
+	 * @param weight Weight to be modified.
+	 * @param derivative Derivative matched to the weight.
+	 */
 	virtual void applyGradient(autoDiff::NodePtr weight, Tensor derivative) = 0;
 
 	virtual ~IOptimizer() = default;

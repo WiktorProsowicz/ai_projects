@@ -25,7 +25,8 @@ public:
 	 * @return IStreamWrapper Pointer to the external wrapper.
 	 */
 	template <typename WrapperType>
-	static IStreamWrapperPtr spawnWrapped(std::ostream& stream) requires std::is_base_of_v<IStreamWrapper, WrapperType>
+	static IStreamWrapperPtr spawnWrapped(std::ostream& stream)
+		requires std::is_base_of_v<IStreamWrapper, WrapperType>
 	{
 		return std::make_shared<WrapperType>(std::make_shared<BaseStreamWrapper>(stream));
 	}
@@ -33,13 +34,14 @@ public:
 	BaseStreamWrapper() = delete; /// Default constructor.
 
 	/**
-     * @brief Creates a new BaseStreamWrapper and assigns an std::ostream to which the content shall be streamed.
-     *
-     * @param stream
-     */
+	 * @brief Creates a new BaseStreamWrapper and assigns an std::ostream to which the content shall be
+	 * streamed.
+	 *
+	 * @param stream
+	 */
 	explicit BaseStreamWrapper(std::ostream& stream)
 		: stream_(stream)
-	{ }
+	{}
 
 	~BaseStreamWrapper() override = default; /// Default virtual destructor.
 
@@ -49,10 +51,10 @@ public:
 	}
 
 	/**
-     * @brief Streams the given `content` to the referenced std::ostream.
-     *
-     * @param content Content to stream into the underlying std::ostream.
-     */
+	 * @brief Streams the given `content` to the referenced std::ostream.
+	 *
+	 * @param content Content to stream into the underlying std::ostream.
+	 */
 	template <typename StreamedType>
 	void put(StreamedType&& content)
 	{

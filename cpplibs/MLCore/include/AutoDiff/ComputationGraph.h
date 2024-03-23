@@ -47,9 +47,9 @@ public:
 	}
 
 	/**
-     * @brief Cleans the graph from cumulated gradient.
-     *
-     */
+	 * @brief Cleans the graph from cumulated gradient.
+	 *
+	 */
 	inline void clearGradients()
 	{
 		gradients_.clear();
@@ -104,7 +104,8 @@ public:
 	/**
 	 * @brief Goes through the graph starting from the primary leaves
 	 *
-	 * @param feedDict Stores values that should fill chosen placeholders. If not given, placeholders keep their old values.
+	 * @param feedDict Stores values that should fill chosen placeholders. If not given, placeholders keep
+	 * their old values.
 	 */
 	void forwardPass(const std::map<PlaceholderPtr, Tensor>& feedDict = {});
 

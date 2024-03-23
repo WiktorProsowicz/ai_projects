@@ -123,8 +123,9 @@ TEST_F(TestLoggingLib, testNamedChannelsLogging)
 						"\033[34m[ INFO][Channel 1] Message 3\033[0m",
 						"\033[34m[ INFO][Channel 1] Message 6\033[0m"});
 
-	checkHarvestedLogs(secondChannelStream.str(),
-					   {"\033[34m[ INFO][Channel 2] Message 5\033[0m", "\033[34m[ INFO][Channel 2] Message 7\033[0m"});
+	checkHarvestedLogs(
+		secondChannelStream.str(),
+		{"\033[34m[ INFO][Channel 2] Message 5\033[0m", "\033[34m[ INFO][Channel 2] Message 7\033[0m"});
 }
 
 } // namespace

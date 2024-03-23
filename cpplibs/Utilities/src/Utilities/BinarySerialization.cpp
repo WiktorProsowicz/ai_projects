@@ -7,21 +7,21 @@
 // __Custom preprocessor macros__
 
 /// Template for template makeBytes functions handling c-style strings.
-#define __REGISTER_MAKEBYTES_CHARS(charType)                                                                                     \
-	template <>                                                                                                                  \
-	std::string makeBytes(charType object)                                                                                       \
-	{                                                                                                                            \
-		return object;                                                                                                           \
+#define __REGISTER_MAKEBYTES_CHARS(charType)                                                                 \
+	template <>                                                                                              \
+	std::string makeBytes(charType object)                                                                   \
+	{                                                                                                        \
+		return object;                                                                                       \
 	}
 
 /// Template for template makeBytes functions handling numeric types.
-#define __REGISTER_MAKEBYTES_NUMERIC(numType)                                                                                    \
-	template <>                                                                                                                  \
-	std::string makeBytes(const numType object)                                                                                  \
-	{                                                                                                                            \
-		std::string s(sizeof(object), ' ');                                                                                      \
-		std::memcpy(s.data(), &object, sizeof(object));                                                                          \
-		return s;                                                                                                                \
+#define __REGISTER_MAKEBYTES_NUMERIC(numType)                                                                \
+	template <>                                                                                              \
+	std::string makeBytes(const numType object)                                                              \
+	{                                                                                                        \
+		std::string s(sizeof(object), ' ');                                                                  \
+		std::memcpy(s.data(), &object, sizeof(object));                                                      \
+		return s;                                                                                            \
 	}
 
 namespace utilities

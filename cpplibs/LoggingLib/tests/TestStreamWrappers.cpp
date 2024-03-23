@@ -77,15 +77,17 @@ TEST_F(TestStreamWrappers, testDecolorizingStream)
 {
 	std::stringstream strStream;
 
-	auto decolorizingStream = streamWrappers::BaseStreamWrapper::spawnWrapped<streamWrappers::DecolorizingStream>(strStream);
+	auto decolorizingStream =
+		streamWrappers::BaseStreamWrapper::spawnWrapped<streamWrappers::DecolorizingStream>(strStream);
 
 	decolorizingStream->putCharString("\033[31;0m[ WARN][Unnamed] Message number 1\033[0m\n");
 	decolorizingStream->putCharString("\033[32;1m[ INFO][Unnamed] Message number 2\033[0m\n");
 	decolorizingStream->putCharString("\033[33m[ERROR][Unnamed] Message number 3\033[0m\n");
 
-	checkHarvestedLogs(
-		strStream.str(),
-		{"[ WARN][Unnamed] Message number 1", "[ INFO][Unnamed] Message number 2", "[ERROR][Unnamed] Message number 3"});
+	checkHarvestedLogs(strStream.str(),
+					   {"[ WARN][Unnamed] Message number 1",
+						"[ INFO][Unnamed] Message number 2",
+						"[ERROR][Unnamed] Message number 3"});
 }
 
 } // namespace

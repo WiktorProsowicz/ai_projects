@@ -32,6 +32,7 @@ NodePtr binaryOperationImpl(const NodePtr& lNode, const NodePtr& rNode)
 	return result;
 }
 } // namespace
+
 namespace binaryOperations
 {
 NodePtr multiply(const NodePtr lNode, const NodePtr rNode)

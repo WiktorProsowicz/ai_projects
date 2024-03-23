@@ -29,9 +29,9 @@ class Callback
 
 public:
 	/**
-     * @brief Tells the callback to execute its task.
-     *
-     */
+	 * @brief Tells the callback to execute its task.
+	 *
+	 */
 	virtual void call() = 0;
 
 	/// Adds single CallbackMode to overall callback's mode.

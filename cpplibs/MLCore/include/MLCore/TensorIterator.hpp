@@ -17,39 +17,39 @@ public:
 	using reference = ValueType&;
 
 	/**
-     * @brief Constructs a new TensorIterator with initial position.
-     *
-     * @param ptr Initially pointed memory.
-     */
+	 * @brief Constructs a new TensorIterator with initial position.
+	 *
+	 * @param ptr Initially pointed memory.
+	 */
 	explicit TensorIterator(pointer ptr)
 		: currPtr_(ptr)
-	{ }
+	{}
 
 	/**
-     * @brief Dereference operator.
-     *
-     * @return reference
-     */
+	 * @brief Dereference operator.
+	 *
+	 * @return reference
+	 */
 	reference operator*()
 	{
 		return *currPtr_;
 	}
 
 	/**
-     * @brief Class member access operator.
-     *
-     * @return pointer
-     */
+	 * @brief Class member access operator.
+	 *
+	 * @return pointer
+	 */
 	pointer operator->()
 	{
 		return currPtr_;
 	}
 
 	/**
-     * @brief Prefix increment operator.
-     *
-     * @return Iterator&
-     */
+	 * @brief Prefix increment operator.
+	 *
+	 * @return Iterator&
+	 */
 	TensorIterator& operator++()
 	{
 		currPtr_++;
@@ -58,16 +58,17 @@ public:
 
 	// NOLINTBEGIN
 	/**
-     * @brief Postfix increment operator.
-     *
-     * @return const Iterator
-     */
+	 * @brief Postfix increment operator.
+	 *
+	 * @return const Iterator
+	 */
 	TensorIterator operator++(int)
 	{
 		auto tmp = *this;
 		++(*this);
 		return tmp;
 	}
+
 	// NOLINTEND
 
 	TensorIterator& operator+=(difference_type n)
@@ -100,24 +101,24 @@ public:
 	}
 
 	/**
-     * @brief Checks if two tensors differ.
-     *
-     * @param other Iterator to compare.
-     * @return true If the tensors are different.
-     * @return false In the opposite case.
-     */
+	 * @brief Checks if two tensors differ.
+	 *
+	 * @param other Iterator to compare.
+	 * @return true If the tensors are different.
+	 * @return false In the opposite case.
+	 */
 	bool operator!=(const TensorIterator& other) const
 	{
 		return currPtr_ != other.currPtr_;
 	}
 
 	/**
-     * @brief Checks if TensorIterator comes first in order before the other one.
-     *
-     * @param other Iterator to compare.
-     * @return true If `this` is smaller than the `other`.
-     * @return false In the opposite case.
-     */
+	 * @brief Checks if TensorIterator comes first in order before the other one.
+	 *
+	 * @param other Iterator to compare.
+	 * @return true If `this` is smaller than the `other`.
+	 * @return false In the opposite case.
+	 */
 	bool operator<(const TensorIterator& other)
 	{
 		return currPtr_ < other.currPtr_;

@@ -24,6 +24,7 @@ std::pair<Tensor, Tensor> MatmulOperator::computeDirectDerivative() const
 
 	const Tensor onesWithOutputShape(value_.shape(), 1.0);
 
-	return {onesWithOutputShape.matmul(rightValue.transposed()), leftValue.transposed().matmul(onesWithOutputShape)};
+	return {onesWithOutputShape.matmul(rightValue.transposed()),
+			leftValue.transposed().matmul(onesWithOutputShape)};
 }
 } // namespace mlCore::autoDiff::binaryOperators

@@ -30,7 +30,7 @@ public:
 		, maxValue_(maxValue)
 		, step_(step)
 
-	{ }
+	{}
 
 	RangeTensorInitializer(RangeTensorInitializer&&) = delete;				   // Move ctor
 	RangeTensorInitializer(const RangeTensorInitializer&) = delete;			   // Copy ctor

@@ -128,14 +128,14 @@ public:
 
 private:
 	/**
-     * @brief Creates a new iterator with parameters passed by a tensor slice.
-     *
-     * @param ptr Pointer to data spanned by the creating slice.
-     * @param dataChunks Chunks of contiguous data from the tensor.
-     * @param chunkLength Size of each chunk of data.
-     * @param offset Offset indicating the shift of the current pointer regarding the beginning
-     *  of the whole data spanned by the slice. The offset assumes the spanned data is contiguous.
-     */
+	 * @brief Creates a new iterator with parameters passed by a tensor slice.
+	 *
+	 * @param ptr Pointer to data spanned by the creating slice.
+	 * @param dataChunks Chunks of contiguous data from the tensor.
+	 * @param chunkLength Size of each chunk of data.
+	 * @param offset Offset indicating the shift of the current pointer regarding the beginning
+	 *  of the whole data spanned by the slice. The offset assumes the spanned data is contiguous.
+	 */
 	SlicedTensorIterator(pointer ptr,
 						 const std::vector<ValueType*>& dataChunks,
 						 const size_t chunkLength,
@@ -144,7 +144,7 @@ private:
 		, dataChunks_(dataChunks)
 		, chunkLength_(chunkLength)
 		, offset_(offset)
-	{ }
+	{}
 
 	/// Updates the pointer value according to current offset. It is assumed the offset is valid.
 	void _updatePointer()

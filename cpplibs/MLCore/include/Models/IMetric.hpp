@@ -27,10 +27,10 @@ class IMetric
 {
 public:
 	/**
-     * @brief Notifies the metric about a specific state of the model learning/inference process.
-     *
-     * @param context Object containing data for the metric.
-     */
+	 * @brief Notifies the metric about a specific state of the model learning/inference process.
+	 *
+	 * @param context Object containing data for the metric.
+	 */
 	virtual void notify(MetricContextPtr context = nullptr) = 0;
 
 	virtual ~IMetric() = default;

@@ -1,7 +1,7 @@
 ---
 BasedOnStyle: WebKit
 AccessModifierOffset: -4
-AlignAfterOpenBracket: true
+AlignAfterOpenBracket: Align
 AlignArrayOfStructures: None
 AlignConsecutiveAssignments:
   Enabled: false
@@ -145,7 +145,7 @@ PPIndentWidth: -1
 PackConstructorInitializers: BinPack
 PenaltyBreakAssignment: 2
 PenaltyBreakBeforeFirstCallParameter: 19
-PenaltyBreakComment: 300
+PenaltyBreakComment: 120
 PenaltyBreakFirstLessLess: 120
 PenaltyBreakOpenParenthesis: 0
 PenaltyBreakString: 1000
@@ -156,7 +156,7 @@ PenaltyReturnTypeOnItsOwnLine: 60
 PointerAlignment: Left
 QualifierAlignment: Leave
 ReferenceAlignment: Pointer
-ReflowComments: false
+ReflowComments: true
 RemoveBracesLLVM: false
 RemoveParentheses: Leave
 RemoveSemicolon: false

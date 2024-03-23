@@ -19,13 +19,13 @@ class DecolorizingStream : public IStreamWrapper
 {
 public:
 	/**
-     * @brief Creates a new DecolorizingStream.
-     *
-     * @param stream Stream to pass to the base stream wrapper.
-     */
+	 * @brief Creates a new DecolorizingStream.
+	 *
+	 * @param stream Stream to pass to the base stream wrapper.
+	 */
 	explicit DecolorizingStream(IStreamWrapperPtr wrappedStream)
 		: wrappedStream_(wrappedStream)
-	{ }
+	{}
 
 	~DecolorizingStream() override = default; /// Default destructor.
 

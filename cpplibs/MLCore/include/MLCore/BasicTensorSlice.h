@@ -30,8 +30,8 @@ concept SizedRange = requires(T t) {
  *
  * Tensor slices are merely the views over mlCore::BasicTensor instances. There can be multiple
  * instances of slices created by providing different sets of indices as long as the referenced
- * tensor is alive, otherwise the slices are not valid. This can be compared to the dangling references problem.
- * No lifetime tracking is performed automatically.
+ * tensor is alive, otherwise the slices are not valid. This can be compared to the dangling references
+ * problem. No lifetime tracking is performed automatically.
  *
  * @tparam ValueType Underlying data type of the referenced tensor.
  */
@@ -45,22 +45,23 @@ public:
 	BasicTensorSlice() = delete; /// Default constructor.
 
 	/**
-     * @brief Constructs tensor slice copying its configuration and linking it to the tensor associated do `other`.
-     *
-     * @param other Slice to copy.
-     *
-     */
+	 * @brief Constructs tensor slice copying its configuration and linking it to the tensor associated do
+	 * `other`.
+	 *
+	 * @param other Slice to copy.
+	 *
+	 */
 	BasicTensorSlice(const BasicTensorSlice& other);
 
 	BasicTensorSlice(BasicTensorSlice&&) = delete; /// Move constructor.
 
 	/**
-     * @brief Copies another slice's configuration to this. Don't confuse it with `assign` method
-     * copying data referenced by other slice.
-     *
-     * @param other Slice to copy.
-     *
-     */
+	 * @brief Copies another slice's configuration to this. Don't confuse it with `assign` method
+	 * copying data referenced by other slice.
+	 *
+	 * @param other Slice to copy.
+	 *
+	 */
 	BasicTensorSlice& operator=(const BasicTensorSlice& other);
 
 	BasicTensorSlice& operator=(BasicTensorSlice&&) = delete; /// Move assignment.
@@ -68,11 +69,11 @@ public:
 	~BasicTensorSlice() = default; /// Default destructor.
 
 	/**
-     * @brief Copies data from tensor referenced by `other` slice. Number of elements
+	 * @brief Copies data from tensor referenced by `other` slice. Number of elements
 	 * spanned by first slice should be divisible by the number of elements spanned by the second one.
-     *
-     * @param other A slice to copy data from the tensor referenced by.
-     */
+	 *
+	 * @param other A slice to copy data from the tensor referenced by.
+	 */
 	void assign(const BasicTensorSlice& other);
 
 	/// @see BasicTensorSlice::assign(const BasicTensorSlice&)
@@ -138,10 +139,11 @@ private:
 	 *
 	 * @param associatedTensor Tensor to be referenced.
 	 * @param indices Span indicating the shape of the slice. The length of the indices should be the same
-     * as the length of the source tensor's shape. Each pair of indices should be a range rather than a single index,
-	 * i.e. (2, 3) instead of (2, 2).
+	 * as the length of the source tensor's shape. Each pair of indices should be a range rather than a single
+	 * index, i.e. (2, 3) instead of (2, 2).
 	 */
-	explicit BasicTensorSlice(BasicTensor<ValueType>& associatedTensor, const std::vector<std::pair<size_t, size_t>>& indices);
+	explicit BasicTensorSlice(BasicTensor<ValueType>& associatedTensor,
+							  const std::vector<std::pair<size_t, size_t>>& indices);
 
 	/**
 	 * @brief Assigns the data from the span to the elements spanned by the slice.
@@ -172,7 +174,8 @@ private:
 	size_t _computeChunkLength() const;
 
 	/// Determines pairs of pointers to arrays of data that shall be aligned together after broadcasting.
-	std::vector<std::pair<ValueType*, ValueType*>> _determineBroadcastedDataPointers(const BasicTensorSlice& other) const;
+	std::vector<std::pair<ValueType*, ValueType*>>
+	_determineBroadcastedDataPointers(const BasicTensorSlice& other) const;
 
 	/// Computes number off all data items spanned by the slice.
 	size_t _computeSliceSize() const;

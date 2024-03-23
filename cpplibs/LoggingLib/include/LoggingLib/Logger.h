@@ -20,8 +20,8 @@ enum class LogType : uint8_t
 };
 
 /**
- * @brief Singleton class used to stream logs to the desired type of output stream. Logger operates on named logging channels and can assign types of logging
- * to emphasise the concrete message and apply coloring.
+ * @brief Singleton class used to stream logs to the desired type of output stream. Logger operates on named
+ * logging channels and can assign types of logging to emphasise the concrete message and apply coloring.
  *
  */
 class Logger
@@ -33,10 +33,10 @@ public:
 	Logger& operator=(Logger&&) = delete;	   // Move assignment
 
 	/**
-     * @brief Returns the global logger instance.
-     *
-     * @return Global logger.
-     */
+	 * @brief Returns the global logger instance.
+	 *
+	 * @return Global logger.
+	 */
 	static Logger& getInstance();
 
 	/**
@@ -86,33 +86,35 @@ public:
 	void setNamedChannelStream(const std::string& name, streamWrappers::IStreamWrapperPtr stream);
 
 	/**
-	 * @brief Cleans the internal logger's configuration, i.e. streams associated to channels, default stream etc.
+	 * @brief Cleans the internal logger's configuration, i.e. streams associated to channels, default stream
+	 * etc.
 	 *
 	 */
 	void reset();
 
 private:
 	/**
-     * @brief Constructs a global logger object.
-     *
-     * @param stream Initial stream that logger shall send logs to.
-     *
-     */
+	 * @brief Constructs a global logger object.
+	 *
+	 * @param stream Initial stream that logger shall send logs to.
+	 *
+	 */
 	Logger()
 		: defaultStream_(std::make_shared<streamWrappers::BaseStreamWrapper>(std::cout))
 		, namedStreamsMap_()
 		, streamingMutex_()
-	{ }
+	{}
 
 	/**
-     * @brief Streams the given message into the channel specified by the `channelName`.
+	 * @brief Streams the given message into the channel specified by the `channelName`.
 	 * Type of the log depends on the given type argument.
-	 * The message is streamed to the std::ostream& stored in the channel_name-stream map and, if not specified, on the default stream.
-     *
-     * @param logType Type of the streamed log.
-     * @param channelName Name of the log channel.
-     * @param logContent Message content.
-     */
+	 * The message is streamed to the std::ostream& stored in the channel_name-stream map and, if not
+	 * specified, on the default stream.
+	 *
+	 * @param logType Type of the streamed log.
+	 * @param channelName Name of the log channel.
+	 * @param logContent Message content.
+	 */
 	void logOnChannel(LogType logType, const char* channelName, const char* logContent);
 
 private:
