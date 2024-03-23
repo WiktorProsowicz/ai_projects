@@ -11,12 +11,13 @@ import pathlib
 import subprocess
 import venv
 from os import path
-from typing import List
+
+from pymodules.utilities import logging_utils
 
 HOME_PATH = pathlib.Path(__file__).absolute().parent.as_posix()
 
 
-def setup_venv() -> None:
+def setup_venv():
     """Sets up the virtual environment."""
 
     venv_path = path.join(HOME_PATH, "venv")
@@ -43,7 +44,7 @@ def setup_venv() -> None:
     logging.info("Then type 'deactivate' to deactivate the environment.")
 
 
-def build_project(*args) -> None:
+def build_project(*args):
     """Compiles C++ files from the repository.
 
     The compiled binaries are linked to each other and in form of libraries and executables
@@ -72,7 +73,7 @@ def build_project(*args) -> None:
         logging.critical('Building project failed: %s', proc_error)
 
 
-def clean_project() -> None:
+def clean_project():
     """Clears generated CMake configuration files.
 
     The project after having been cleaned is prepared to be rebuilt.
@@ -88,7 +89,7 @@ def clean_project() -> None:
         logging.critical('Cleaning project failed: %s', proc_error)
 
 
-def install_dependencies() -> None:
+def install_dependencies():
     """Downloads and builds external libraries.
 
     The used libraries are specified by the `conanfile.py`.
@@ -110,12 +111,30 @@ def install_dependencies() -> None:
             'Setting up external dependencies failed: %s', proc_error)
 
 
+def run_unit_tests():
+    """Runs C++ and Python tests found in the workspace."""
+
+    build_path = os.path.join(HOME_PATH, 'build')
+
+    try:
+
+        logging.info('Running C++ unit tests.')
+
+        subprocess.run(['ctest', '--test-dir', build_path,
+                       '--output-on-failure'], check=True)
+
+    except subprocess.CalledProcessError as proc_error:
+        logging.critical(
+            'Unit test run failed: %s', proc_error
+        )
+
+
 def _get_arg_parser() -> argparse.ArgumentParser:
     """Returns an argument parser for the script."""
 
     functions_descriptions = "\n".join(
         [f"{func.__name__}: {func.__doc__.splitlines()[0]}" for func in [
-            setup_venv, build_project, clean_project, install_dependencies]]
+            setup_venv, build_project, clean_project, install_dependencies, run_unit_tests]]
     )
 
     program_desc = (
@@ -137,14 +156,15 @@ def _get_arg_parser() -> argparse.ArgumentParser:
     return arg_parser
 
 
-def main(function: str, *args) -> None:
+def main(function: str, *args):
     """Main function delegating the flow to other ones.
 
     Args:
         function (str): Name of the function to be called.
     """
 
-    for available_func in [setup_venv, build_project, clean_project, install_dependencies]:
+    for available_func in [setup_venv, build_project, clean_project,
+                           install_dependencies, run_unit_tests]:
         if available_func.__name__ == function:
             available_func(*args)  # type: ignore
             return
@@ -156,5 +176,7 @@ if __name__ == "__main__":
 
     parser = _get_arg_parser()
     arguments, left_args = parser.parse_known_args()
+
+    logging_utils.setup_logging()
 
     main(arguments.function_name, *(arguments.args + left_args))
