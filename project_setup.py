@@ -56,9 +56,15 @@ def build_project(*args) -> None:
 
     build_path = os.path.join(HOME_PATH, 'build')
 
+    default_args = (
+        '-S', HOME_PATH,
+        '-B', build_path,
+        '-DCMAKE_C_COMPILER=gcc-12',
+        '-DCMAKE_CXX_COMPILER=g++-11'
+    )
+
     try:
-        subprocess.run(['cmake', '-S', HOME_PATH, '-B',
-                       build_path, *args], check=True)
+        subprocess.run(['cmake', *default_args, *args], check=True)
 
         subprocess.run(['make', '-C', build_path, '-j'], check=True)
 
