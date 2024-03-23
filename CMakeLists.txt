@@ -3,17 +3,24 @@ cmake_minimum_required(VERSION "${CMAKE_MINIMUM_REQUIRED_VERSION}")
 
 project(ai_projects VERSION 1.0.0)
 
+option(BUILD_TESTS "Build test executables." OFF)
+
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_PREFIX_PATH ${CMAKE_CURRENT_SOURCE_DIR}/build/ConanFiles ${CMAKE_MODULE_PATH})
 
-set(BUILD_SHARED_LIBS True)
+find_package(fmt REQUIRED)
+
+if(${BUILD_TESTS})
 
 enable_testing()
 
-option(BUILD_TESTS "Build test executables." OFF)
+find_package(GTest REQUIRED)
 
 include(GoogleTest)
+
+endif()
 
 set(COMMON_COMPILE_OPTIONS
     -Wall
@@ -41,7 +48,7 @@ set(COMMON_COMPILE_OPTIONS
     -Wno-deprecated
 )
 
-add_subdirectory(LoggingLib)
+add_subdirectory(cpplibs/LoggingLib)
 
-add_subdirectory(MLCore)
-add_subdirectory(Utilities)
+add_subdirectory(cpplibs/MLCore)
+add_subdirectory(cpplibs/Utilities)

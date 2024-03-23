@@ -6,6 +6,6 @@ include("${CMAKE_SOURCE_DIR}/Common.cmake")
 
 install_library()
 
-target_link_libraries(${PROJECT_NAME} LoggingLib fmt)
+target_link_libraries(${PROJECT_NAME} LoggingLib fmt::fmt)
 
 add_tests()

@@ -13,16 +13,12 @@ macro(install_library)
     # install library
     add_library(${PROJECT_NAME} SHARED)
 
-    target_sources(${PROJECT_NAME} INTERFACE "${${PROJECT_NAME}_PUBLIC_HEADERS}" "${${PROJECT_NAME}_PRIVATE_HEADERS}"
-                                   PRIVATE "${${PROJECT_NAME}_SRC}")
+    target_sources(${PROJECT_NAME} PUBLIC "${${PROJECT_NAME}_PUBLIC_HEADERS}" 
+                                   PRIVATE "${${PROJECT_NAME}_SRC}" "${${PROJECT_NAME}_PRIVATE_HEADERS}")
 
     set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
 
     set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/)
-
-    target_include_directories(${PROJECT_NAME} PUBLIC
-                        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-                        $<INSTALL_INTERFACE:include>)
 
     if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/src/include)
         target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/include)
@@ -76,7 +72,7 @@ macro(add_tests)
 
             add_executable("${TEST_NAME}" "${TEST_FILE}")
 
-            target_link_libraries("${TEST_NAME}" PUBLIC ${PROJECT_NAME} gtest gtest_main)
+            target_link_libraries("${TEST_NAME}" PUBLIC ${PROJECT_NAME} GTest::gtest GTest::gtest_main)
 
             if(${ARGC} GREATER 0)
                 target_link_libraries("${TEST_NAME}" PUBLIC ${ARGV})
