@@ -6,16 +6,12 @@
  * by Wiktor Prosowicz
  **********************/
 
-// __Tested headers__
-#include <Utilities/BinarySerialization.h>
-
-// __CPP headers__
-#include <strstream>
 #include <fstream>
+#include <strstream>
 
-// __External software__
-#include <gtest/gtest.h>
+#include <Utilities/BinarySerialization.h>
 #include <fmt/format.h>
+#include <gtest/gtest.h>
 
 /*****************************
  *

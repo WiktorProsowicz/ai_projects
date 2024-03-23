@@ -1,11 +1,9 @@
 #ifndef LOGGINGLIB_INCLUDE_LOGGINGLIB_LOGGINGLIB_HPP
 #define LOGGINGLIB_INCLUDE_LOGGINGLIB_LOGGINGLIB_HPP
 
-// __C++ standard headers__
 #include <sstream>
 
-// __Own headers__
-#include <LoggingLib/Logger.h>
+#include "LoggingLib/Logger.h"
 
 /**
  * @brief Logs a message having some informative content.

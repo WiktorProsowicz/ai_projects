@@ -1,11 +1,11 @@
-#include <MLCore/TensorOperationsImpl.h>
+#include "MLCore/TensorOperationsImpl.h"
 
 #include <cmath>
 
 #include <fmt/format.h>
 
-#include <MLCore/Utilities.h>
-#include <MLCore/BasicTensor.h>
+#include "MLCore/BasicTensor.h"
+#include "MLCore/Utilities.h"
 
 // NOLINTBEGIN
 

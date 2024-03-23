@@ -6,16 +6,12 @@
  * by Wiktor Prosowicz
  **********************/
 
-// __Tested headers__
-#include <StreamWrappers/DecolorizingStream.hpp>
-#include <StreamWrappers/BaseStreamWrapper.hpp>
-
-// __C++ standard headers__
 #include <vector>
 
-// __External headers__
-#include <gtest/gtest.h>
+#include <StreamWrappers/BaseStreamWrapper.hpp>
+#include <StreamWrappers/DecolorizingStream.hpp>
 #include <fmt/format.h>
+#include <gtest/gtest.h>
 
 namespace
 {

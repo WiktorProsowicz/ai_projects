@@ -6,14 +6,13 @@
  * by Wiktor Prosowicz
  **********************/
 
-#include <AutoDiff/GraphOperations.h>
-#include <AutoDiff/BinaryOperators/BinaryOperator.h>
-#include <AutoDiff/UnaryOperators/UnaryOperator.h>
-
-#include <gtest/gtest.h>
 #include <iostream>
 
+#include <AutoDiff/BinaryOperators/BinaryOperator.h>
+#include <AutoDiff/GraphOperations.h>
+#include <AutoDiff/UnaryOperators/UnaryOperator.h>
 #include <MLCore/TensorInitializers/RangeTensorInitializer.hpp>
+#include <gtest/gtest.h>
 
 namespace
 {

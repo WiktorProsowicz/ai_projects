@@ -1,12 +1,11 @@
 #include <vector>
 
-#include <gtest/gtest.h>
-
-#include <Models/ILayer.hpp>
 #include <Models/Callback.hpp>
+#include <Models/ILayer.hpp>
 #include <Models/IMeasurable.hpp>
 #include <Models/IMetric.hpp>
 #include <Models/IOptimizer.hpp>
+#include <gtest/gtest.h>
 
 namespace
 {

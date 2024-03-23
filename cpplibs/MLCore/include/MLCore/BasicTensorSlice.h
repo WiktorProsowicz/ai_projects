@@ -2,11 +2,11 @@
 #define MLCORE_INCLUDE_MLCORE_BASICTENSORSLICE_H
 
 // __C++ standard headers__
-#include <vector>
 #include <cstdio>
 #include <functional>
-#include <span>
 #include <ostream>
+#include <span>
+#include <vector>
 
 #include "MLCore/SlicedTensorIterator.hpp"
 

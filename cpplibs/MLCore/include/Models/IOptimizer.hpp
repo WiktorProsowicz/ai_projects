@@ -3,7 +3,7 @@
 
 #include <memory>
 
-#include <AutoDiff/GraphNodes.hpp>
+#include "AutoDiff/GraphNodes.hpp"
 
 namespace mlCore::models
 {

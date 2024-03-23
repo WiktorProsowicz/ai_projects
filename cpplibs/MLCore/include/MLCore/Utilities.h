@@ -1,14 +1,12 @@
 #ifndef MLCORE_UTILITIES_H
 #define MLCORE_UTILITIES_H
 
-// __C++ standard headers__
 #include <iterator>
 #include <limits>
 #include <sstream>
-#include <vector>
 #include <variant>
+#include <vector>
 
-// __External software headers__
 #include <fmt/format.h>
 #include <fmt/ranges.h>
 

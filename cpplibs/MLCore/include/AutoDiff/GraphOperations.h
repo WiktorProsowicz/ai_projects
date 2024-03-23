@@ -1,8 +1,8 @@
 #ifndef AUTODIFF_GRAPHOPERATIONS_H
 #define AUTODIFF_GRAPHOPERATIONS_H
 
-#include <AutoDiff/ComputationGraph.h>
-#include <AutoDiff/GraphNodes.hpp>
+#include "AutoDiff/ComputationGraph.h"
+#include "AutoDiff/GraphNodes.hpp"
 
 /**
  * @brief Algorithms operating on GraphNodes.

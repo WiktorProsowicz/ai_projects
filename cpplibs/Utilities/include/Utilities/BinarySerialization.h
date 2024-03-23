@@ -1,11 +1,10 @@
 #ifndef UTILITIES_INCLUDE_UTILITIES_BINARYSERIALIZATION_H
 #define UTILITIES_INCLUDE_UTILITIES_BINARYSERIALIZATION_H
 
-// __C++ standard headers__
 #include <any>
 #include <list>
-#include <string>
 #include <ostream>
+#include <string>
 #include <vector>
 
 namespace utilities

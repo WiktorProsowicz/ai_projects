@@ -1,15 +1,13 @@
 #ifndef UTILITIES_INCLUDE_UTILITIES_THREADPOOL_HPP
 #define UTILITIES_INCLUDE_UTILITIES_THREADPOOL_HPP
 
-// __C++ standard headers__
-#include <vector>
-#include <future>
-#include <mutex>
 #include <condition_variable>
 #include <functional>
+#include <future>
+#include <mutex>
+#include <vector>
 
-// __Own software headers__
-#include <Utilities/ThreadSafeQueue.hpp>
+#include "Utilities/ThreadSafeQueue.hpp"
 
 namespace utilities
 {

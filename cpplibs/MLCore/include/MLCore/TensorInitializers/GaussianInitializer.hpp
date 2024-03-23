@@ -1,8 +1,9 @@
 #ifndef MLCORE_INCLUDE_MLCORE_TENSORINITIALIZERS_GAUSSIANINITIALIZER_HPP
 #define MLCORE_INCLUDE_MLCORE_TENSORINITIALIZERS_GAUSSIANINITIALIZER_HPP
 
-#include <MLCore/TensorInitializers/ITensorInitializer.hpp>
 #include <random>
+
+#include "MLCore/TensorInitializers/ITensorInitializer.hpp"
 
 namespace mlCore::tensorInitializers
 {

@@ -6,15 +6,10 @@
  * by Wiktor Prosowicz
  **********************/
 
-// __Tested headers__
-#include <MLCore/BasicTensorSlice.h>
-
-// __External software headers__
-#include <gtest/gtest.h>
-
-// __Own software headers__
 #include <MLCore/BasicTensor.h>
+#include <MLCore/BasicTensorSlice.h>
 #include <MLCore/TensorOperations.h>
+#include <gtest/gtest.h>
 
 namespace
 {

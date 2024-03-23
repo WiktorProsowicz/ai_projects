@@ -6,8 +6,8 @@
  * by Wiktor Prosowicz
  **********************/
 
-#include <MLCore/TensorOperations.h>
 #include <MLCore/TensorInitializers/RangeTensorInitializer.hpp>
+#include <MLCore/TensorOperations.h>
 #include <MLCore/Utilities.h>
 #include <gtest/gtest.h>
 

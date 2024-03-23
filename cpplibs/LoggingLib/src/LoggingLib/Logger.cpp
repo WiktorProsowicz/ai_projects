@@ -1,10 +1,7 @@
-// __Related headers__
-#include <LoggingLib/Logger.h>
+#include "LoggingLib/Logger.h"
 
-// __C++ standard headers__
 #include <mutex>
 
-// __External headers__
 #include <fmt/format.h>
 
 namespace loggingLib

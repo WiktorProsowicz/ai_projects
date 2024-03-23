@@ -3,7 +3,7 @@
 
 #include <optional>
 
-#include <AutoDiff/GraphNodes.hpp>
+#include "AutoDiff/GraphNodes.hpp"
 
 namespace mlCore::autoDiff::binaryOperators
 {

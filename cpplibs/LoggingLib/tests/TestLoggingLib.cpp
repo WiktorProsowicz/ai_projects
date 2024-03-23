@@ -6,17 +6,13 @@
  * by Wiktor Prosowicz
  **********************/
 
-// __Tested headers__
-#include <LoggingLib/LoggingLib.hpp>
-
-// __C++ standard headers__
 #include <fstream>
 #include <ranges>
 #include <vector>
 
-// __External headers__
-#include <gtest/gtest.h>
+#include <LoggingLib/LoggingLib.hpp>
 #include <fmt/format.h>
+#include <gtest/gtest.h>
 
 namespace
 {

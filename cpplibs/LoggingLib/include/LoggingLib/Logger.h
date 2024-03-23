@@ -1,14 +1,12 @@
 #ifndef LOGGINGLIB_INCLUDE_LOGGINGLIB_LOGGER_H
 #define LOGGINGLIB_INCLUDE_LOGGINGLIB_LOGGER_H
 
-// __CPP headers__
-#include <iostream>
 #include <functional>
+#include <iostream>
 #include <map>
 #include <mutex>
 
-// __Own software headers__
-#include <StreamWrappers/BaseStreamWrapper.hpp>
+#include "StreamWrappers/BaseStreamWrapper.hpp"
 
 namespace loggingLib
 {

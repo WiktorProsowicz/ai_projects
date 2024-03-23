@@ -1,7 +1,5 @@
-// __Related header__
-#include <Utilities/ThreadPool.h>
+#include "Utilities/ThreadPool.h"
 
-// __C++ standard headers__
 #include <functional>
 
 namespace utilities

@@ -1,10 +1,9 @@
 #ifndef UTILITIES_INCLUDE_UTILITIES_THREADSAFEQUEUE_HPP
 #define UTILITIES_INCLUDE_UTILITIES_THREADSAFEQUEUE_HPP
 
-// __C++ standard headers__
-#include <shared_mutex>
 #include <mutex>
 #include <queue>
+#include <shared_mutex>
 
 namespace utilities
 {

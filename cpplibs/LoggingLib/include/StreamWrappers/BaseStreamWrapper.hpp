@@ -1,11 +1,9 @@
 #ifndef LOGGINGLIB_INCLUDE_STREAMWRAPPERS_BASESTREAMWRAPPER_HPP
 #define LOGGINGLIB_INCLUDE_STREAMWRAPPERS_BASESTREAMWRAPPER_HPP
 
-// __C++ standard headers__
 #include <ostream>
 
-// __Own software headers__
-#include <StreamWrappers/IStreamWrapper.hpp>
+#include "StreamWrappers/IStreamWrapper.hpp"
 
 namespace streamWrappers
 {

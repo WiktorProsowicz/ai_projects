@@ -1,7 +1,5 @@
-// __Related headers__
-#include <Utilities/BinarySerialization.h>
+#include "Utilities/BinarySerialization.h"
 
-// __C++ standard headers__
 #include <cstring>
 
 // __Custom preprocessor macros__

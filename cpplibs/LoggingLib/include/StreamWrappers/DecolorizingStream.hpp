@@ -1,13 +1,11 @@
 #ifndef LOGGINGLIB_INCLUDE_STREAMWRAPPERS_DECOLORIZINGSTREAM_HPP
 #define LOGGINGLIB_INCLUDE_STREAMWRAPPERS_DECOLORIZINGSTREAM_HPP
 
-// __C++ standard headers__
-#include <regex>
 #include <cstring>
 #include <fstream>
+#include <regex>
 
-// __Own software headers__
-#include <StreamWrappers/IStreamWrapper.hpp>
+#include "StreamWrappers/IStreamWrapper.hpp"
 
 namespace streamWrappers
 {

@@ -6,18 +6,12 @@
  * by Wiktor Prosowicz
  **********************/
 
-// __Tested headers__
-#include <Utilities/ThreadPool.h>
-
-// __CPP headers__
 #include <chrono>
 
-// __External software__
-#include <gtest/gtest.h>
-#include <fmt/format.h>
-
-// __Own software__
 #include <LoggingLib/LoggingLib.hpp>
+#include <Utilities/ThreadPool.h>
+#include <fmt/format.h>
+#include <gtest/gtest.h>
 
 namespace
 {

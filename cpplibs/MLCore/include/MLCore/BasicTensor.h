@@ -1,19 +1,18 @@
 #ifndef MLCORE_BASICTENSOR_H
 #define MLCORE_BASICTENSOR_H
 
-// __C++ standard headers__
 #include <algorithm>
 #include <functional>
 #include <memory>
 #include <numeric>
 #include <vector>
 
-// __Own software headers__
 #include <LoggingLib/LoggingLib.hpp>
-#include <MLCore/Utilities.h>
-#include <MLCore/TensorInitializers/ITensorInitializer.hpp>
-#include <MLCore/TensorIterator.hpp>
-#include <MLCore/BasicTensorSlice.h>
+
+#include "MLCore/BasicTensorSlice.h"
+#include "MLCore/TensorInitializers/ITensorInitializer.hpp"
+#include "MLCore/TensorIterator.hpp"
+#include "MLCore/Utilities.h"
 
 namespace mlCore
 {

@@ -3,8 +3,8 @@
 
 #include <memory>
 
-#include <AutoDiff/GraphNodes.hpp>
-#include <MLCore/BasicTensor.h>
+#include "AutoDiff/GraphNodes.hpp"
+#include "MLCore/BasicTensor.h"
 
 namespace mlCore::models
 {

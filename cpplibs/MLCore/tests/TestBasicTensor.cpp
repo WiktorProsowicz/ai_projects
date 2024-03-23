@@ -6,15 +6,13 @@
  * by Wiktor Prosowicz
  **********************/
 
-#include <MLCore/BasicTensor.h>
-
 #include <iostream>
 
-#include <gtest/gtest.h>
-#include <fmt/format.h>
-
 #include <LoggingLib/LoggingLib.hpp>
+#include <MLCore/BasicTensor.h>
 #include <MLCore/TensorInitializers/RangeTensorInitializer.hpp>
+#include <fmt/format.h>
+#include <gtest/gtest.h>
 
 namespace
 {

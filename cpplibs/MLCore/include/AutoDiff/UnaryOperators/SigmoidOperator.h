@@ -1,7 +1,7 @@
 #ifndef UNARYOPERATORS_SIGMOIDOPERATOR_H
 #define UNARYOPERATORS_SIGMOIDOPERATOR_H
 
-#include <AutoDiff/UnaryOperators/UnaryOperator.h>
+#include "AutoDiff/UnaryOperators/UnaryOperator.h"
 
 namespace mlCore::autoDiff::unaryOperators
 {

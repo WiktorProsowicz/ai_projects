@@ -1,12 +1,10 @@
 #ifndef MLCORE_INCLUDE_MLCORE_TENSOROPERATIONS_H
 #define MLCORE_INCLUDE_MLCORE_TENSOROPERATIONS_H
 
-// __C++ standard headers__
 #include <cmath>
 
-// __Own software headers__
-#include <MLCore/BasicTensor.h>
-#include <MLCore/Utilities.h>
+#include "MLCore/BasicTensor.h"
+#include "MLCore/Utilities.h"
 
 namespace mlCore
 {

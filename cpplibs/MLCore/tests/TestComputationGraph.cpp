@@ -5,17 +5,15 @@
  *
  * by Wiktor Prosowicz
  **********************/
-#include <AutoDiff/ComputationGraph.h>
-
 #include <sstream>
 
-#include <gtest/gtest.h>
-
 #include <AutoDiff/BinaryOperators/BinaryOperator.h>
-#include <AutoDiff/UnaryOperators/UnaryOperator.h>
+#include <AutoDiff/ComputationGraph.h>
 #include <AutoDiff/GraphOperations.h>
-#include <MLCore/TensorInitializers/RangeTensorInitializer.hpp>
+#include <AutoDiff/UnaryOperators/UnaryOperator.h>
 #include <MLCore/TensorInitializers/GaussianInitializer.hpp>
+#include <MLCore/TensorInitializers/RangeTensorInitializer.hpp>
+#include <gtest/gtest.h>
 
 namespace
 {

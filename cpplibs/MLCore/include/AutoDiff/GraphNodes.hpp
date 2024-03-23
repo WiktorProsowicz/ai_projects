@@ -1,8 +1,9 @@
 #ifndef MLCORE_GRAPHNODES_H
 #define MLCORE_GRAPHNODES_H
 
-#include <MLCore/BasicTensor.h>
 #include <memory>
+
+#include "MLCore/BasicTensor.h"
 
 /**
  * @brief Classes representing nodes in ComputationGraphs. Nodes hold tensors and can be linked to each other.

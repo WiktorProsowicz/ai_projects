@@ -1,11 +1,8 @@
-// __Related headers__
-#include <MLCore/BasicTensorSlice.h>
+#include "MLCore/BasicTensorSlice.h"
 
-// __Standard library headers__
 #include <iomanip>
 
-// __Own software headers__
-#include <MLCore/BasicTensor.h>
+#include "MLCore/BasicTensor.h"
 
 #define OPERATION_WITH_SCALAR_RHS(op, rhs)                                                                   \
 	const auto chunkLength = _computeChunkLength();                                                          \

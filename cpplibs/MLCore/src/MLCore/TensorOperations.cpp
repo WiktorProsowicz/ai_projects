@@ -1,11 +1,8 @@
-// __Related headers__
-#include <MLCore/TensorOperations.h>
+#include "MLCore/TensorOperations.h"
 
-// __C++ standard headers__
 #include <cmath>
 
-// __Own software headers__
-#include <MLCore/TensorOperationsImpl.h>
+#include "MLCore/TensorOperationsImpl.h"
 
 namespace mlCore
 {

@@ -1,15 +1,14 @@
-#include <AutoDiff/GraphOperations.h>
+#include "AutoDiff/GraphOperations.h"
 
-#include <AutoDiff/BinaryOperators/AddOperator.h>
-#include <AutoDiff/BinaryOperators/DivideOperator.h>
-#include <AutoDiff/BinaryOperators/MatmulOperator.h>
-#include <AutoDiff/BinaryOperators/MultiplyOperator.h>
-#include <AutoDiff/BinaryOperators/PowerOperator.h>
-#include <AutoDiff/BinaryOperators/SubtractOperator.h>
-
-#include <AutoDiff/UnaryOperators/LnOperator.h>
-#include <AutoDiff/UnaryOperators/ReluOperator.h>
-#include <AutoDiff/UnaryOperators/SigmoidOperator.h>
+#include "AutoDiff/BinaryOperators/AddOperator.h"
+#include "AutoDiff/BinaryOperators/DivideOperator.h"
+#include "AutoDiff/BinaryOperators/MatmulOperator.h"
+#include "AutoDiff/BinaryOperators/MultiplyOperator.h"
+#include "AutoDiff/BinaryOperators/PowerOperator.h"
+#include "AutoDiff/BinaryOperators/SubtractOperator.h"
+#include "AutoDiff/UnaryOperators/LnOperator.h"
+#include "AutoDiff/UnaryOperators/ReluOperator.h"
+#include "AutoDiff/UnaryOperators/SigmoidOperator.h"
 
 namespace mlCore::autoDiff
 {

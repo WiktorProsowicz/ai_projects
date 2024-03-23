@@ -1,7 +1,7 @@
 #ifndef BINARYOPERATORS_DIVIDEOPERATOR_H
 #define BINARYOPERATORS_DIVIDEOPERATOR_H
 
-#include <AutoDiff/BinaryOperators/BinaryOperator.h>
+#include "AutoDiff/BinaryOperators/BinaryOperator.h"
 
 namespace mlCore::autoDiff::binaryOperators
 {
