@@ -112,10 +112,10 @@ namespace mlCore::detail
 namespace
 {
 /**
- * @brief Checks if the shapes of two tensors can be stretched to perform the broadcast operation 
- * 
- * @param shape1 
- * @param shape2 
+ * @brief Checks if the shapes of two tensors can be stretched to perform the broadcast operation
+ *
+ * @param shape1
+ * @param shape2
  */
 void checkShapesForBroadcasting(const std::vector<size_t>& shape1, const std::vector<size_t>& shape2)
 {
@@ -136,7 +136,7 @@ void checkShapesForBroadcasting(const std::vector<size_t>& shape1, const std::ve
 
 /**
  * @brief Fills tensor's shape from left side with given value
- * 
+ *
  * @param shape Shape to be filled
  * @param biggerSize Size of the result tensor. If less than shape.size(), no padding is added
  * @param paddingVal Value to pad the shape with

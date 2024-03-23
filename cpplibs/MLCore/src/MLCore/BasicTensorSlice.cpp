@@ -42,12 +42,12 @@ namespace
 /**
  * @brief Computes index of the element that separates the `shape` so that the right side is fully covered by the `indices` and the left one not.
  * The function assumes that the `indices` have been validated.
- * 
+ *
  * @example
  * 	shape: {4, 5, 6, 7, 8}
  * 	indices: {(2, 3), (3, 4), (0, 6), (0, 7)}
- * 	Result: 2 
- * 
+ * 	Result: 2
+ *
  * @param shape Shape to divide.
  * @param indices Indices referring to the spanned part of the shape.
  * @return Index of the leftmost shape's element spanned entirely by the respective indices.

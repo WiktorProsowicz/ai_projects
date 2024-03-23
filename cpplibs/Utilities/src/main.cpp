@@ -1,8 +1,8 @@
 /***************************************
  * Main executable for 'Utilities' lib.
- * 
+ *
  * Copyright (c) 2023
- * 
+ *
  * by Wiktor Prosowicz
  ***************************************/
 

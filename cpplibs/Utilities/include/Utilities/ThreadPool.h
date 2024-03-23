@@ -20,7 +20,7 @@ public:
 
 	/**
 	 * @brief Creates a new thread pool and initializes it with `numThreads` of threads.
-	 * 
+	 *
 	 * @param numThreads Initial number of working threads.
 	 */
 	ThreadPool(size_t numThreads)
@@ -41,33 +41,33 @@ public:
 public:
 	/**
 	 * @brief Initializes the thread pool with passed number of threads.
-	 * 
+	 *
 	 * @param numThreads Number of working threads created for the pool.
 	 */
 	void init(size_t numThreads);
 
 	/**
 	 * @brief Resizes the number of working threads. If the `numThreads` is smaller then size(), truncated threads shall bring their tasks to an end.
-	 * 
-	 * @param numThreads 
+	 *
+	 * @param numThreads
 	 */
 	void resize(size_t numThreads);
 
 	/**
 	 * @brief Joins the working threads and processes all of the available tasks.
-	 * 
+	 *
 	 */
 	void terminate();
 
 	/**
 	 * @brief Joins the working threads and discards all waiting tasks.
-	 * 
+	 *
 	 */
 	void cancel();
 
 	/**
 	 * @brief Tells if the thread pool has been initialized.
-	 * 
+	 *
 	 * @return true The pool is initialized and has prepared the threads.
 	 * @return false The pool has not been yet initialized.
 	 */
@@ -79,7 +79,7 @@ public:
 
 	/**
 	 * @brief Tells if the pool can be provided with tasks and is able to process them.
-	 * 
+	 *
 	 * @return true Pool is active.
 	 * @return false Pool is either stopped or not yet initialized.
 	 */
@@ -90,7 +90,7 @@ public:
 
 	/**
 	 * @brief Returns the number of working threads.
-	 * 
+	 *
 	 * @return Number of thread.
 	 */
 	size_t size() const
@@ -101,7 +101,7 @@ public:
 
 	/**
 	 * @brief Adds a new task to the queue.
-	 * 
+	 *
 	 * @tparam F Type of the function to be called within the task.
 	 * @tparam Args Arguments to be packed with the function to create the task.
 	 * @param f Callable.

@@ -1,8 +1,8 @@
 /**********************
  * Test suite for 'ai_projects'
- * 
+ *
  * Copyright (c) 2023
- * 
+ *
  * by Wiktor Prosowicz
  **********************/
 
@@ -12,9 +12,9 @@
 #include <gtest/gtest.h>
 
 /*****************************
- * 
+ *
  * Global declarations
- * 
+ *
  *****************************/
 
 template <typename OperType>
@@ -48,9 +48,9 @@ struct BinaryTestParams
 };
 
 /*****************************
- * 
+ *
  * Test Fixture
- * 
+ *
  *****************************/
 
 namespace
@@ -108,9 +108,9 @@ protected:
 };
 
 /*****************************
- * 
+ *
  * Particular test calls
- * 
+ *
  *****************************/
 
 TEST_F(TestTensorOperations, testNaturalLogarithm)

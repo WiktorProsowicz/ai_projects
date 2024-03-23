@@ -7,7 +7,7 @@ namespace mlCore::autoDiff::unaryOperators
 {
 /**
  * @brief SigmoidOperator wraps sigmoid - a tensor unary operation
- * 
+ *
  */
 class SigmoidOperator final : public UnaryOperator
 {

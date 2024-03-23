@@ -7,8 +7,8 @@ LoggingLib is a module containing classes used to handle various kinds of logged
 ## 0.0.1
 
 - Introduced macros
-    - `LOG_WARN` 
-    - `LOG_ERROR` 
+    - `LOG_WARN`
+    - `LOG_ERROR`
     - `LOG_INFO`
 
 ## 1.0.0
@@ -40,7 +40,7 @@ namespace loggingLib
 Segregation of logged messages is performed with use of channels. Every channel is unique by its name. Logs can be differentiated by `LogType` enum class variants carrying additional semantics:
 
 - **WARN** - used for logs which should be emphasized but don't directly affect the program
-- **ERROR** - used for logs that indicate specific types of fault and additionally throw a runtime error instance 
+- **ERROR** - used for logs that indicate specific types of fault and additionally throw a runtime error instance
 - **INFO** - used for informative logs
 
 
@@ -68,11 +68,11 @@ logger.reset();
 
 ## Stream Wrappers
 
-Set of classes following the Decorator pattern. Wrappers can perform a certain kind of action defined in concrete class before or after delegating further streaming to the wrapped object. Additionally the streamed content can be modified in a specific way. 
+Set of classes following the Decorator pattern. Wrappers can perform a certain kind of action defined in concrete class before or after delegating further streaming to the wrapped object. Additionally the streamed content can be modified in a specific way.
 
 ### IStreamWrapper
 
-An interface for [Stream Wrappers](#stream-wrappers). Defines a public streaming method being a template-pattern algorithm which uses a couple of functions possible to be overridden. 
+An interface for [Stream Wrappers](#stream-wrappers). Defines a public streaming method being a template-pattern algorithm which uses a couple of functions possible to be overridden.
 
 Implementation:
 ```cpp

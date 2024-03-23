@@ -7,7 +7,7 @@ namespace mlCore::autoDiff::unaryOperators
 {
 /**
  * @brief LnOperator represents natural logarithm operation performed on contained value.
- * 
+ *
  */
 class LnOperator final : public UnaryOperator
 {

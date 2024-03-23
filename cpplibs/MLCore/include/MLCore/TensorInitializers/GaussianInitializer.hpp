@@ -8,7 +8,7 @@ namespace mlCore::tensorInitializers
 {
 /**
  * @brief Initializer class yielding values sampled from the gaussian distribution.
- * 
+ *
  */
 template <typename ValueType>
 class GaussianInitializer : public ITensorInitializer<ValueType>

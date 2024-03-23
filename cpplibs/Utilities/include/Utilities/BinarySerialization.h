@@ -15,8 +15,8 @@ namespace detail
 /**
  * @brief Template function used to define custom conversion-to-bytes mechanics for chosen types.
  * Purpose of the function is to provide means of representing objects as byte-arrays containing data
- * relevant to the reader of the serialized version, rather than the direct underlying bytes. 
- * 
+ * relevant to the reader of the serialized version, rather than the direct underlying bytes.
+ *
  * @tparam Type Type of the object to be converted into byte representation.
  * @param object Object to be serialized.
  * @return Short-char string containing bytes extracted from the `object`.
@@ -40,8 +40,8 @@ std::string makeBytes(const std::vector<VectorItemType>& object)
 } // namespace detail
 
 /**
- * @brief Class sued to wrap objects of various types. It defines means of conversion of the objects to the pre-defined binary forms. 
- * 
+ * @brief Class sued to wrap objects of various types. It defines means of conversion of the objects to the pre-defined binary forms.
+ *
  */
 template <typename... ArgTypes>
 class SerializationPack
@@ -55,7 +55,7 @@ public:
 
 	/**
 	 * @brief Constructs the SerializationPack from given arguments and initializes the internal objects pack, adjusting types if needed.
-	 * 
+	 *
 	 * @param args Object to pack.
 	 */
 	SerializationPack(const ArgTypes&... args)
@@ -69,7 +69,7 @@ private:
 	/**
 	 * @brief Attempts to retrieve and cast an element from internal objects pack.
 	 * The number of returned element is indicated by the current value of `poppedArgIndex_`.
-	 * 
+	 *
 	 * @tparam CastedType Desired type to cast the retrieved element to.
 	 * @return Casted element.
 	 */
@@ -85,7 +85,7 @@ private:
 
 	/**
 	 * @brief Writes contained elements in form of extracted bytes to the given stream.
-	 * 
+	 *
 	 * @param out Stream to write the elements to.
 	 */
 	void _packToStream(std::ostream& out) const
@@ -103,10 +103,10 @@ private:
 /**
  * @brief Writes the contents of the `pack` to the given stream. Pack's elements are converted
  * to the internal binary representation according to the custom converting algorithms.
- * 
+ *
  * @param out Stream to write the `pack`'s content to.
  * @param pack SerializationPack containing elements to convert and write.
- * @return std::ostream& 
+ * @return std::ostream&
  */
 template <typename... ArgTypes>
 std::ostream& operator<<(std::ostream& out, const SerializationPack<ArgTypes...>& pack)

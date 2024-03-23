@@ -9,9 +9,9 @@
 namespace utilities
 {
 /**
- * @brief Class serving as a FIFO data structure, delegating the getting/setting requests to the underlying standard queue and protecting the 
+ * @brief Class serving as a FIFO data structure, delegating the getting/setting requests to the underlying standard queue and protecting the
  * contained objects by multiple-thread access.
- * 
+ *
  * @tparam T Type of the stored objects.
  */
 template <typename T>
@@ -19,8 +19,8 @@ class ThreadSafeQueue : protected std::queue<T>
 {
 public:
 	/**
-    * @brief Creates a new empty queue. 
-    * 
+    * @brief Creates a new empty queue.
+    *
     */
 	ThreadSafeQueue() = default;
 
@@ -31,7 +31,7 @@ public:
 
 	/**
      * @brief Destroys the queue, deleting all of the contained objects.
-     * 
+     *
      */
 	~ThreadSafeQueue()
 	{
@@ -81,10 +81,10 @@ public:
 
 	/**
 	 * @brief Attempts to erase the front element of the queue and assigns it to the provided holder.
-	 * 
+	 *
 	 * @param holder Object to which the front element will be assigned.
-	 * @return true 
-	 * @return false 
+	 * @return true
+	 * @return false
 	 */
 	bool tryPop(T& holder)
 	{

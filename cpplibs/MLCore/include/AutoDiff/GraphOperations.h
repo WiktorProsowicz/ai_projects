@@ -28,8 +28,8 @@ concept NodeOperation = requires(NodePtrs... inputNodes, Operation oper)
 };
 
 /**
- * @brief Performs given operation on input nodes returning NodePtr and adds the result to ComputationGraph if provided. 
- * 
+ * @brief Performs given operation on input nodes returning NodePtr and adds the result to ComputationGraph if provided.
+ *
  * @param operation Operation complying with NodeOperation concept.
  * @param graph Pointer to computation graph instance to which the result will be added.
  * @param inputNodes Arguments for `operation`.

@@ -8,7 +8,7 @@ namespace mlCore::models
 
 /**
  * @brief Specifies the moment at which the callback should be called.
- * 
+ *
  */
 enum class CallbackMode : uint8_t
 {
@@ -21,7 +21,7 @@ enum class CallbackMode : uint8_t
 
 /**
  * @brief Interface for classes executing specific actions at specific points in time.
- * 
+ *
  */
 class Callback
 {
@@ -30,7 +30,7 @@ class Callback
 public:
 	/**
      * @brief Tells the callback to execute its task.
-     * 
+     *
      */
 	virtual void call() = 0;
 

@@ -13,7 +13,7 @@ macro(install_library)
     # install library
     add_library(${PROJECT_NAME} SHARED)
 
-    target_sources(${PROJECT_NAME} PUBLIC "${${PROJECT_NAME}_PUBLIC_HEADERS}" 
+    target_sources(${PROJECT_NAME} PUBLIC "${${PROJECT_NAME}_PUBLIC_HEADERS}"
                                    PRIVATE "${${PROJECT_NAME}_SRC}" "${${PROJECT_NAME}_PRIVATE_HEADERS}")
 
     set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
@@ -35,13 +35,13 @@ macro(install_library)
 
 endmacro()
 
-    
+
 
 # ****************************************
 #  Creates an executable for the library.
 # ****************************************
 macro(add_executable_for_lib)
-    
+
     file(GLOB_RECURSE ${PROJECT_NAME}_MAIN src/main.cpp)
 
     if(${PROJECT_NAME}_MAIN)
@@ -50,7 +50,7 @@ macro(add_executable_for_lib)
         target_link_libraries(${PROJECT_NAME}Executable PUBLIC ${PROJECT_NAME})
 
         set_target_properties(${PROJECT_NAME}Executable PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/)
-                
+
         target_compile_options(${PROJECT_NAME}Executable PRIVATE ${COMMON_COMPILE_OPTIONS})
     endif()
 endmacro()
@@ -79,7 +79,7 @@ macro(add_tests)
             endif()
 
             set_target_properties("${TEST_NAME}" PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/test/${PROJECT_NAME}/)
-            
+
             target_compile_options("${TEST_NAME}" PRIVATE ${COMMON_COMPILE_OPTIONS})
 
             gtest_discover_tests("${TEST_NAME}")

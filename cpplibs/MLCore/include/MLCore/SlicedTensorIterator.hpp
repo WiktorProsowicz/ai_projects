@@ -8,9 +8,9 @@
 namespace mlCore
 {
 /**
- * @brief Iterates over data spanned by a tensor slice according to provided 
- * 
- * @tparam ValueType 
+ * @brief Iterates over data spanned by a tensor slice according to provided
+ *
+ * @tparam ValueType
  */
 template <typename ValueType>
 class SlicedTensorIterator
@@ -129,7 +129,7 @@ public:
 private:
 	/**
      * @brief Creates a new iterator with parameters passed by a tensor slice.
-     * 
+     *
      * @param ptr Pointer to data spanned by the creating slice.
      * @param dataChunks Chunks of contiguous data from the tensor.
      * @param chunkLength Size of each chunk of data.

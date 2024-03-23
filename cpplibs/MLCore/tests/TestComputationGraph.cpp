@@ -1,8 +1,8 @@
 /**********************
  * Test suite for 'ai_projects'
- * 
+ *
  * Copyright (c) 2023
- * 
+ *
  * by Wiktor Prosowicz
  **********************/
 #include <AutoDiff/ComputationGraph.h>
@@ -20,9 +20,9 @@
 namespace
 {
 /*****************************
- * 
+ *
  * Common data structures
- * 
+ *
  *****************************/
 
 class BinaryOperatorDecorator;
@@ -131,9 +131,9 @@ struct BackPropagationConfig
 };
 
 /*****************************
- * 
+ *
  * Common functions
- * 
+ *
  *****************************/
 
 /// Decorates input `node` or returns it if it is not of operator type.
@@ -215,7 +215,7 @@ mlCore::autoDiff::NodePtr getBinaryOperationByDesc(const std::string& descriptio
 
 /**
  * @brief Generates a tree of nodes based on given config.
- * 
+ *
  * @param config Vector of pairs: <name of new node, operation and names of its inputs>.
  * @return Pair: <head of the constructed tree, pairs of [parent, child] relations between the nodes>.
  */
@@ -324,9 +324,9 @@ constructTree(const std::vector<std::pair<std::string, std::string>>& config)
 }
 
 /*****************************
- * 
+ *
  * Test Fixture
- * 
+ *
  *****************************/
 class TestComputationGraph : public testing::Test
 {
@@ -338,7 +338,7 @@ protected:
 
 	/**
      * @brief Traverses tree and returns all unique nodes.
-     * 
+     *
      * @param root Root node of the traversed tree.
      * @return All of the nodes present in the tree.
      */
@@ -373,9 +373,9 @@ protected:
 
 	/**
 	 * @brief Creates a feed map that can be used in forward-pass of ComputationGraph.
-	 * 
+	 *
 	 * @param inputs Placeholders to assign input tensors to.
-	 * @return Created feed map with random generated inputs. 
+	 * @return Created feed map with random generated inputs.
 	 */
 	static std::map<mlCore::autoDiff::PlaceholderPtr, mlCore::Tensor>
 	createFeedMap(const std::set<mlCore::autoDiff::PlaceholderPtr>& inputs)
@@ -399,7 +399,7 @@ protected:
 
 	/**
      * @brief Traverses the graph and checks whether the nodes are connected as expected.
-     * 
+     *
      * @param expectedRelations Set of (parent, child) pairs containing ids of graph nodes from root perspective.
      * @param root Node from whose perspective the relations are collected.
      */
@@ -444,9 +444,9 @@ protected:
 	}
 
 	/**
-     * @brief Constructs an instance of ComputationGraph and runs it in both directions, collecting gradients and checking whether all of the value-updating 
-     * and derivative-computing operations are run.  
-     * 
+     * @brief Constructs an instance of ComputationGraph and runs it in both directions, collecting gradients and checking whether all of the value-updating
+     * and derivative-computing operations are run.
+     *
      * @param tree Root node of the tree to construct the graph from.
      */
 	void checkBackPropagation(const BackPropagationConfig& config)
@@ -486,7 +486,7 @@ protected:
 
 	/**
 	 * @brief Simulates computation graph forward pass and gradients updates.
-	 * 
+	 *
 	 * @param tree Root node of the nodes tree.
 	 * @param trainableWeights Weights to be updated with gradient.
 	 * @param input Input layer for feed map.
@@ -535,9 +535,9 @@ protected:
 };
 
 /*****************************
- * 
+ *
  * Particular test calls
- * 
+ *
  *****************************/
 
 TEST_F(TestComputationGraph, testGraphStructureBuilding)

@@ -25,7 +25,7 @@ class TensorOperationsImpl;
 
 /**
  * @brief Class implements a concept of tensor, support basic operation, transposition etc.
- * 
+ *
  * @tparam ValueType Type of the underlying data
  */
 template <typename ValueType>
@@ -43,46 +43,46 @@ class BasicTensor
 public:
 	/**
 	 * @brief Constructs a new scalar-type tensor.
-	 * 
+	 *
 	 */
 	BasicTensor();
 
 	/**
 	 * @brief Constructs a new scalar-type tensor with initial value. Useful as a conversion from ValueType.
 	 * Example:
-	 * 
+	 *
 	 * tensor : BasicTensor<double>
-	 * 
+	 *
 	 * tensor + 5.0   ->   tensor + BasicTensor<double>(5.0)
-	 * 
-	 * @param initVal 
+	 *
+	 * @param initVal
 	 */
 	BasicTensor(ValueType initVal);
 
 	/**
 	 * @brief Copy constructor.
-	 * 
+	 *
 	 * @param other Tensor to copy.
 	 */
 	BasicTensor(const BasicTensor& other);
 
 	/**
 	 * @brief Move constructor.
-	 * 
+	 *
 	 * @param other Tensor to move.
 	 */
 	BasicTensor(BasicTensor&& other);
 
 	/**
 	 * @brief Construct a new tensor with given shape.
-	 * 
+	 *
 	 * @param shape Tensor's initial shape.
 	 */
 	BasicTensor(const std::vector<size_t>& shape);
 
 	/**
 	 * @brief Constructs tensor from shape and fills it with initial value.
-	 * 
+	 *
 	 * @param shape Tensor's initial shape.
 	 * @param initVal Initial value for the whole tensor's data.
 	 */
@@ -90,7 +90,7 @@ public:
 
 	/**
 	 * @brief Constructs a new tensor from shape and gives it initial values.
-	 * 
+	 *
 	 * @param shape Tensor's initial shape.
 	 * @param initValues Values to assign, there is no check of the init list length.
 	 */
@@ -98,23 +98,23 @@ public:
 
 	/**
 	 * @brief Tensor's destructor releasing the resources.
-	 * 
+	 *
 	 */
 	~BasicTensor();
 
 	/**
 	 * @brief Copy assignment operator.
-	 * 
+	 *
 	 * @param other Tensor to copy.
-	 * @return BasicTensor& 
+	 * @return BasicTensor&
 	 */
 	BasicTensor& operator=(const BasicTensor& other);
 
 	/**
 	 * @brief Move assignment operator.
-	 * 
+	 *
 	 * @param other Tensor to move.
-	 * @return BasicTensor& 
+	 * @return BasicTensor&
 	 */
 	BasicTensor& operator=(BasicTensor&& other);
 
@@ -150,14 +150,14 @@ public:
 
 	/**
 	 * @brief Changes shape of the tensor. Basic checks over the given shape are performed.
-	 * 
+	 *
 	 * @param newShape The new shape to assign.
 	 */
 	void reshape(const std::vector<size_t>& newShape);
 
 	/**
 	 * @brief Assigns new values to tensor in places specified by axes ranges.
-	 * 
+	 *
 	 * @param indices List of ranges through each axis that will be taken into account while assigning new data.
 	 * @param newData List of values to assign.
 	 * @param wrapData Whether the values should be repeated to fit. If false and there are to few values, an exception will be raised.
@@ -195,7 +195,7 @@ public:
 
 	/**
 	 * @brief Performs matrix multiplication operation on `this` and `other` tensor.
-	 * 
+	 *
 	 * @param other Tensor to matrix-multiply `this` by.
 	 * @return BasicTensor Product of matrix multiplication.
 	 */
@@ -203,14 +203,14 @@ public:
 
 	/**
 	 * @brief Creates transposed version of `this`.
-	 * 
+	 *
 	 * @return Transposed tensor.
 	 */
 	BasicTensor transposed() const;
 
 	/**
 	 * @brief Fills the tensor with given data.
-	 * 
+	 *
 	 * @param newData Data to assign to tensor.
 	 * @param wrapData Whether to repeat the data to fit.
 	 */
@@ -218,14 +218,14 @@ public:
 
 	/**
 	 * @brief Fills the tensor with data given by initializer.
-	 * 
+	 *
 	 * @param initializer Initializer object from which the data to assign is taken.
 	 */
 	void fill(const tensorInitializers::ITensorInitializer<ValueType>& initializer);
 
 	/**
 	 * @brief Assigns values to the tensor.
-	 * 
+	 *
 	 * @tparam InputIter Type of iterator to take data from.
 	 * @param first Beginning iterator of values collection.
 	 * @param last Ending iterator.
@@ -265,7 +265,7 @@ public:
 
 	/**
 	 * @brief Creates a view over the tensor's data. The spanned data is determined by the provided indices.
-	 * 
+	 *
 	 * @param indices Set of ranges through each axis that will be taken into account while creating the slice.
 	 */
 	BasicTensorSlice<ValueType> slice(const std::vector<std::pair<size_t, size_t>>& indices);

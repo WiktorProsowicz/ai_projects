@@ -1,8 +1,8 @@
 /**********************
  * Test suite for 'ai_projects'
- * 
+ *
  * Copyright (c) 2023
- * 
+ *
  * by Wiktor Prosowicz
  **********************/
 
@@ -19,9 +19,9 @@
 namespace
 {
 /*****************************
- * 
+ *
  * Test Fixture TestBasicTensorSlice
- * 
+ *
  *****************************/
 
 class TestBasicTensorSlice : public ::testing::Test
@@ -206,9 +206,9 @@ private:
 };
 
 /*****************************
- * 
+ *
  * Particular test calls
- * 
+ *
  *****************************/
 
 TEST_F(TestBasicTensorSlice, ProducesCorrectBeginAndEndIterators)

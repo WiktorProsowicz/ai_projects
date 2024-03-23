@@ -12,14 +12,14 @@ namespace streamWrappers
 
 /**
  * @brief Class providing template streaming algorithm that operates on wrapped std::ostream.
- * 
+ *
  */
 class BaseStreamWrapper : public IStreamWrapper
 {
 public:
 	/**
-	 * @brief Creates a new stack of `stream` < BaseStreamWrapper < `WrapperType`. 
-	 * 
+	 * @brief Creates a new stack of `stream` < BaseStreamWrapper < `WrapperType`.
+	 *
 	 * @tparam WrapperType Type of the most external wrapper.
 	 * @param stream std::ostream to be wrapped by the intermediate BaseStreamWrapper.
 	 * @return IStreamWrapper Pointer to the external wrapper.
@@ -34,8 +34,8 @@ public:
 
 	/**
      * @brief Creates a new BaseStreamWrapper and assigns an std::ostream to which the content shall be streamed.
-     * 
-     * @param stream 
+     *
+     * @param stream
      */
 	explicit BaseStreamWrapper(std::ostream& stream)
 		: stream_(stream)
@@ -50,7 +50,7 @@ public:
 
 	/**
      * @brief Streams the given `content` to the referenced std::ostream.
-     * 
+     *
      * @param content Content to stream into the underlying std::ostream.
      */
 	template <typename StreamedType>
@@ -63,8 +63,8 @@ public:
 
 	/**
 	 * @brief Returns a reference to the underlying stream.
-	 * 
-	 * @return std::ostream& 
+	 *
+	 * @return std::ostream&
 	 */
 	std::ostream& getStream()
 	{

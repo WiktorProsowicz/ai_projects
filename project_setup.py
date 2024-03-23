@@ -20,12 +20,12 @@ HOME_PATH = pathlib.Path(__file__).absolute().parent.as_posix()
 def setup_venv():
     """Sets up the virtual environment."""
 
-    venv_path = path.join(HOME_PATH, "venv")
+    venv_path = path.join(HOME_PATH, 'venv')
 
     if os.path.exists(venv_path):
         logging.warning(
             "Directory '%s' already exists. If you are sure you want to"
-            + " replace it with a new environment, delete it and run again.",
+            + ' replace it with a new environment, delete it and run again.',
             venv_path,
         )
         return
@@ -132,14 +132,14 @@ def run_unit_tests():
 def _get_arg_parser() -> argparse.ArgumentParser:
     """Returns an argument parser for the script."""
 
-    functions_descriptions = "\n".join(
+    functions_descriptions = '\n'.join(
         [f"{func.__name__}: {func.__doc__.splitlines()[0]}" for func in [
             setup_venv, build_project, clean_project, install_dependencies, run_unit_tests]]
     )
 
     program_desc = (
-        "Script contains functions helping with project management.\n"
-        + "Available functions:\n\n"
+        'Script contains functions helping with project management.\n'
+        + 'Available functions:\n\n'
         + f"{functions_descriptions}"
     )
 
@@ -148,9 +148,9 @@ def _get_arg_parser() -> argparse.ArgumentParser:
     )
 
     arg_parser.add_argument(
-        "function_name", help="name of the function to be used")
+        'function_name', help='name of the function to be used')
     arg_parser.add_argument(
-        "args", nargs="*", help="positional arguments for the function"
+        'args', nargs='*', help='positional arguments for the function'
     )
 
     return arg_parser
@@ -172,7 +172,7 @@ def main(function: str, *args):
     logging.error("Couldn't find the function '%s'.", function)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
 
     parser = _get_arg_parser()
     arguments, left_args = parser.parse_known_args()

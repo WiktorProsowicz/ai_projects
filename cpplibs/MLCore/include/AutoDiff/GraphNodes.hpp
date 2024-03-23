@@ -6,7 +6,7 @@
 
 /**
  * @brief Classes representing nodes in ComputationGraphs. Nodes hold tensors and can be linked to each other.
- * 
+ *
  */
 namespace mlCore::autoDiff
 {
@@ -23,7 +23,7 @@ using ConstantPtr = std::shared_ptr<Constant>;
 
 /**
  * @brief Mother class of computation graph nodes.
- * 
+ *
  */
 class Node
 {
@@ -64,7 +64,7 @@ protected:
 
 /**
  * @brief A class to be inserted as i.e. weight matrix, bias etc
- * 
+ *
  */
 class Variable : public Node
 {
@@ -77,7 +77,7 @@ public:
 
 /**
  * @brief Its value cannot be assigned, changed. Computed derivative is always zero.
- * 
+ *
  */
 class Constant : public Node
 {
@@ -89,7 +89,7 @@ public:
 
 /**
  * @brief Created to provide proper semantics for graph element holding external data.
- * 
+ *
  */
 class Placeholder : public Node
 {

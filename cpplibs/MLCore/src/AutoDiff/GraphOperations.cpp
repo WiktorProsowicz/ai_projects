@@ -15,9 +15,9 @@ namespace mlCore::autoDiff
 {
 
 /****************
- * 
+ *
  * Binary
- * 
+ *
  ****************/
 namespace
 {
@@ -80,9 +80,9 @@ NodePtr unaryOperationImpl(const NodePtr& node)
 } // namespace
 
 /****************
- * 
+ *
  * Activations
- * 
+ *
  ****************/
 
 namespace unaryOperations
@@ -94,9 +94,9 @@ NodePtr ln(NodePtr node)
 } // namespace unaryOperations
 
 /****************
- * 
+ *
  * Activations
- * 
+ *
  ****************/
 
 namespace nodesActivations

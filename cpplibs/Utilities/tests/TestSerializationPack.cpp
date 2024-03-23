@@ -1,8 +1,8 @@
 /**********************
  * Test suite for 'ai_projects'
- * 
+ *
  * Copyright (c) 2023
- * 
+ *
  * by Wiktor Prosowicz
  **********************/
 
@@ -18,16 +18,16 @@
 #include <fmt/format.h>
 
 /*****************************
- * 
+ *
  * Common functions
- * 
+ *
  *****************************/
 
 namespace
 {
 /**
  * @brief Compares serialized bytes in form of char-string with vector of expected bytes.
- * 
+ *
  * @param str Serialized bytes.
  * @param bytes Expected bytes.
  */
@@ -48,14 +48,14 @@ void compareStringifiedOutputWithBytes(const std::string& str, const std::vector
 } // namespace
 
 /*****************************
- * 
+ *
  * Particular test calls
- * 
+ *
  *****************************/
 
 /**
  * @brief Streams an example serialization pack and compares the output with expected bytes.
- * 
+ *
  */
 TEST(TestSerializationPack, testSerializationWithExpectedOutput)
 {

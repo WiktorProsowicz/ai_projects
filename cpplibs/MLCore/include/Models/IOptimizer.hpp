@@ -9,14 +9,14 @@ namespace mlCore::models
 {
 /**
  * @brief Interface for classes optimizing layers' weights with use of gradients.
- * 
+ *
  */
 class IOptimizer
 {
 public:
 	/**
      * @brief Modifies the weight with respect to the derivative.
-     * 
+     *
      * @param weight Weight to be modified.
      * @param derivative Derivative matched to the weight.
      */

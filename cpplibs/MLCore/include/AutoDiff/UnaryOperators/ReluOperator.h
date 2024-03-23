@@ -7,7 +7,7 @@ namespace mlCore::autoDiff::unaryOperators
 {
 /**
  * @brief ReluOperator represents REctified Linear Unit tensor operation
- * 
+ *
  */
 class ReluOperator final : public UnaryOperator
 {

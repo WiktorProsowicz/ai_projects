@@ -1,8 +1,8 @@
 /**********************
  * Test suite for 'ai_projects'
- * 
+ *
  * Copyright (c) 2023
- * 
+ *
  * by Wiktor Prosowicz
  **********************/
 
@@ -21,9 +21,9 @@
 namespace
 {
 /*****************************
- * 
+ *
  * Test Fixture
- * 
+ *
  *****************************/
 
 class TestLoggingLib : public testing::Test
@@ -56,9 +56,9 @@ protected:
 };
 
 /*****************************
- * 
+ *
  * Particular test calls
- * 
+ *
  *****************************/
 
 TEST_F(TestLoggingLib, testDefaultStreamLogging)

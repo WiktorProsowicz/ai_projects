@@ -1,8 +1,8 @@
 /**********************
  * Test suite for 'ai_projects'
- * 
+ *
  * Copyright (c) 2023
- * 
+ *
  * by Wiktor Prosowicz
  **********************/
 
@@ -55,9 +55,9 @@ std::string stringifyTensor(const mlCore::Tensor& tensor)
 }
 
 /*****************************
- * 
+ *
  * Test Fixture
- * 
+ *
  *****************************/
 class TestDerivativeExtractor : public testing::Test
 {
@@ -210,9 +210,9 @@ protected:
 };
 
 /*****************************
- * 
+ *
  * Particular test calls
- * 
+ *
  *****************************/
 
 TEST_F(TestDerivativeExtractor, testReluDerivative)

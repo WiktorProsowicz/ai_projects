@@ -1,8 +1,8 @@
 /**********************
  * Test suite for 'ai_projects'
- * 
+ *
  * Copyright (c) 2023
- * 
+ *
  * by Wiktor Prosowicz
  **********************/
 
@@ -20,9 +20,9 @@ namespace
 {
 
 /*****************************
- * 
+ *
  * Test Fixture
- * 
+ *
  *****************************/
 
 class TestBasicTensor : public testing::Test
@@ -30,9 +30,9 @@ class TestBasicTensor : public testing::Test
 protected:
 	/**
 	 * @brief Checks if tensor objects have equal contents
-	 * 
-	 * @param tensor1 
-	 * @param tensor2 
+	 *
+	 * @param tensor1
+	 * @param tensor2
 	 */
 	static void checkTensorEquality(const mlCore::Tensor& tensor1, const mlCore::Tensor& tensor2)
 	{
@@ -50,8 +50,8 @@ protected:
 
 	/**
 	 * @brief Checks if given tensor is a dead empty object
-	 * 
-	 * @param tensor Checked object that is expected to behave as if its content has been moved 
+	 *
+	 * @param tensor Checked object that is expected to behave as if its content has been moved
 	 */
 	static void isTensorEmpty(const mlCore::Tensor& tensor)
 	{
@@ -64,7 +64,7 @@ protected:
 
 	/**
 	 * @brief Checks whether the given tensor has expected values.
-	 * 
+	 *
 	 * @param tensor Tensor object whose values are checked
 	 * @param values Expected values that the tensor should contain
 	 */
@@ -85,9 +85,9 @@ protected:
 };
 
 /*****************************
- * 
+ *
  * Particular test calls
- * 
+ *
  *****************************/
 
 TEST_F(TestBasicTensor, testConstructorWithShape)

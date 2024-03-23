@@ -1,8 +1,8 @@
 /**********************
  * Test suite for 'ai_projects'
- * 
+ *
  * Copyright (c) 2023
- * 
+ *
  * by Wiktor Prosowicz
  **********************/
 
@@ -22,9 +22,9 @@
 namespace
 {
 /*************************
- * 
+ *
  * Common data structures
- * 
+ *
  *************************/
 
 class Task
@@ -86,16 +86,16 @@ private:
 };
 
 /*****************************
- * 
+ *
  * Test Fixture
- * 
+ *
  *****************************/
 class TestThreadPool : public testing::Test
 {
 protected:
 	/**
 	 * @brief Creates a vector of tasks.
-	 * 
+	 *
 	 * @param numberOfTasks Number of tasks to create.
 	 * @param waitingInterval Number of miliseconds each task need to wait when run.
 	 * @return Created tasks.
@@ -114,7 +114,7 @@ protected:
 
 	/**
 	 * @brief Computes duration of the run tasks.
-	 * 
+	 *
 	 * @param tasks Vector of tasks that have been run.
 	 * @return Time span between the start of the earliest task and the end of the latest one.
 	 */
@@ -134,9 +134,9 @@ protected:
 } // namespace
 
 /*****************************
- * 
+ *
  * Particular test calls
- * 
+ *
  *****************************/
 
 TEST_F(TestThreadPool, testTasksProcessing)

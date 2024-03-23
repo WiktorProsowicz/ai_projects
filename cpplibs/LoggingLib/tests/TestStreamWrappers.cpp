@@ -1,8 +1,8 @@
 /**********************
  * Test suite for 'ai_projects'
- * 
+ *
  * Copyright (c) 2023
- * 
+ *
  * by Wiktor Prosowicz
  **********************/
 
@@ -20,9 +20,9 @@
 namespace
 {
 /*****************************
- * 
+ *
  * Test Fixture
- * 
+ *
  *****************************/
 
 class TestStreamWrappers : public testing::Test
@@ -55,9 +55,9 @@ protected:
 };
 
 /*****************************
- * 
+ *
  * Particular test calls
- * 
+ *
  *****************************/
 
 TEST_F(TestStreamWrappers, testBaseStreamWrapper)

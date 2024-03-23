@@ -10,7 +10,7 @@ namespace mlCore::tensorInitializers
 {
 /**
  * @brief Yields values from linear range
- * 
+ *
  */
 template <class ValueType>
 class RangeTensorInitializer : public ITensorInitializer<ValueType>
@@ -18,10 +18,10 @@ class RangeTensorInitializer : public ITensorInitializer<ValueType>
 public:
 	/**
 	 * @brief Construct a new Range Tensor Initializer object
-	 * 
+	 *
 	 * @param firstValue Initial value to be returned and appended with each yield
 	 * @param step The increment factor of the initializer's value
-	 * @param maxValue The border value at which the initializer stops 
+	 * @param maxValue The border value at which the initializer stops
 	 */
 	explicit RangeTensorInitializer(ValueType firstValue,
 									ValueType step = 1,

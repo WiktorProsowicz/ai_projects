@@ -12,9 +12,9 @@ namespace
 {
 
 /*********************************************
- * 
+ *
  * Classes implementing the tested interfaces
- * 
+ *
  *********************************************/
 
 /// Test class for checking ILayer code building
@@ -131,9 +131,9 @@ public:
 };
 
 /*************
- * 
+ *
  * Test cases
- * 
+ *
  *************/
 
 TEST(TestModels, testTestLayer)

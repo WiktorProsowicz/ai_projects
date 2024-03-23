@@ -18,7 +18,7 @@ public:
 
 	/**
      * @brief Constructs a new TensorIterator with initial position.
-     * 
+     *
      * @param ptr Initially pointed memory.
      */
 	explicit TensorIterator(pointer ptr)
@@ -27,7 +27,7 @@ public:
 
 	/**
      * @brief Dereference operator.
-     * 
+     *
      * @return reference
      */
 	reference operator*()
@@ -37,8 +37,8 @@ public:
 
 	/**
      * @brief Class member access operator.
-     * 
-     * @return pointer 
+     *
+     * @return pointer
      */
 	pointer operator->()
 	{
@@ -47,8 +47,8 @@ public:
 
 	/**
      * @brief Prefix increment operator.
-     * 
-     * @return Iterator& 
+     *
+     * @return Iterator&
      */
 	TensorIterator& operator++()
 	{
@@ -58,9 +58,9 @@ public:
 
 	// NOLINTBEGIN
 	/**
-     * @brief Postfix increment operator. 
-     * 
-     * @return const Iterator 
+     * @brief Postfix increment operator.
+     *
+     * @return const Iterator
      */
 	TensorIterator operator++(int)
 	{
@@ -89,8 +89,8 @@ public:
 
 	/**
 	 * @brief Compares two operators.
-	 * 
-	 * @param other Iterator to compare. 
+	 *
+	 * @param other Iterator to compare.
 	 * @return true If iterators are equal.
 	 * @return false In the opposite case.
 	 */
@@ -101,7 +101,7 @@ public:
 
 	/**
      * @brief Checks if two tensors differ.
-     * 
+     *
      * @param other Iterator to compare.
      * @return true If the tensors are different.
      * @return false In the opposite case.
@@ -113,7 +113,7 @@ public:
 
 	/**
      * @brief Checks if TensorIterator comes first in order before the other one.
-     * 
+     *
      * @param other Iterator to compare.
      * @return true If `this` is smaller than the `other`.
      * @return false In the opposite case.

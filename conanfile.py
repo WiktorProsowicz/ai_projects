@@ -7,10 +7,10 @@ class AiProjectsRecipe(conan.ConanFile):
     """Specifies the project's requirements for external dependencies."""
 
     name = 'ai_projects'
-    version = "1.0.0"
+    version = '1.0.0'
     author = 'WiktorProsowicz'
-    url = "https://github.com/WiktorProsowicz/ai_projects"
-    settings = "os", "arch", "compiler", "build_type"
+    url = 'https://github.com/WiktorProsowicz/ai_projects'
+    settings = 'os', 'arch', 'compiler', 'build_type'
     generators = 'CMakeDeps', 'CMakeToolchain'
 
     def build_requirements(self):

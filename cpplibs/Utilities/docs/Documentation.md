@@ -11,7 +11,7 @@ Utilities lib contain project-wide classes and functions helping at development.
 
 ## 1.1.0
 
-- Introduced [SerializationPack](#serializationpack) and basic object-to-byte algorithms (Numerics, Vectors, C-strings, Cpp-strings) 
+- Introduced [SerializationPack](#serializationpack) and basic object-to-byte algorithms (Numerics, Vectors, C-strings, Cpp-strings)
 
 # Components
 
