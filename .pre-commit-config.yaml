@@ -31,7 +31,7 @@ repos:
     hooks:
       - id: clang-format
         args:
-        - '-style=file:setuputils/.clang-format'
+          - -style=file:setuputils/.clang-format
         types_or: [c++, c]
 
   # Ensures Python files are formatted using autopep8 formatter
@@ -46,6 +46,7 @@ repos:
     rev: v1.8.0
     hooks:
       - id: mypy
+        args: [--explicit-package-bases, --python-executable, venv/bin/python]
 
   # Ensures python files are written using modern syntax
   - repo: https://github.com/asottile/pyupgrade

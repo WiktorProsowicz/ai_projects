@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Script containing functions for managing the project workspace.
 
 Available functions and corresponding arguments are described in the
@@ -23,7 +22,7 @@ def setup_venv():
     venv_path = path.join(HOME_PATH, 'venv')
 
     if os.path.exists(venv_path):
-        logging.warning(
+        logging.warning(  # pylint: disable=logging-not-lazy
             "Directory '%s' already exists. If you are sure you want to"
             + ' replace it with a new environment, delete it and run again.',
             venv_path,
@@ -132,8 +131,14 @@ def run_unit_tests():
 def _get_arg_parser() -> argparse.ArgumentParser:
     """Returns an argument parser for the script."""
 
+    def get_basic_doc(function) -> str:
+        if function.__doc__:
+            return function.__doc__.splitlines()[0]
+
+        return ''
+
     functions_descriptions = '\n'.join(
-        [f"{func.__name__}: {func.__doc__.splitlines()[0]}" for func in [
+        [f"{func.__name__}: {get_basic_doc(func)}" for func in [
             setup_venv, build_project, clean_project, install_dependencies, run_unit_tests]]
     )
 

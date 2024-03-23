@@ -1,6 +1,5 @@
 """Contains class responsible for managing project C++ dependencies."""
-
-import conan
+import conan  # type: ignore, pylint: disable=import-error
 
 
 class AiProjectsRecipe(conan.ConanFile):
