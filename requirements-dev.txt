@@ -5,5 +5,5 @@
 # - Linting and static analysis tools to be integrated with IDE 
 # ----------------------------------------------------------------------
 
-pre-commit
-cpplint
+pre-commit==3.6.2
+cpplint==1.6.1

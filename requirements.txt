@@ -2,5 +2,5 @@
 # Contains libraries crucial for running the main project functionalities.
 # -------------------------------------------------------------------------
 
-cmake
-conan
+cmake==3.28.4
+conan==2.2.1
