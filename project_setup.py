@@ -144,6 +144,32 @@ def install_dependencies():
             'Setting up external dependencies failed: %s', proc_error)
 
 
+def run_repository_checks():
+    """Runs static checks on the files found in the repository.
+
+    The purpose is to determine whether the current code is qualifies to be
+    merged into main branch. This together with unit tests is an obligatory
+    condition so that the code can be published on the main project branch.
+
+    The checks include:
+        - running pre-commit hooks specified in .pre-commit-config.yaml
+        - running clang-tidy static analysis on C++ files
+    """
+
+    try:
+
+        logging.info('Running pre-commit hooks.')
+
+        subprocess.run(['pre-commit', 'run', '--all-files'], check=True)
+
+        logging.info('Running clang-tidy checks.')
+
+        _run_clang_tidy()
+
+    except subprocess.CalledProcessError:
+        logging.critical('Static checks failed!')
+
+
 def run_unit_tests():
     """Runs C++ and Python tests found in the workspace."""
 
@@ -173,7 +199,8 @@ def _get_arg_parser() -> argparse.ArgumentParser:
 
     functions_descriptions = '\n'.join(
         [f"{func.__name__}: {get_basic_doc(func)}" for func in [
-            setup_venv, build_project, clean_project, install_dependencies, run_unit_tests]]
+            setup_venv, build_project, clean_project,
+            install_dependencies, run_unit_tests, run_repository_checks]]
     )
 
     program_desc = (
@@ -203,7 +230,7 @@ def main(function: str, *args):
     """
 
     for available_func in [setup_venv, build_project, clean_project,
-                           install_dependencies, run_unit_tests]:
+                           install_dependencies, run_unit_tests, run_repository_checks]:
         if available_func.__name__ == function:
             available_func(*args)  # type: ignore
             return
