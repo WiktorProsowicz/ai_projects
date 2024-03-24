@@ -32,7 +32,7 @@ public:
 	 * @return true Graph is declared to be able to extend
 	 * @return false Graph should not be extended
 	 */
-	inline bool isActive() const noexcept
+	bool isActive() const noexcept
 	{
 		return isActive_;
 	}
@@ -41,7 +41,7 @@ public:
 	 * @brief Erases all graph structure nodes
 	 *
 	 */
-	inline void reset() noexcept
+	void reset() noexcept
 	{
 		nodes_.clear();
 		gradients_.clear();
@@ -51,7 +51,7 @@ public:
 	 * @brief Cleans the graph from cumulated gradient.
 	 *
 	 */
-	inline void clearGradients()
+	void clearGradients()
 	{
 		gradients_.clear();
 	}
@@ -60,7 +60,7 @@ public:
 	 * @brief Enables adding nodes to the graph by friend Operations classes
 	 *
 	 */
-	inline void activate() noexcept
+	void activate() noexcept
 	{
 		isActive_ = true;
 	}
@@ -69,7 +69,7 @@ public:
 	 * @brief Blocks the graph and disallow it to extend
 	 *
 	 */
-	inline void deactivate() noexcept
+	void deactivate() noexcept
 	{
 		isActive_ = false;
 	}

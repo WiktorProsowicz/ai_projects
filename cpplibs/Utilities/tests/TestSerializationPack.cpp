@@ -7,7 +7,7 @@
  **********************/
 
 #include <fstream>
-#include <strstream>
+#include <sstream>
 
 #include <Utilities/BinarySerialization.h>
 #include <fmt/format.h>

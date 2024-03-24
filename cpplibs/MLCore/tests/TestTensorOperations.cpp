@@ -116,10 +116,12 @@ TEST_F(TestTensorOperations, testNaturalLogarithm)
 {
 	using mlCore::tensorInitializers::RangeTensorInitializer;
 
+	// NOLINTBEGIN(modernize-use-std-numbers)
 	UnaryTestParams params{.initializer = std::make_unique<RangeTensorInitializer<double>>(1.0),
 						   .expectedValues = {0.000, 0.693, 1.099, 1.386, 1.609, 1.792, 1.946, 2.079, 2.197,
 											  2.303, 2.398, 2.485, 2.565, 2.639, 2.708, 2.773, 2.833, 2.890,
 											  2.944, 2.996, 3.045, 3.091, 3.135, 3.178, 3.219, 3.258, 3.296}};
+	// NOLINTEND
 
 	performUnaryOperationAndCompare(params, mlCore::TensorOperations::ln);
 }

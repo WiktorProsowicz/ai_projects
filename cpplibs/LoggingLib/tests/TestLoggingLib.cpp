@@ -6,7 +6,6 @@
  * by Wiktor Prosowicz
  **********************/
 
-#include <fstream>
 #include <ranges>
 #include <vector>
 

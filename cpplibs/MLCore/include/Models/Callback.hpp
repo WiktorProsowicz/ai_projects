@@ -1,6 +1,7 @@
 #ifndef MLCORE_INCLUDE_MODELS_ICALLBACK_HPP
 #define MLCORE_INCLUDE_MODELS_ICALLBACK_HPP
 
+#include <memory>
 #include <type_traits>
 
 namespace mlCore::models

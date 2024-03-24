@@ -35,12 +35,9 @@ protected:
 		{
 			return ::testing::AssertionSuccess();
 		}
-		else
-		{
-			return ::testing::AssertionFailure()
-				   << "Expected serialization: " << expectedSerialization << "\n"
-				   << "Actual serialization: " << serialized;
-		}
+
+		return ::testing::AssertionFailure() << "Expected serialization: " << expectedSerialization << "\n"
+											 << "Actual serialization: " << serialized;
 	}
 
 	/// Moves the given `startIter` `expectedValues`.size() times with the given `offset` and compares the
@@ -357,7 +354,7 @@ TEST_F(TestBasicTensorSlice, PerformsAssignOperationWithRange)
 	{
 		auto tensor = spawnTestTensor_2_2_2();
 		auto slice = tensor.slice({{0, 2}, {0, 2}, {1, 2}});
-		slice.assign(std::initializer_list{10.0, 20.0});
+		slice.assign(std::initializer_list<double>{10.0, 20.0});
 
 		EXPECT_TRUE(tensorHasExpectedValues(tensor, {1.0, 10.0, 3.0, 20.0, 5.0, 10.0, 7.0, 20.0}));
 	}
@@ -384,8 +381,9 @@ TEST_F(TestBasicTensorSlice, DetectsAssignmentOfRangeImpossibleToAlign)
 	auto tensor = spawnTestTensor_2_2_2();
 	auto slice = tensor.slice({{0, 1}, {0, 2}, {0, 2}});
 
-	EXPECT_THROW(slice.assign(std::initializer_list{10.0, 20.0, 30.0}), std::invalid_argument);
-	EXPECT_THROW(slice.assign(std::initializer_list{10.0, 20.0, 30.0, 40.0, 50.0}), std::invalid_argument);
+	EXPECT_THROW(slice.assign(std::initializer_list<double>{10.0, 20.0, 30.0}), std::invalid_argument);
+	EXPECT_THROW(slice.assign(std::initializer_list<double>{10.0, 20.0, 30.0, 40.0, 50.0}),
+				 std::invalid_argument);
 }
 
 TEST_F(TestBasicTensorSlice, PerformsAssignOperationWithOtherSlice)

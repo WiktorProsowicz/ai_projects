@@ -136,13 +136,13 @@ public:
 	}
 
 	/// Gets beginning tensor's iterator.
-	inline TensorIterator<ValueType> begin() const
+	TensorIterator<ValueType> begin() const
 	{
 		return TensorIterator<ValueType>(data_);
 	}
 
 	/// Gets ending tensor's iterator.
-	inline TensorIterator<ValueType> end() const
+	TensorIterator<ValueType> end() const
 	{
 		return TensorIterator<ValueType>(data_ + length_);
 	}
@@ -274,7 +274,7 @@ public:
 	BasicTensorSlice<ValueType> slice(const std::vector<std::pair<size_t, size_t>>& indices);
 
 	template <typename TensorValueType>
-	friend std::ostream& operator<<(std::ostream& out, const BasicTensor<TensorValueType>& tensor);
+	friend std::ostream& operator<<(std::ostream& ostream, const BasicTensor<TensorValueType>& tensor);
 
 private:
 	/// Traverses list of indices and checks ranges correctness. Correct indices specify tensor slice that can
@@ -300,7 +300,7 @@ private:
 };
 
 template <typename TensorValueType>
-std::ostream& operator<<(std::ostream& out, const BasicTensor<TensorValueType>& tensor);
+std::ostream& operator<<(std::ostream& ostream, const BasicTensor<TensorValueType>& tensor);
 
 using Tensor = BasicTensor<double>;
 using TensorPtr = std::shared_ptr<Tensor>;

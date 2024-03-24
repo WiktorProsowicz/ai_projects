@@ -12,7 +12,7 @@ namespace mlCore
  * Explicit instantiations
  **************************/
 template class BasicTensor<double>;
-template std::ostream& operator<<(std::ostream& out, const BasicTensor<double>& tensor);
+template std::ostream& operator<<(std::ostream& ostream, const BasicTensor<double>& tensor);
 
 template <typename ValueType>
 BasicTensor<ValueType>::BasicTensor()
@@ -632,16 +632,16 @@ BasicTensor<ValueType>::slice(const std::vector<std::pair<size_t, size_t>>& indi
 }
 
 template <typename TensorValueType>
-std::ostream& operator<<(std::ostream& out, const BasicTensor<TensorValueType>& tensor)
+std::ostream& operator<<(std::ostream& ostream, const BasicTensor<TensorValueType>& tensor)
 {
 
-	out << "<BasicTensor dtype=" << typeid(TensorValueType).name()
-		<< " shape=" << stringifyVector(tensor.shape_) << ">";
+	ostream << "<BasicTensor dtype=" << typeid(TensorValueType).name()
+			<< " shape=" << stringifyVector(tensor.shape_) << ">";
 
 	if(tensor.nDimensions() == 0)
 	{
-		out << "\n" << *tensor.begin();
-		return out;
+		ostream << "\n" << *tensor.begin();
+		return ostream;
 	}
 
 	std::vector<std::string> stringifiedNumbers;
@@ -663,7 +663,7 @@ std::ostream& operator<<(std::ostream& out, const BasicTensor<TensorValueType>& 
 					   size_t)>
 		recursePrint;
 
-	recursePrint = [&blockSize, &recursePrint, &out, &tensor](
+	recursePrint = [&blockSize, &recursePrint, &ostream, &tensor](
 					   std::vector<size_t>::const_iterator shapeIter,
 					   std::vector<std::string>::const_iterator stringifiedDataIter,
 					   const std::string& preamble,
@@ -672,23 +672,24 @@ std::ostream& operator<<(std::ostream& out, const BasicTensor<TensorValueType>& 
 		offset /= *shapeIter;
 		if(shapeIter == std::prev(tensor.shape_.end()))
 		{
-			out << "\n" << preamble << "[";
+			ostream << "\n" << preamble << "[";
 
 			size_t elementNr;
 
 			for(elementNr = 0; elementNr < (*shapeIter) - 1; elementNr++)
 			{
-				out << std::setw(blockSize)
-					<< *std::next(stringifiedDataIter, static_cast<ptrdiff_t>(elementNr)) << ", ";
+				ostream << std::setw(blockSize)
+						<< *std::next(stringifiedDataIter, static_cast<ptrdiff_t>(elementNr)) << ", ";
 			}
 
-			out << std::setw(blockSize) << *std::next(stringifiedDataIter, static_cast<ptrdiff_t>(elementNr));
+			ostream << std::setw(blockSize)
+					<< *std::next(stringifiedDataIter, static_cast<ptrdiff_t>(elementNr));
 
-			out << "]";
+			ostream << "]";
 		}
 		else
 		{
-			out << "\n" << preamble << "[";
+			ostream << "\n" << preamble << "[";
 
 			size_t printNr;
 			for(printNr = 0; printNr < (*shapeIter); printNr++)
@@ -699,7 +700,7 @@ std::ostream& operator<<(std::ostream& out, const BasicTensor<TensorValueType>& 
 							 offset);
 			}
 
-			out << "\n" << preamble << "]";
+			ostream << "\n" << preamble << "]";
 		}
 	};
 
@@ -711,7 +712,7 @@ std::ostream& operator<<(std::ostream& out, const BasicTensor<TensorValueType>& 
 
 	recursePrint(tensor.shape_.cbegin(), stringifiedNumbers.begin(), "", offset);
 
-	return out;
+	return ostream;
 }
 
 } // namespace mlCore

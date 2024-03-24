@@ -17,10 +17,10 @@ class BasicTensor;
 
 namespace detail
 {
-template <typename T>
-concept SizedRange = requires(T t) {
-	requires std::ranges::range<T>;
-	t.size();
+template <typename Type>
+concept SizedRange = requires(Type item) {
+	requires std::ranges::range<Type>;
+	item.size();
 };
 
 } // namespace detail
@@ -131,7 +131,7 @@ public:
 	SlicedTensorIterator<ValueType> end() const;
 
 	template <typename SliceValueType>
-	friend std::ostream& operator<<(std::ostream& os, const BasicTensorSlice<SliceValueType>& slice);
+	friend std::ostream& operator<<(std::ostream& ostream, const BasicTensorSlice<SliceValueType>& slice);
 
 private:
 	/**
@@ -190,7 +190,7 @@ private:
 using TensorSlice = BasicTensorSlice<double>;
 
 template <typename ValueType>
-std::ostream& operator<<(std::ostream& out, const BasicTensorSlice<ValueType>& slice);
+std::ostream& operator<<(std::ostream& ostream, const BasicTensorSlice<ValueType>& slice);
 
 } // namespace mlCore
 

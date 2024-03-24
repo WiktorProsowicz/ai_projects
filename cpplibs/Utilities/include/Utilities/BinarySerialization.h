@@ -26,14 +26,14 @@ std::string makeBytes(Type object);
 template <typename VectorItemType>
 std::string makeBytes(const std::vector<VectorItemType>& object)
 {
-	std::string ss;
+	std::string strComposer;
 
 	for(const auto& item : object)
 	{
-		ss += makeBytes(item);
+		strComposer += makeBytes(item);
 	}
 
-	return ss;
+	return strComposer;
 }
 
 } // namespace detail
@@ -77,7 +77,7 @@ private:
 	template <typename CastedType>
 	std::decay_t<CastedType> _popSingleArg() const
 	{
-		auto& frontArg = *(std::next(args_.cbegin(), static_cast<int64_t>(poppedArgIndex_)));
+		const auto& frontArg = *(std::next(args_.cbegin(), static_cast<int64_t>(poppedArgIndex_)));
 
 		poppedArgIndex_++;
 

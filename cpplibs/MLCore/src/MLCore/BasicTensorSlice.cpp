@@ -172,7 +172,7 @@ size_t BasicTensorSlice<ValueType>::_computeSliceSize() const
 {
 	const auto shape = _computeSliceShape();
 
-	return std::accumulate(shape.begin(), shape.end(), 1, std::multiplies<size_t>());
+	return std::accumulate(shape.begin(), shape.end(), 1, std::multiplies<>());
 }
 
 template <typename ValueType>
@@ -364,7 +364,7 @@ size_t getFlattenedIndex(const std::vector<size_t>& shape, const std::vector<siz
 
 size_t computeNElementsInShape(const std::span<const size_t>& shape)
 {
-	return std::accumulate(shape.begin(), shape.end(), 1, std::multiplies<size_t>());
+	return std::accumulate(shape.begin(), shape.end(), 1, std::multiplies<>());
 }
 } // namespace
 
@@ -463,7 +463,7 @@ BasicTensorSlice<ValueType>::_determineBroadcastedDataPointers(const BasicTensor
 namespace
 {
 template <typename ValueType>
-void serializeContiguousMemory(std::ostream& out,
+void serializeContiguousMemory(std::ostream& ostream,
 							   const std::span<ValueType>& data,
 							   const std::string& preamble,
 							   const std::span<size_t>& shape,
@@ -476,29 +476,29 @@ void serializeContiguousMemory(std::ostream& out,
 		recurseSerialize;
 
 	recurseSerialize =
-		[&recurseSerialize, &out, &data, &shape, blockLength](const std::span<size_t>::iterator shapeIter,
-															  std::span<ValueType>::iterator dataBeg,
-															  std::span<ValueType>::iterator dataEnd,
-															  const std::string& preamble)
+		[&recurseSerialize, &ostream, &shape, blockLength](const std::span<size_t>::iterator shapeIter,
+														   typename std::span<ValueType>::iterator dataBeg,
+														   typename std::span<ValueType>::iterator dataEnd,
+														   const std::string& preamble)
 	{
 		if(shapeIter == std::prev(shape.end()))
 		{
-			out << "\n" << preamble << "[";
+			ostream << "\n" << preamble << "[";
 
 			for(auto dataIter = dataBeg; dataIter != dataEnd - 1; dataIter++)
 			{
-				out << std::setw(blockLength) << *dataIter << ", ";
+				ostream << std::setw(blockLength) << *dataIter << ", ";
 			}
 
-			out << std::setw(blockLength) << *(dataEnd - 1);
+			ostream << std::setw(blockLength) << *(dataEnd - 1);
 
-			out << "]";
+			ostream << "]";
 		}
 		else
 		{
 			const auto offset = std::distance(dataBeg, dataEnd) / *shapeIter;
 
-			out << "\n" << preamble << "[";
+			ostream << "\n" << preamble << "[";
 
 			for(size_t dimIdx = 0; dimIdx < *shapeIter; dimIdx++)
 			{
@@ -508,7 +508,7 @@ void serializeContiguousMemory(std::ostream& out,
 								 preamble + " ");
 			}
 
-			out << "\n" << preamble << "]";
+			ostream << "\n" << preamble << "]";
 		}
 	};
 
@@ -523,7 +523,7 @@ int getBlockSize(const std::vector<ValueType*>& dataPtrs, const size_t& chunkLen
 						   int{0},
 						   [chunkLength](const size_t& acc, const ValueType* dataPtr)
 						   {
-							   const auto maxForChunk =
+							   const auto* const maxForChunk =
 								   std::max_element(dataPtr,
 													dataPtr + chunkLength,
 													[](const ValueType& lhs, const ValueType& rhs) {
@@ -540,10 +540,10 @@ int getBlockSize(const std::vector<ValueType*>& dataPtrs, const size_t& chunkLen
 } // namespace
 
 template <typename SliceValueType>
-std::ostream& operator<<(std::ostream& out, const BasicTensorSlice<SliceValueType>& slice)
+std::ostream& operator<<(std::ostream& ostream, const BasicTensorSlice<SliceValueType>& slice)
 {
-	out << "<BasicTensorSlice dtype=" << typeid(SliceValueType).name()
-		<< " shape=" << stringifyVector(slice._computeSliceShape()) << ">";
+	ostream << "<BasicTensorSlice dtype=" << typeid(SliceValueType).name()
+			<< " shape=" << stringifyVector(slice._computeSliceShape()) << ">";
 
 	const auto& dataPtrs = *(slice.dataChunks_);
 	auto tShape = slice._computeSliceShape();
@@ -559,16 +559,16 @@ std::ostream& operator<<(std::ostream& out, const BasicTensorSlice<SliceValueTyp
 					   const std::string&)>
 		recursePrint;
 
-	recursePrint = [&recursePrint, &out, &dataPtrs, &tShape, &mergedShape, &chunkLength, &blockLength](
+	recursePrint = [&recursePrint, &ostream, &tShape, &mergedShape, &chunkLength, &blockLength](
 					   std::vector<size_t>::iterator shapeIter,
-					   std::vector<SliceValueType*>::const_iterator dataBeg,
-					   std::vector<SliceValueType*>::const_iterator dataEnd,
+					   typename std::vector<SliceValueType*>::const_iterator dataBeg,
+					   typename std::vector<SliceValueType*>::const_iterator dataEnd,
 					   const std::string& preamble)
 	{
 		if(shapeIter == std::prev(mergedShape.end()))
 		{
 			serializeContiguousMemory(
-				out,
+				ostream,
 				std::span(*dataBeg, chunkLength),
 				preamble,
 				std::span(tShape.begin() + mergedShape.size() - 1, tShape.size() - mergedShape.size() + 1),
@@ -578,7 +578,7 @@ std::ostream& operator<<(std::ostream& out, const BasicTensorSlice<SliceValueTyp
 		{
 			const auto offset = std::distance(dataBeg, dataEnd) / *shapeIter;
 
-			out << "\n" << preamble << "[";
+			ostream << "\n" << preamble << "[";
 
 			for(size_t dimIdx = 0; dimIdx < *shapeIter; dimIdx++)
 			{
@@ -588,13 +588,13 @@ std::ostream& operator<<(std::ostream& out, const BasicTensorSlice<SliceValueTyp
 							 preamble + " ");
 			}
 
-			out << "\n" << preamble << "]";
+			ostream << "\n" << preamble << "]";
 		}
 	};
 
 	recursePrint(mergedShape.begin(), dataPtrs.cbegin(), dataPtrs.cend(), "");
 
-	return out;
+	return ostream;
 }
 
 } // namespace mlCore
