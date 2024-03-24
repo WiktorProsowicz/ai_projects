@@ -5,5 +5,6 @@
 # - Linting and static analysis tools to be integrated with IDE
 # ----------------------------------------------------------------------
 
+clang-tidy==18.1.1
 cpplint==1.6.1
 pre-commit==3.6.2

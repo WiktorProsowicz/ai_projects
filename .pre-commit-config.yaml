@@ -19,8 +19,6 @@ repos:
   - repo: https://github.com/pocc/pre-commit-hooks
     rev: v1.3.5
     hooks:
-      - id: clang-tidy
-        args: [--config-file=setuputils/.clang-tidy, -p=build]
       - id: cppcheck
       - id: cpplint
         args: ['--filter=-whitespace/tab,-whitespace/braces,-whitespace/comments,-whitespace/indent,-whitespace/line_length,-readability/braces,-build/include_order']

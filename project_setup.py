@@ -16,6 +16,40 @@ from pymodules.utilities import logging_utils
 HOME_PATH = pathlib.Path(__file__).absolute().parent.as_posix()
 
 
+def _run_clang_tidy():
+    """Runs clang-tidy analysis on C++ files present in the repository.
+
+    Throws:
+        subprocess.CalledProcessError: If the clang-tidy tool crashed.
+    """
+
+    cpplibs_path = os.path.join(HOME_PATH, 'cpplibs')
+    supported_extensions = ['.cpp']
+
+    files_to_check = []
+
+    for root, _, filenames in os.walk(cpplibs_path):
+        for filename in filenames:
+
+            full_path = os.path.join(root, filename)
+
+            if pathlib.Path(full_path).absolute().suffix in supported_extensions:
+                files_to_check.append(full_path)
+
+    tidy_config_path = os.path.join(HOME_PATH, 'setuputils', '.clang-tidy')
+    build_path = os.path.join(HOME_PATH, 'build')
+
+    tidy_args = (
+        '-p',
+        build_path,
+        f'--config-file={tidy_config_path}',
+        '--use-color'
+    )
+
+    subprocess.run(['clang-tidy', *tidy_args,
+                   *files_to_check], check=True)
+
+
 def setup_venv():
     """Sets up the virtual environment."""
 
@@ -60,7 +94,7 @@ def build_project(*args):
         '-S', HOME_PATH,
         '-B', build_path,
         '-DCMAKE_C_COMPILER=gcc-12',
-        '-DCMAKE_CXX_COMPILER=g++-11'
+        '-DCMAKE_CXX_COMPILER=g++-12'
     )
 
     try:
