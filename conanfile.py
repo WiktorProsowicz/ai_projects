@@ -12,11 +12,6 @@ class AiProjectsRecipe(conan.ConanFile):
     settings = 'os', 'arch', 'compiler', 'build_type'
     generators = 'CMakeDeps', 'CMakeToolchain'
 
-    def build_requirements(self):
-        """Specifies the requirements needed to properly develop the project."""
-
-        self.test_requires('gtest/1.14.0')  # pylint: disable=not-callable
-
     def requirements(self):
         """Specifies the basic project requirements."""
 

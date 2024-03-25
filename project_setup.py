@@ -122,22 +122,25 @@ def clean_project():
         logging.critical('Cleaning project failed: %s', proc_error)
 
 
-def install_dependencies():
+def install_dependencies(*args):
     """Downloads and builds external libraries.
 
     The used libraries are specified by the `conanfile.py`.
+
+    Args:
+        *args: Arguments passed to the conan executable.
     """
 
     build_path = os.path.join(HOME_PATH, 'build')
 
     default_args = (
         f'--output-folder={build_path}/ConanFiles',
-        '--build=missing',
-        '--profile=./setuputils/conan_release_prof.ini'
+        '--build=missing'
     )
 
     try:
-        subprocess.run(['conan', 'install', *default_args, '.'], check=True)
+        subprocess.run(
+            ['conan', 'install', *default_args, *args, '.'], check=True)
 
     except subprocess.CalledProcessError as proc_error:
         logging.critical(
