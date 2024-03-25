@@ -4,6 +4,7 @@ Available functions and corresponding arguments are described in the
 main function as well as in the doc strings of the functions.
 """
 import argparse
+import json
 import logging
 import os
 import pathlib
@@ -23,27 +24,29 @@ def _run_clang_tidy():
         subprocess.CalledProcessError: If the clang-tidy tool crashed.
     """
 
-    cpplibs_path = os.path.join(HOME_PATH, 'cpplibs')
-    supported_extensions = ['.cpp']
+    build_path = os.path.join(HOME_PATH, 'build')
+    compile_db_path = os.path.join(build_path, 'compile_commands.json')
+
+    if not os.path.exists(compile_db_path):
+        raise FileNotFoundError('Could not find compile database.')
 
     files_to_check = []
 
-    for root, _, filenames in os.walk(cpplibs_path):
-        for filename in filenames:
+    with open(compile_db_path, encoding='utf-8') as compilation_db_fp:
 
-            full_path = os.path.join(root, filename)
+        compile_db = json.load(compilation_db_fp)
 
-            if pathlib.Path(full_path).absolute().suffix in supported_extensions:
-                files_to_check.append(full_path)
+        for entry in compile_db:
+            files_to_check.append(entry['file'])
 
     tidy_config_path = os.path.join(HOME_PATH, 'setuputils', '.clang-tidy')
-    build_path = os.path.join(HOME_PATH, 'build')
 
     tidy_args = (
         '-p',
         build_path,
         f'--config-file={tidy_config_path}',
-        '--use-color'
+        '--use-color',
+        '-extra-arg=-Wno-unknown-warning-option'
     )
 
     subprocess.run(['clang-tidy', *tidy_args,
