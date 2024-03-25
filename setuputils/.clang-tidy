@@ -1,4 +1,139 @@
----
-Checks: '-abseil*, -altera*, -android*, bugprone*, -bugprone-macro-parentheses, -bugprone-easily-swappable-parameters, cert*, -fuchsia*, -google*, -linuxkernel*,
-  -llvm*, -llvmlibc*, modernize*, -modernize-use-trailing-return-type, -modernize-pass-by-value, -modernize-use-nodiscard, readability*, -readability-redundant-access-specifiers,
-  -readability-magic-numbers, -readability-named-parameter, -readability-redundant-string-init, -readability-redundant-member-init, -cert-err58-cpp '
+Checks: >
+  boost-use-to-string,
+  bugprone-branch-clone,
+  bugprone-forward-declaration-namespace,
+  bugprone-incorrect-roundings,
+  bugprone-infinite-loop,
+  bugprone-lambda-function-name,
+  bugprone-sizeof-expression,
+  bugprone-suspicious-enum-usage,
+  bugprone-suspicious-include,
+  bugprone-suspicious-semicolon,
+  bugprone-suspicious-string-compare,
+  bugprone-swapped-arguments,
+  bugprone-throw-keyword-missing,
+  bugprone-too-small-loop-variable,
+  bugprone-unchecked-optional-access,
+  bugprone-use-after-move,
+  bugprone-virtual-near-miss,
+  bugprone-parent-virtual-call,
+  bugprone-standalone-empty,
+  bugprone-stringview-nullptr,
+  bugprone-string-integer-assignment,
+  bugprone-string-constructor,
+  bugprone-terminating-continue,
+  clang-diagnostic-*,
+  -clang-diagnostic-unknown-warning-option,
+  clang-analyzer-*,
+  cppcoreguidelines-avoid-do-while,
+  cppcoreguidelines-avoid-goto,
+  cppcoreguidelines-avoid-non-const-global-variables,
+  cppcoreguidelines-avoid-reference-coroutine-parameters,
+  cppcoreguidelines-init-variables,
+  cppcoreguidelines-no-malloc,
+  cppcoreguidelines-owning-memory,
+  cppcoreguidelines-prefer-member-initializer,
+  cppcoreguidelines-pro-type-const-cast,
+  cppcoreguidelines-slicing,
+  cppcoreguidelines-special-member-functions,
+  cppcoreguidelines-virtual-class-destructor,
+  cppcoreguidelines-narrowing-conversions,
+  google-default-arguments,
+  google-runtime-int,
+  google-explicit-constructor,
+  google-readability-avoid-underscore-in-googletest-name,
+  google-readability-casting,
+  google-upgrade-googletest-case,
+  llvm-namespace-comment,
+  misc-*,
+  -misc-confusable-identifiers,
+  -misc-no-recursion,
+  -misc-non-private-member-variables-in-classes,
+  modernize-*,
+  -modernize-avoid-c-arrays,
+  -modernize-concat-nested-namespaces,
+  -modernize-use-trailing-return-type,
+  -modernize-use-nodiscard,
+  performance-*,
+  -performance-no-int-to-ptr,
+  portability-std-allocator-const,
+  portability-simd-intrinsics,
+  readability-*,
+  -readability-operators-representation,
+  -readability-redundant-access-specifiers,
+  -readability-magic-numbers,
+  -readability-function-cognitive-complexity,
+  -readability-identifier-length,
+
+WarningsAsErrors: "*"
+HeaderFilterRegex: ".*"
+FormatStyle: none
+
+# https://releases.llvm.org/16.0.0/tools/clang/tools/extra/docs/clang-tidy/checks/readability/identifier-naming.html
+CheckOptions:
+  - key: readability-implicit-bool-conversion.AllowPointerConditions
+    value: true
+  - key: readability-identifier-naming.AggressiveDependentMemberLookup
+    value: Off
+  - key: readability-identifier-naming.ClassHungarianPrefix
+    value: Off
+  - key: readability-identifier-naming.ClassIgnoredRegexp
+    value: ""
+  - key: readability-identifier-naming.IgnoreFailedSplit
+    value: Off
+  - key: readability-identifier-naming.GetConfigPerFile
+    value: On
+  - key: readability-identifier-naming.IgnoreMainLikeFunctions
+    value: On
+  - key: readability-identifier-naming.ClassCase
+    value: CamelCase
+  - key: readability-identifier-naming.ClassPrefix
+    value: ""
+  - key: readability-identifier-naming.ClassSuffix
+    value: ""
+  - key: readability-identifier-naming.ClassMethodCase
+    value: camelBack
+  - key: readability-identifier-naming.NamespaceCase
+    value: camelBack
+  - key: readability-identifier-naming.TypedefCase
+    value: CamelCase
+  - key: readability-identifier-naming.TypeAliasCase
+    value: CamelCase
+  - key: readability-identifier-naming.EnumCase
+    value: CamelCase
+  - key: readability-identifier-naming.UnionCase
+    value: CamelCase
+  - key: readability-identifier-naming.MacroDefinitionCase
+    value: UPPER_CASE
+  - key: readability-identifier-naming.FunctionCase
+    value: camelBack
+  - key: readability-identifier-naming.ParameterCase
+    value: camelBack
+  - key: readability-identifier-naming.MemberCase
+    value: camelBack
+  - key: readability-identifier-naming.MethodCase
+    value: camelBack
+  - key: readability-identifier-naming.VirtualMethodCase
+    value: camelBack
+  - key: readability-identifier-naming.PublicMethodCase
+    value: camelBack
+  - key: readability-identifier-naming.ProtectedMethodCase
+    value: camelBack
+  - key: readability-identifier-naming.PrivateMethodCase
+    value: camelBack
+  - key: readability-identifier-naming.PrivateMethodPrefix
+    value: "_"
+  - key: readability-identifier-naming.PublicMemberCase
+    value: camelBack
+  - key: readability-identifier-naming.ProtectedMemberCase
+    value: camelBack
+  - key: readability-identifier-naming.PrivateMemberCase
+    value: camelBack
+  - key: readability-identifier-naming.PrivateMemberPrefix
+    value: "_"
+  - key: readability-identifier-naming.LocalVariableCase
+    value: camelBack
+  - key: readability-identifier-naming.EnumConstantCase
+    value: UPPER_CASE
+  - key: readability-identified-naming.TemplateParameterCase
+    value: CamelCase
