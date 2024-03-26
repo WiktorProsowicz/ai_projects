@@ -10,11 +10,14 @@ template <typename ValueType>
 class TensorIterator
 {
 public:
+	// NOLINTBEGIN
 	using iterator_category = std::random_access_iterator_tag;
 	using value_type = ValueType;
 	using difference_type = std::ptrdiff_t;
 	using pointer = ValueType*;
 	using reference = ValueType&;
+
+	// NOLINTEND
 
 	/**
 	 * @brief Constructs a new TensorIterator with initial position.
@@ -22,7 +25,7 @@ public:
 	 * @param ptr Initially pointed memory.
 	 */
 	explicit TensorIterator(pointer ptr)
-		: currPtr_(ptr)
+		: _currPtr(ptr)
 	{}
 
 	/**
@@ -32,7 +35,7 @@ public:
 	 */
 	reference operator*()
 	{
-		return *currPtr_;
+		return *_currPtr;
 	}
 
 	/**
@@ -42,7 +45,7 @@ public:
 	 */
 	pointer operator->()
 	{
-		return currPtr_;
+		return _currPtr;
 	}
 
 	/**
@@ -52,7 +55,7 @@ public:
 	 */
 	TensorIterator& operator++()
 	{
-		currPtr_++;
+		_currPtr++;
 		return *this;
 	}
 
@@ -73,19 +76,19 @@ public:
 
 	TensorIterator& operator+=(difference_type n)
 	{
-		currPtr_ += n;
+		_currPtr += n;
 		return *this;
 	}
 
 	TensorIterator& operator-=(difference_type n)
 	{
-		currPtr_ -= n;
+		_currPtr -= n;
 		return *this;
 	}
 
 	difference_type operator-(const TensorIterator& other) const
 	{
-		return currPtr_ - other.currPtr_;
+		return _currPtr - other._currPtr;
 	}
 
 	/**
@@ -97,7 +100,7 @@ public:
 	 */
 	bool operator==(const TensorIterator& other) const
 	{
-		return currPtr_ == other.currPtr_;
+		return _currPtr == other._currPtr;
 	}
 
 	/**
@@ -109,7 +112,7 @@ public:
 	 */
 	bool operator!=(const TensorIterator& other) const
 	{
-		return currPtr_ != other.currPtr_;
+		return _currPtr != other._currPtr;
 	}
 
 	/**
@@ -121,11 +124,11 @@ public:
 	 */
 	bool operator<(const TensorIterator& other)
 	{
-		return currPtr_ < other.currPtr_;
+		return _currPtr < other._currPtr;
 	}
 
 private:
-	pointer currPtr_;
+	pointer _currPtr;
 };
 } // namespace mlCore
 

@@ -6,7 +6,7 @@
 
 #define OPERATION_WITH_SCALAR_RHS(op, rhs)                                                                   \
 	const auto chunkLength = _computeChunkLength();                                                          \
-	for(auto* dataPtr : *dataChunks_)                                                                        \
+	for(auto* dataPtr : *_dataChunks)                                                                        \
 	{                                                                                                        \
 		for(size_t dataIdx = 0; dataIdx < chunkLength; dataIdx++)                                            \
 		{                                                                                                    \
@@ -26,7 +26,7 @@
 	auto dataPtr = data.data();                                                                              \
 	size_t dataIdx = 0;                                                                                      \
                                                                                                              \
-	for(auto* tensorDataPtr : *dataChunks_)                                                                  \
+	for(auto* tensorDataPtr : *_dataChunks)                                                                  \
 	{                                                                                                        \
 		for(size_t chunkIdx = 0; chunkIdx < chunkLength; ++chunkIdx, dataIdx = (dataIdx + 1) % data.size())  \
 		{                                                                                                    \
@@ -77,9 +77,9 @@ template std::ostream& operator<<(std::ostream& os, const BasicTensorSlice<doubl
 
 template <typename ValueType>
 BasicTensorSlice<ValueType>::BasicTensorSlice(const BasicTensorSlice<ValueType>& other)
-	: tensor_(other.tensor_)
-	, indices_(other.indices_)
-	, dataChunks_(std::make_unique<std::vector<ValueType*>>(*other.dataChunks_))
+	: _tensor(other._tensor)
+	, _indices(other._indices)
+	, _dataChunks(std::make_unique<std::vector<ValueType*>>(*other._dataChunks))
 {}
 
 template <typename ValueType>
@@ -87,8 +87,8 @@ BasicTensorSlice<ValueType>& BasicTensorSlice<ValueType>::operator=(const BasicT
 {
 	if(&other != this)
 	{
-		tensor_ = other.tensor_;
-		indices_ = other.indices_;
+		_tensor = other._tensor;
+		_indices = other._indices;
 	}
 
 	return *this;
@@ -97,18 +97,18 @@ BasicTensorSlice<ValueType>& BasicTensorSlice<ValueType>::operator=(const BasicT
 template <typename ValueType>
 BasicTensorSlice<ValueType>::BasicTensorSlice(BasicTensor<ValueType>& associatedTensor,
 											  const std::vector<std::pair<size_t, size_t>>& indices)
-	: tensor_(associatedTensor)
-	, indices_(indices)
-	, dataChunks_(std::make_unique<std::vector<ValueType*>>(_computeDataPointers()))
+	: _tensor(associatedTensor)
+	, _indices(indices)
+	, _dataChunks(std::make_unique<std::vector<ValueType*>>(_computeDataPointers()))
 {}
 
 template <typename ValueType>
 std::vector<size_t> BasicTensorSlice<ValueType>::_computeSliceShape() const
 {
-	std::vector<size_t> collectedShapeDims(indices_.size(), 0);
+	std::vector<size_t> collectedShapeDims(_indices.size(), 0);
 
-	std::transform(indices_.cbegin(),
-				   indices_.cend(),
+	std::transform(_indices.cbegin(),
+				   _indices.cend(),
 				   collectedShapeDims.begin(),
 				   [](const auto& indexPair) { return indexPair.second - indexPair.first; });
 
@@ -120,8 +120,8 @@ std::vector<ValueType*> BasicTensorSlice<ValueType>::_computeDataPointers() cons
 {
 	std::vector<ValueType*> dataPointers;
 
-	const auto& tShape = tensor_.get().shape_;
-	const auto pivotElement = getPivotShapeElement(tShape, indices_);
+	const auto& tShape = _tensor.get()._shape;
+	const auto pivotElement = getPivotShapeElement(tShape, _indices);
 
 	std::function<std::vector<ValueType*>(ValueType*, size_t, size_t)> recurseGetPointers;
 
@@ -137,7 +137,7 @@ std::vector<ValueType*> BasicTensorSlice<ValueType>::_computeDataPointers() cons
 
 		std::vector<ValueType*> pointers;
 
-		for(size_t nextSpanIndex = indices_.at(shapeIdx).first; nextSpanIndex < indices_.at(shapeIdx).second;
+		for(size_t nextSpanIndex = _indices.at(shapeIdx).first; nextSpanIndex < _indices.at(shapeIdx).second;
 			nextSpanIndex++)
 		{
 			const auto collectedPointers =
@@ -149,7 +149,7 @@ std::vector<ValueType*> BasicTensorSlice<ValueType>::_computeDataPointers() cons
 		return pointers;
 	};
 
-	return recurseGetPointers(tensor_.get().data_, 0, tensor_.get().length_);
+	return recurseGetPointers(_tensor.get()._data, 0, _tensor.get()._length);
 }
 
 template <typename ValueType>
@@ -157,9 +157,9 @@ size_t BasicTensorSlice<ValueType>::_computeChunkLength() const
 {
 	size_t chunkLength = 1;
 
-	const auto& tShape = tensor_.get().shape_;
+	const auto& tShape = _tensor.get()._shape;
 
-	for(size_t shapeIdx = getPivotShapeElement(tShape, indices_); shapeIdx < tShape.size(); shapeIdx++)
+	for(size_t shapeIdx = getPivotShapeElement(tShape, _indices); shapeIdx < tShape.size(); shapeIdx++)
 	{
 		chunkLength *= tShape.at(shapeIdx);
 	}
@@ -371,43 +371,43 @@ size_t computeNElementsInShape(const std::span<const size_t>& shape)
 template <typename ValueType>
 SlicedTensorIterator<ValueType> BasicTensorSlice<ValueType>::begin() const
 {
-	std::vector<size_t> firstElementPath(indices_.size());
+	std::vector<size_t> firstElementPath(_indices.size());
 
-	std::transform(indices_.cbegin(),
-				   indices_.cend(),
+	std::transform(_indices.cbegin(),
+				   _indices.cend(),
 				   firstElementPath.begin(),
 				   [](const auto& indices) { return indices.first; });
 
-	auto* startDataPtr = tensor_.get().data_ + getFlattenedIndex(tensor_.get().shape_, firstElementPath);
+	auto* startDataPtr = _tensor.get()._data + getFlattenedIndex(_tensor.get()._shape, firstElementPath);
 
-	return SlicedTensorIterator<ValueType>(startDataPtr, *dataChunks_, _computeChunkLength(), 0);
+	return SlicedTensorIterator<ValueType>(startDataPtr, *_dataChunks, _computeChunkLength(), 0);
 }
 
 template <typename ValueType>
 SlicedTensorIterator<ValueType> BasicTensorSlice<ValueType>::end() const
 {
-	std::vector<size_t> lastElementPath(indices_.size());
+	std::vector<size_t> lastElementPath(_indices.size());
 
-	std::transform(indices_.cbegin(),
-				   indices_.cend(),
+	std::transform(_indices.cbegin(),
+				   _indices.cend(),
 				   lastElementPath.begin(),
 				   [](const auto& indices) { return indices.second - 1; });
 
-	auto* endDataPtr = tensor_.get().data_ + getFlattenedIndex(tensor_.get().shape_, lastElementPath) + 1;
+	auto* endDataPtr = _tensor.get()._data + getFlattenedIndex(_tensor.get()._shape, lastElementPath) + 1;
 
 	return SlicedTensorIterator<ValueType>(
-		endDataPtr, *dataChunks_, _computeChunkLength(), (dataChunks_->size() * _computeChunkLength()));
+		endDataPtr, *_dataChunks, _computeChunkLength(), (_dataChunks->size() * _computeChunkLength()));
 }
 
 template <typename ValueType>
 std::vector<std::pair<ValueType*, ValueType*>>
 BasicTensorSlice<ValueType>::_determineBroadcastedDataPointers(const BasicTensorSlice& other) const
 {
-	const auto& tShape = tensor_.get().shape_;
-	const auto& oShape = other.tensor_.get().shape_;
+	const auto& tShape = _tensor.get()._shape;
+	const auto& oShape = other._tensor.get()._shape;
 
-	const auto pivotElement = getPivotShapeElement(tShape, indices_);
-	const auto oPivotElement = getPivotShapeElement(oShape, other.indices_);
+	const auto pivotElement = getPivotShapeElement(tShape, _indices);
+	const auto oPivotElement = getPivotShapeElement(oShape, other._indices);
 
 	const auto mergedShapeThis = mergeShape(_computeSliceShape(), pivotElement, _computeChunkLength());
 	const auto mergedShapeOther =
@@ -422,8 +422,8 @@ BasicTensorSlice<ValueType>::_determineBroadcastedDataPointers(const BasicTensor
 
 	std::vector<std::pair<ValueType*, ValueType*>> zippedDataPointers;
 
-	const auto& dataPointersThis = *dataChunks_;
-	const auto& dataPointersOther = *(other.dataChunks_);
+	const auto& dataPointersThis = *_dataChunks;
+	const auto& dataPointersOther = *(other._dataChunks);
 
 	std::vector<size_t> indicesPathThis(mergedShapeThis.size(), 0);
 	std::vector<size_t> indicesPathOther(mergedShapeOther.size(), 0);
@@ -520,7 +520,7 @@ int getBlockSize(const std::vector<ValueType*>& dataPtrs, const size_t& chunkLen
 {
 	return std::accumulate(dataPtrs.cbegin(),
 						   dataPtrs.cend(),
-						   int{0},
+						   0,
 						   [chunkLength](const size_t& acc, const ValueType* dataPtr)
 						   {
 							   const auto* const maxForChunk =
@@ -545,13 +545,13 @@ std::ostream& operator<<(std::ostream& ostream, const BasicTensorSlice<SliceValu
 	ostream << "<BasicTensorSlice dtype=" << typeid(SliceValueType).name()
 			<< " shape=" << stringifyVector(slice._computeSliceShape()) << ">";
 
-	const auto& dataPtrs = *(slice.dataChunks_);
+	const auto& dataPtrs = *(slice._dataChunks);
 	auto tShape = slice._computeSliceShape();
 	const auto chunkLength = slice._computeChunkLength();
 	const auto blockLength = getBlockSize(dataPtrs, chunkLength);
 
 	auto mergedShape =
-		mergeShape(tShape, getPivotShapeElement(slice.tensor_.get().shape(), slice.indices_), chunkLength);
+		mergeShape(tShape, getPivotShapeElement(slice._tensor.get().shape(), slice._indices), chunkLength);
 
 	std::function<void(std::vector<size_t>::iterator,
 					   typename std::vector<SliceValueType*>::const_iterator,

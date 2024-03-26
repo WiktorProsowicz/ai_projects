@@ -61,7 +61,7 @@ class TestDerivativeExtractor : public testing::Test
 {
 protected:
 	template <UnaryNodeOperation Operation>
-	static mlCore::Tensor computeDefinitionDerivative(Operation oper, const mlCore::Tensor& inputTensor)
+	static mlCore::Tensor _computeDefinitionDerivative(Operation oper, const mlCore::Tensor& inputTensor)
 	{
 		constexpr double kEpsilon = 1e-6;
 
@@ -74,7 +74,7 @@ protected:
 		return (frontShiftedResult->getValue() - backShiftedResult->getValue()) / (2 * kEpsilon);
 	}
 
-	static void compareTwoDerivatives(const mlCore::Tensor& computedDerivative,
+	static void _compareTwoDerivatives(const mlCore::Tensor& computedDerivative,
 									  const mlCore::Tensor& expDerivative,
 									  const std::string& message)
 	{
@@ -90,7 +90,7 @@ protected:
 	}
 
 	template <BinaryNodeOperation Operation>
-	static void testBinaryOperationDerivative(Operation oper, const BinaryParams& params)
+	static void _testBinaryOperationDerivative(Operation oper, const BinaryParams& params)
 	{
 		using mlCore::autoDiff::binaryOperators::BinaryOperator;
 
@@ -123,17 +123,17 @@ protected:
 		{ return oper(leftInputNode, node); };
 
 		// computing derivative according to definition
-		const auto leftDefDerivative = computeDefinitionDerivative(leftLockedOperation, leftNodeValue);
+		const auto leftDefDerivative = _computeDefinitionDerivative(leftLockedOperation, leftNodeValue);
 
-		const auto rightDefDerivative = computeDefinitionDerivative(rightLockedOperation, rightNodeValue);
+		const auto rightDefDerivative = _computeDefinitionDerivative(rightLockedOperation, rightNodeValue);
 
-		compareTwoDerivatives(leftDerivative,
+		_compareTwoDerivatives(leftDerivative,
 							  leftDefDerivative,
 							  "Found inequality while comparing DerivativeExtractor result and "
 							  "definition derivative with regard to left input!\n\nInputs:\n\n" +
 								  stringifyTensor(leftNodeValue) + "\n\n" + stringifyTensor(rightNodeValue));
 
-		compareTwoDerivatives(rightDerivative,
+		_compareTwoDerivatives(rightDerivative,
 							  rightDefDerivative,
 							  "Found inequality while comparing DerivativeExtractor result and "
 							  "definition derivative with regard to right input!\n\nInputs:\n\n" +
@@ -141,7 +141,7 @@ protected:
 	}
 
 	template <UnaryNodeOperation Operation>
-	static void testUnaryOperationDerivative(Operation oper, const UnaryParams& params)
+	static void _testUnaryOperationDerivative(Operation oper, const UnaryParams& params)
 	{
 		using mlCore::autoDiff::unaryOperators::UnaryOperator;
 
@@ -163,9 +163,9 @@ protected:
 		const auto derivative = operationResult->computeDirectDerivative();
 
 		// computing derivative according to definition
-		const auto definitionDerivative = computeDefinitionDerivative(oper, nodeValue);
+		const auto definitionDerivative = _computeDefinitionDerivative(oper, nodeValue);
 
-		compareTwoDerivatives(
+		_compareTwoDerivatives(
 			derivative,
 			definitionDerivative,
 			"Found inequality while comparing derivative, computed with "
@@ -173,7 +173,7 @@ protected:
 				stringifyTensor(nodeValue));
 	}
 
-	static void testMatmulDerivativeExtracting(const mlCore::Tensor& leftTensor,
+	static void _testMatmulDerivativeExtracting(const mlCore::Tensor& leftTensor,
 											   const mlCore::Tensor& rightTensor,
 											   const mlCore::Tensor& outer,
 											   const std::pair<mlCore::Tensor, mlCore::Tensor>& expected)
@@ -202,9 +202,9 @@ protected:
 						 << rightTensor << "\n\nOuter derivative:\n\n"
 						 << outer;
 
-		compareTwoDerivatives(leftDerivative, leftExpected, messageGenerator.str());
+		_compareTwoDerivatives(leftDerivative, leftExpected, messageGenerator.str());
 
-		compareTwoDerivatives(rightDerivative, rightExpected, messageGenerator.str());
+		_compareTwoDerivatives(rightDerivative, rightExpected, messageGenerator.str());
 	}
 };
 
@@ -222,7 +222,7 @@ TEST_F(TestDerivativeExtractor, testReluDerivative)
 	const UnaryParams params{.tensorShape = {3, 3},
 							 .initializer = std::make_unique<RangeTensorInitializer<double>>(-3.0, .7)};
 
-	testUnaryOperationDerivative([](NodePtr node) { return nodesActivations::relu(node); }, params);
+	_testUnaryOperationDerivative([](NodePtr node) { return nodesActivations::relu(node); }, params);
 }
 
 TEST_F(TestDerivativeExtractor, testLnDerivative)
@@ -233,7 +233,7 @@ TEST_F(TestDerivativeExtractor, testLnDerivative)
 	const UnaryParams params{.tensorShape = {3, 3},
 							 .initializer = std::make_unique<RangeTensorInitializer<double>>(0.1, .7)};
 
-	testUnaryOperationDerivative([](NodePtr node) { return unaryOperations::ln(node); }, params);
+	_testUnaryOperationDerivative([](NodePtr node) { return unaryOperations::ln(node); }, params);
 }
 
 TEST_F(TestDerivativeExtractor, testSigmoidDerivative)
@@ -244,7 +244,7 @@ TEST_F(TestDerivativeExtractor, testSigmoidDerivative)
 	const UnaryParams params{.tensorShape = {5, 5},
 							 .initializer = std::make_unique<RangeTensorInitializer<double>>(-9.0, .7)};
 
-	testUnaryOperationDerivative([](NodePtr node) { return nodesActivations::sigmoid(node); }, params);
+	_testUnaryOperationDerivative([](NodePtr node) { return nodesActivations::sigmoid(node); }, params);
 }
 
 TEST_F(TestDerivativeExtractor, testMultiplyDerivative)
@@ -257,7 +257,7 @@ TEST_F(TestDerivativeExtractor, testMultiplyDerivative)
 							  .rightTensorShape = {3, 5},
 							  .rightInitializer = std::make_unique<RangeTensorInitializer<double>>(5, .3)};
 
-	testBinaryOperationDerivative(
+	_testBinaryOperationDerivative(
 		[](NodePtr left, NodePtr right) { return binaryOperations::multiply(left, right); }, params);
 }
 
@@ -271,7 +271,7 @@ TEST_F(TestDerivativeExtractor, testDivideDerivative)
 							  .rightTensorShape = {3, 5},
 							  .rightInitializer = std::make_unique<RangeTensorInitializer<double>>(5, .3)};
 
-	testBinaryOperationDerivative(
+	_testBinaryOperationDerivative(
 		[](NodePtr left, NodePtr right) { return binaryOperations::divide(left, right); }, params);
 }
 
@@ -285,7 +285,7 @@ TEST_F(TestDerivativeExtractor, testAddDerivative)
 							  .rightTensorShape = {3, 5},
 							  .rightInitializer = std::make_unique<RangeTensorInitializer<double>>(5, .3)};
 
-	testBinaryOperationDerivative(
+	_testBinaryOperationDerivative(
 		[](NodePtr left, NodePtr right) { return binaryOperations::add(left, right); }, params);
 }
 
@@ -299,7 +299,7 @@ TEST_F(TestDerivativeExtractor, testSubtractDerivative)
 							  .rightTensorShape = {3, 5},
 							  .rightInitializer = std::make_unique<RangeTensorInitializer<double>>(5, .3)};
 
-	testBinaryOperationDerivative(
+	_testBinaryOperationDerivative(
 		[](NodePtr left, NodePtr right) { return binaryOperations::subtract(left, right); }, params);
 }
 
@@ -316,7 +316,7 @@ TEST_F(TestDerivativeExtractor, testPowerDerivative)
 		.rightTensorShape = {3, 5},
 		.rightInitializer = std::make_unique<RangeTensorInitializer<double>>(5, .1)};
 
-	testBinaryOperationDerivative(powerLambda, paramsWithLeftScalar);
+	_testBinaryOperationDerivative(powerLambda, paramsWithLeftScalar);
 }
 
 TEST_F(TestDerivativeExtractor, testMatmulDerivative)
@@ -338,7 +338,7 @@ TEST_F(TestDerivativeExtractor, testMatmulDerivative)
 	mlCore::Tensor rightExpected({3, 2});
 	rightExpected.fill({-2.6, -6, 3, 2.4, 8.6, 10.8});
 
-	testMatmulDerivativeExtracting(
+	_testMatmulDerivativeExtracting(
 		leftInput, rightInput, outerDerivative, std::pair{leftExpected, rightExpected});
 }
 

@@ -26,7 +26,7 @@ namespace
 class TestLoggingLib : public testing::Test
 {
 protected:
-	static void checkHarvestedLogs(const std::string& logsBulk, const std::vector<std::string>& expectedLogs)
+	static void _checkHarvestedLogs(const std::string& logsBulk, const std::vector<std::string>& expectedLogs)
 	{
 		std::istringstream logsStream(logsBulk.c_str());
 
@@ -82,7 +82,7 @@ TEST_F(TestLoggingLib, testDefaultStreamLogging)
 												"\033[34m[ INFO][Channel 2] Message number 5\033[0m",
 												"\033[1;31m[ERROR][Channel 2] Message number 6\033[0m"};
 
-	checkHarvestedLogs(defaultStream.str(), expectedLogs);
+	_checkHarvestedLogs(defaultStream.str(), expectedLogs);
 }
 
 TEST_F(TestLoggingLib, testNamedChannelsLogging)
@@ -110,17 +110,17 @@ TEST_F(TestLoggingLib, testNamedChannelsLogging)
 
 	LOG_INFO("Channel 2", "Message 8");
 
-	checkHarvestedLogs(defaultStream.str(),
+	_checkHarvestedLogs(defaultStream.str(),
 					   {"\033[34m[ INFO][Unnamed] Message 1\033[0m",
 						"\033[34m[ INFO][Unnamed] Message 4\033[0m",
 						"\033[34m[ INFO][Channel 2] Message 8\033[0m"});
 
-	checkHarvestedLogs(firstChannelStream.str(),
+	_checkHarvestedLogs(firstChannelStream.str(),
 					   {"\033[34m[ INFO][Channel 1] Message 2\033[0m",
 						"\033[34m[ INFO][Channel 1] Message 3\033[0m",
 						"\033[34m[ INFO][Channel 1] Message 6\033[0m"});
 
-	checkHarvestedLogs(
+	_checkHarvestedLogs(
 		secondChannelStream.str(),
 		{"\033[34m[ INFO][Channel 2] Message 5\033[0m", "\033[34m[ INFO][Channel 2] Message 7\033[0m"});
 }

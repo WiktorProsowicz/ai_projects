@@ -67,27 +67,27 @@ public:
 	std::vector<TensorDataType> operator()(const RawTensorInitList<TensorDataType>& containerValue)
 	{
 
-		if(collectedShapeIndices_.find(currentLevel) == collectedShapeIndices_.end())
+		if(_collectedShapeIndices.find(_currentLevel) == _collectedShapeIndices.end())
 		{
-			collectedShapeIndices_.emplace(currentLevel, containerValue.size());
+			_collectedShapeIndices.emplace(_currentLevel, containerValue.size());
 		}
-		else if(containerValue.size() != collectedShapeIndices_.at(currentLevel))
+		else if(containerValue.size() != _collectedShapeIndices.at(_currentLevel))
 		{
 			LOG_ERROR("TensorOperations",
-					  fmt::format("Inconsistent elements number at axis {}.", currentLevel));
+					  fmt::format("Inconsistent elements number at axis {}.", _currentLevel));
 		}
 
 		std::vector<std::vector<TensorDataType>> collectedValueSets;
 		collectedValueSets.reserve(containerValue.size());
 
-		currentLevel++;
+		_currentLevel++;
 
 		for(const auto& valueSet : containerValue)
 		{
 			collectedValueSets.emplace_back(std::visit(*this, valueSet));
 		}
 
-		currentLevel--;
+		_currentLevel--;
 
 		if(collectedValueSets.empty())
 		{
@@ -122,7 +122,7 @@ public:
 	{
 		std::vector<size_t> collectedShape;
 
-		for(const auto& [axis, index] : collectedShapeIndices_)
+		for(const auto& [axis, index] : _collectedShapeIndices)
 		{
 			collectedShape.push_back(index);
 		}
@@ -131,8 +131,8 @@ public:
 	}
 
 private:
-	std::map<size_t, size_t> collectedShapeIndices_{};
-	size_t currentLevel = 0;
+	std::map<size_t, size_t> _collectedShapeIndices;
+	size_t _currentLevel = 0;
 };
 } // namespace detail
 

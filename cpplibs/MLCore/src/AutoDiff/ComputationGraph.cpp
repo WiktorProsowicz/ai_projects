@@ -10,24 +10,24 @@ namespace mlCore::autoDiff
 
 bool ComputationGraph::hasGradient(const size_t& nodeId) const
 {
-	return std::find_if(gradients_.begin(),
-						gradients_.end(),
+	return std::find_if(_gradients.begin(),
+						_gradients.end(),
 						[&nodeId](const std::pair<NodePtr, Tensor>& nodeGrad)
-						{ return nodeGrad.first->getIndex() == nodeId; }) == gradients_.end();
+						{ return nodeGrad.first->getIndex() == nodeId; }) == _gradients.end();
 }
 
 bool ComputationGraph::hasGradient(const std::string& nodeName) const
 {
-	return std::find_if(gradients_.begin(),
-						gradients_.end(),
+	return std::find_if(_gradients.begin(),
+						_gradients.end(),
 						[&nodeName](const std::pair<NodePtr, Tensor>& nodeGrad)
-						{ return nodeGrad.first->getName() == nodeName; }) == gradients_.end();
+						{ return nodeGrad.first->getName() == nodeName; }) == _gradients.end();
 }
 
 const Tensor& ComputationGraph::getGradientByNodeId(const size_t& nodeId) const
 {
-	return std::find_if(gradients_.begin(),
-						gradients_.end(),
+	return std::find_if(_gradients.begin(),
+						_gradients.end(),
 						[&nodeId](const std::pair<NodePtr, Tensor>& nodeGrad)
 						{ return nodeGrad.first->getIndex() == nodeId; })
 		->second;
@@ -35,8 +35,8 @@ const Tensor& ComputationGraph::getGradientByNodeId(const size_t& nodeId) const
 
 const Tensor& ComputationGraph::getGradientByNodeName(const std::string& nodeName) const
 {
-	return std::find_if(gradients_.begin(),
-						gradients_.end(),
+	return std::find_if(_gradients.begin(),
+						_gradients.end(),
 						[&nodeName](const std::pair<NodePtr, Tensor>& nodeGrad)
 						{ return nodeGrad.first->getName() == nodeName; })
 		->second;
@@ -44,14 +44,14 @@ const Tensor& ComputationGraph::getGradientByNodeName(const std::string& nodeNam
 
 void ComputationGraph::addNode(const NodePtr node)
 {
-	if(!isActive_)
+	if(!_isActive)
 	{
 		LOG_WARN("ComputationGraph", "Cannot add node to the graph which is not active.");
 		return;
 	}
 
-	areNodesSorted_ = false;
-	nodes_.push_back(node);
+	_areNodesSorted = false;
+	_nodes.push_back(node);
 }
 
 void ComputationGraph::_sortNodes()
@@ -59,7 +59,7 @@ void ComputationGraph::_sortNodes()
 
 	std::set<NodePtr> nodesWithParent;
 
-	for(const auto& node : nodes_)
+	for(const auto& node : _nodes)
 	{
 		if(const auto castedBinaryOp = std::dynamic_pointer_cast<binaryOperators::BinaryOperator>(node))
 		{
@@ -76,8 +76,8 @@ void ComputationGraph::_sortNodes()
 
 	std::set<NodePtr> orphanedNodes;
 
-	std::set_difference(nodes_.cbegin(),
-						nodes_.cend(),
+	std::set_difference(_nodes.cbegin(),
+						_nodes.cend(),
 						nodesWithParent.cbegin(),
 						nodesWithParent.cend(),
 						std::inserter(orphanedNodes, orphanedNodes.end()));
@@ -111,19 +111,19 @@ void ComputationGraph::_sortNodes()
 		traverseTree(orphanedNode);
 	}
 
-	nodes_ = newNodes;
+	_nodes = newNodes;
 
-	areNodesSorted_ = true;
+	_areNodesSorted = true;
 }
 
 void ComputationGraph::forwardPass(const std::map<PlaceholderPtr, Tensor>& feedDict)
 {
-	if(!areNodesSorted_)
+	if(!_areNodesSorted)
 	{
 		_sortNodes();
 	}
 
-	for(const auto& node : nodes_)
+	for(const auto& node : _nodes)
 	{
 		if(const auto placeholder = std::dynamic_pointer_cast<Placeholder>(node);
 		   placeholder && (feedDict.find(placeholder) != feedDict.end()))
@@ -143,7 +143,7 @@ void ComputationGraph::forwardPass(const std::map<PlaceholderPtr, Tensor>& feedD
 
 void ComputationGraph::computeGradients(const NodePtr root)
 {
-	if(!areNodesSorted_)
+	if(!_areNodesSorted)
 	{
 		_sortNodes();
 	}
@@ -153,13 +153,13 @@ void ComputationGraph::computeGradients(const NodePtr root)
 	// traverses the nodes tree and computes gradient in regard of every node
 	backPropagate = [&backPropagate, this](const NodePtr node, const Tensor& cumulatedGradient)
 	{
-		if(this->gradients_.find(node) == this->gradients_.end())
+		if(this->_gradients.find(node) == this->_gradients.end())
 		{
-			this->gradients_.emplace(node, cumulatedGradient);
+			this->_gradients.emplace(node, cumulatedGradient);
 		}
 		else
 		{
-			auto& grad = this->gradients_.at(node);
+			auto& grad = this->_gradients.at(node);
 			grad = grad + cumulatedGradient;
 		}
 

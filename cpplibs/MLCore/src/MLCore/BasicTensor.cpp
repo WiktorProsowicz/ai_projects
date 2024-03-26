@@ -16,37 +16,36 @@ template std::ostream& operator<<(std::ostream& ostream, const BasicTensor<doubl
 
 template <typename ValueType>
 BasicTensor<ValueType>::BasicTensor()
-	: length_(1)
-	, shape_()
-	, data_()
+	: _length(1)
+	, _data()
 {
-	data_ = new ValueType[1];
+	_data = new ValueType[1];
 }
 
 template <typename ValueType>
 BasicTensor<ValueType>::BasicTensor(ValueType initVal)
 	: BasicTensor()
 {
-	*data_ = initVal;
+	*_data = initVal;
 }
 
 template <typename ValueType>
 BasicTensor<ValueType>::BasicTensor(const std::vector<size_t>& shape)
-	: length_()
-	, shape_(shape)
-	, data_()
+	: _length()
+	, _shape(shape)
+	, _data()
 {
 	try
 	{
-		_checkShapeElementsPositive(shape_);
+		_checkShapeElementsPositive(_shape);
 	}
 	catch(const std::runtime_error&)
 	{
 		LOG_WARN("BasicTensor",
 				 "Shape's members have to be greater than zero. Changing all zero dims to 1's.");
 
-		std::for_each(shape_.begin(),
-					  shape_.end(),
+		std::for_each(_shape.begin(),
+					  _shape.end(),
 					  [](auto& dim)
 					  {
 						  if(dim == 0)
@@ -58,7 +57,7 @@ BasicTensor<ValueType>::BasicTensor(const std::vector<size_t>& shape)
 
 	try
 	{
-		_checkShapeFitsInBounds(shape_);
+		_checkShapeFitsInBounds(_shape);
 	}
 	catch(const std::runtime_error&)
 	{
@@ -81,24 +80,24 @@ BasicTensor<ValueType>::BasicTensor(const std::vector<size_t>& shape)
 				 "shape: "
 					 << stringifyVector(newShape));
 
-		shape_ = std::move(newShape);
+		_shape = std::move(newShape);
 	}
 
-	length_ = std::accumulate(shape_.begin(),
-							  shape_.end(),
+	_length = std::accumulate(_shape.begin(),
+							  _shape.end(),
 							  size_t(1),
 							  [](const auto current, const auto dim) { return current * dim; });
 
-	data_ = new ValueType[length_];
+	_data = new ValueType[_length];
 }
 
 template <typename ValueType>
 BasicTensor<ValueType>::BasicTensor(const std::vector<size_t>& shape, const ValueType initVal)
 	: BasicTensor(shape)
 {
-	for(size_t i = 0; i < length_; i++)
+	for(size_t i = 0; i < _length; i++)
 	{
-		data_[i] = initVal;
+		_data[i] = initVal;
 	}
 }
 
@@ -109,38 +108,38 @@ BasicTensor<ValueType>::BasicTensor(const std::vector<size_t>& shape,
 {
 
 	size_t pos = 0;
-	for(auto valsIter = initValues.begin(); valsIter < initValues.end() && pos < length_; pos++, valsIter++)
+	for(auto valsIter = initValues.begin(); valsIter < initValues.end() && pos < _length; pos++, valsIter++)
 	{
-		data_[pos] = *valsIter;
+		_data[pos] = *valsIter;
 	}
 }
 
 template <typename ValueType>
 BasicTensor<ValueType>::BasicTensor(const BasicTensor& other)
-	: length_(other.length_)
-	, shape_(other.shape_)
-	, data_(new ValueType[length_])
+	: _length(other._length)
+	, _shape(other._shape)
+	, _data(new ValueType[_length])
 {
-	for(size_t pos = 0; pos < length_; pos++)
+	for(size_t pos = 0; pos < _length; pos++)
 	{
-		data_[pos] = other.data_[pos];
+		_data[pos] = other._data[pos];
 	}
 }
 
 template <typename ValueType>
 BasicTensor<ValueType>::BasicTensor(BasicTensor&& other)
-	: length_(other.length_)
-	, shape_(std::move(other.shape_))
-	, data_(other.data_)
+	: _length(other._length)
+	, _shape(std::move(other._shape))
+	, _data(other._data)
 {
-	other.length_ = 0;
-	other.data_ = nullptr;
+	other._length = 0;
+	other._data = nullptr;
 }
 
 template <typename ValueType>
 BasicTensor<ValueType>::~BasicTensor()
 {
-	delete[] data_;
+	delete[] _data;
 }
 
 template <typename ValueType>
@@ -148,18 +147,18 @@ BasicTensor<ValueType>& BasicTensor<ValueType>::operator=(const BasicTensor& oth
 {
 	if(&other != this)
 	{
-		if(length_ != other.length_)
+		if(_length != other._length)
 		{
-			delete[] data_;
-			length_ = other.length_;
-			data_ = new ValueType[length_];
+			delete[] _data;
+			_length = other._length;
+			_data = new ValueType[_length];
 		}
 
-		shape_ = other.shape_;
+		_shape = other._shape;
 
-		for(size_t i = 0; i < length_; i++)
+		for(size_t i = 0; i < _length; i++)
 		{
-			data_[i] = other.data_[i];
+			_data[i] = other._data[i];
 		}
 	}
 
@@ -171,14 +170,14 @@ BasicTensor<ValueType>& BasicTensor<ValueType>::operator=(BasicTensor&& other)
 {
 	if(&other != this)
 	{
-		delete[] data_;
-		data_ = other.data_;
-		other.data_ = nullptr;
+		delete[] _data;
+		_data = other._data;
+		other._data = nullptr;
 
-		length_ = other.length_;
-		other.length_ = 0;
+		_length = other._length;
+		other._length = 0;
 
-		shape_ = std::move(other.shape_);
+		_shape = std::move(other._shape);
 	}
 
 	return *this;
@@ -191,7 +190,7 @@ void BasicTensor<ValueType>::reshape(const std::vector<size_t>& newShape)
 	_checkShapeFitsInBounds(newShape);
 	_checkShapeCompatible(newShape);
 
-	shape_ = newShape;
+	_shape = newShape;
 }
 
 template <typename ValueType>
@@ -231,12 +230,12 @@ void BasicTensor<ValueType>::_checkShapeCompatible(const std::vector<size_t>& sh
 						size_t(0),
 						[](const auto current, const auto axis) { return current * axis; });
 
-	if(newLength != length_)
+	if(newLength != _length)
 	{
 		throw std::out_of_range(
 			fmt::format("Cannot reshape if the new shape's total size ({}) does not match current the ({}).",
 						newLength,
-						length_));
+						_length));
 	}
 }
 
@@ -249,7 +248,7 @@ void BasicTensor<ValueType>::_checkIndicesList(IndicesIter beg, IndicesIter end)
 		throw std::out_of_range("Indices list must have minimum length of 1.");
 	}
 
-	if(static_cast<size_t>(std::distance(beg, end)) > shape_.size())
+	if(static_cast<size_t>(std::distance(beg, end)) > _shape.size())
 	{
 		throw std::out_of_range("Indices list cannot be longer than tensor's shape.");
 	}
@@ -262,15 +261,15 @@ void BasicTensor<ValueType>::_checkIndicesList(IndicesIter beg, IndicesIter end)
 		{
 			throw std::out_of_range(
 				fmt::format("Upper index is not greater than lower for shape '{}' at index {}.",
-							stringifyVector(shape_),
+							stringifyVector(_shape),
 							shapeIt));
 		}
 
-		if(upper > shape_[shapeIt])
+		if(upper > _shape[shapeIt])
 		{
 			throw std::out_of_range(fmt::format(
 				"Upper index cannot be greater than particular dimension size for shape '{}' at index {}.",
-				stringifyVector(shape_),
+				stringifyVector(_shape),
 				shapeIt));
 		}
 	}
@@ -339,11 +338,11 @@ BasicTensor<ValueType>& BasicTensor<ValueType>::operator/=(const BasicTensor& ot
 template <typename ValueType>
 BasicTensor<ValueType> BasicTensor<ValueType>::operator-() const
 {
-	BasicTensor<ValueType> ret(shape_);
+	BasicTensor<ValueType> ret(_shape);
 
-	for(size_t i = 0; i < length_; i++)
+	for(size_t i = 0; i < _length; i++)
 	{
-		ret.data_[i] = -data_[i];
+		ret._data[i] = -_data[i];
 	}
 
 	return ret;
@@ -359,31 +358,31 @@ BasicTensor<ValueType> BasicTensor<ValueType>::matmul(const BasicTensor& other) 
 	{
 		throw std::runtime_error(
 			fmt::format("Cannot perform matrix multiplication for shapes '{}' and '{}' - {}",
-						stringifyVector(shape_),
-						stringifyVector(other.shape_),
+						stringifyVector(_shape),
+						stringifyVector(other._shape),
 						message));
 	};
 
 	// checking if first tensor can be padded to nDims >= 2
-	if(other.shape_.size() < 2)
+	if(other._shape.size() < 2)
 	{
 		throwInformative("Cannot obtain last but one dimension of the second tensor");
 	}
 
 	// for padding tensors shapes
-	const size_t biggerSize = std::max(shape_.size(), other.shape_.size());
+	const size_t biggerSize = std::max(_shape.size(), other._shape.size());
 
 	// padded shapes for easier operating
 	std::vector<size_t> paddedShapeFirst(biggerSize, 1);
 	std::vector<size_t> paddedShapeSecond(biggerSize, 1);
 
-	std::copy(shape_.cbegin(),
-			  shape_.cend(),
-			  std::next(paddedShapeFirst.begin(), static_cast<ptrdiff_t>(biggerSize - shape_.size())));
+	std::copy(_shape.cbegin(),
+			  _shape.cend(),
+			  std::next(paddedShapeFirst.begin(), static_cast<ptrdiff_t>(biggerSize - _shape.size())));
 
-	std::copy(other.shape_.cbegin(),
-			  other.shape_.cend(),
-			  std::next(paddedShapeSecond.begin(), static_cast<ptrdiff_t>(biggerSize - other.shape_.size())));
+	std::copy(other._shape.cbegin(),
+			  other._shape.cend(),
+			  std::next(paddedShapeSecond.begin(), static_cast<ptrdiff_t>(biggerSize - other._shape.size())));
 
 	// checking matmul conditions
 	if(paddedShapeFirst[biggerSize - 1] != paddedShapeSecond[biggerSize - 2])
@@ -429,11 +428,11 @@ BasicTensor<ValueType> BasicTensor<ValueType>::matmul(const BasicTensor& other) 
 	std::vector<size_t> firstTreePath(biggerSize - 2, 0);
 	std::vector<size_t> secondTreePath(biggerSize - 2, 0);
 
-	while(resElementPos < resultTensor.length_)
+	while(resElementPos < resultTensor._length)
 	{
 		// proper data pointers with offsets for obtaining frame elements
-		const ValueType* firstDataPtr = data_ + computeFramePos(firstTreePath, shape_);
-		const ValueType* secondDataPtr = other.data_ + computeFramePos(secondTreePath, other.shape_);
+		const ValueType* firstDataPtr = _data + computeFramePos(firstTreePath, _shape);
+		const ValueType* secondDataPtr = other._data + computeFramePos(secondTreePath, other._shape);
 
 		// rows and cols of result frame
 		for(size_t rowIter = 0; rowIter < retShape[biggerSize - 2]; rowIter++)
@@ -443,7 +442,7 @@ BasicTensor<ValueType> BasicTensor<ValueType>::matmul(const BasicTensor& other) 
 				// position of a certain multiplication in sum of multiplications
 				for(size_t mulIter = 0; mulIter < adjacentDimension; mulIter++)
 				{
-					resultTensor.data_[resElementPos] +=
+					resultTensor._data[resElementPos] +=
 						firstDataPtr[rowIter * adjacentDimension + mulIter] *
 						secondDataPtr[mulIter * paddedShapeSecond[biggerSize - 1] + colIter];
 				}
@@ -485,14 +484,14 @@ BasicTensor<ValueType> BasicTensor<ValueType>::transposed() const
 {
 
 	std::vector<size_t> retShape;
-	for(size_t i = 0; i < shape_.size() - 2; i++)
+	for(size_t i = 0; i < _shape.size() - 2; i++)
 	{
-		retShape.push_back(shape_[i]);
+		retShape.push_back(_shape[i]);
 	}
 
 	// size of a single 2-dimensional part that takes part in single matrix multiplication
-	const size_t frameShapeFirst = *(++shape_.rbegin());
-	const size_t frameShapeSecond = *shape_.rbegin();
+	const size_t frameShapeFirst = *(++_shape.rbegin());
+	const size_t frameShapeSecond = *_shape.rbegin();
 	const size_t frameLength = frameShapeFirst * frameShapeSecond;
 
 	retShape.push_back(frameShapeSecond);
@@ -500,12 +499,12 @@ BasicTensor<ValueType> BasicTensor<ValueType>::transposed() const
 
 	BasicTensor<ValueType> ret(retShape);
 
-	for(size_t frameOffset = 0; frameOffset < length_; frameOffset += frameLength)
+	for(size_t frameOffset = 0; frameOffset < _length; frameOffset += frameLength)
 	{
 		for(size_t posInFrame = 0; posInFrame < frameLength; posInFrame++)
 		{
-			ret.data_[frameOffset + posInFrame] =
-				data_[frameOffset + (posInFrame % frameShapeFirst) * frameShapeSecond +
+			ret._data[frameOffset + posInFrame] =
+				_data[frameOffset + (posInFrame % frameShapeFirst) * frameShapeSecond +
 					  (posInFrame / frameShapeFirst)];
 		}
 	}
@@ -541,9 +540,9 @@ void BasicTensor<ValueType>::assign(std::initializer_list<std::pair<size_t, size
 
 	// for quicker iterating over data array when last dimensions are left with unspecified indices
 	size_t wholeDimensionsOffset = 1;
-	for(size_t i = shape_.size() - 1; i > treePath.size() - 1; i--)
+	for(size_t i = _shape.size() - 1; i > treePath.size() - 1; i--)
 	{
-		wholeDimensionsOffset *= shape_[i];
+		wholeDimensionsOffset *= _shape[i];
 	}
 
 	auto computeFramePos =
@@ -563,7 +562,7 @@ void BasicTensor<ValueType>::assign(std::initializer_list<std::pair<size_t, size
 	size_t elementsProcessed = 0;
 	while(elementsProcessed < itemsToAssign)
 	{
-		auto dataPtr = data_ + computeFramePos(treePath, shape_);
+		auto dataPtr = _data + computeFramePos(treePath, _shape);
 
 		for(size_t elemPos = 0; elemPos < wholeDimensionsOffset; elemPos++)
 		{
@@ -593,12 +592,12 @@ template <typename ValueType>
 void BasicTensor<ValueType>::fill(const tensorInitializers::ITensorInitializer<ValueType>& initializer)
 {
 	size_t elementPos = 0;
-	while(initializer.canYield() && (elementPos < length_))
+	while(initializer.canYield() && (elementPos < _length))
 	{
-		data_[elementPos] = initializer.yield();
+		_data[elementPos] = initializer.yield();
 		elementPos++;
 	}
-	if(elementPos < length_)
+	if(elementPos < _length)
 	{
 		throw std::out_of_range("Too few values to assign to the tensor");
 	}
@@ -616,15 +615,15 @@ BasicTensor<ValueType>::slice(const std::vector<std::pair<size_t, size_t>>& indi
 {
 	_checkIndicesList(indices.begin(), indices.end());
 
-	if(indices.size() == shape_.size())
+	if(indices.size() == _shape.size())
 	{
 		return BasicTensorSlice<ValueType>(*this, indices);
 	}
 
 	std::vector<std::pair<size_t, size_t>> paddedIndices = indices;
 
-	std::transform(std::next(shape_.cbegin(), static_cast<ptrdiff_t>(indices.size())),
-				   shape_.cend(),
+	std::transform(std::next(_shape.cbegin(), static_cast<ptrdiff_t>(indices.size())),
+				   _shape.cend(),
 				   std::back_inserter(paddedIndices),
 				   [](const auto& dim) { return std::pair<size_t, size_t>(0, dim); });
 
@@ -636,7 +635,7 @@ std::ostream& operator<<(std::ostream& ostream, const BasicTensor<TensorValueTyp
 {
 
 	ostream << "<BasicTensor dtype=" << typeid(TensorValueType).name()
-			<< " shape=" << stringifyVector(tensor.shape_) << ">";
+			<< " shape=" << stringifyVector(tensor._shape) << ">";
 
 	if(tensor.nDimensions() == 0)
 	{
@@ -670,7 +669,7 @@ std::ostream& operator<<(std::ostream& ostream, const BasicTensor<TensorValueTyp
 					   size_t offset)
 	{
 		offset /= *shapeIter;
-		if(shapeIter == std::prev(tensor.shape_.end()))
+		if(shapeIter == std::prev(tensor._shape.end()))
 		{
 			ostream << "\n" << preamble << "[";
 
@@ -705,12 +704,12 @@ std::ostream& operator<<(std::ostream& ostream, const BasicTensor<TensorValueTyp
 	};
 
 	// for traversing data
-	const auto offset = std::accumulate(tensor.shape_.begin(),
-										tensor.shape_.end(),
+	const auto offset = std::accumulate(tensor._shape.begin(),
+										tensor._shape.end(),
 										size_t(1),
 										[](const size_t& curr, const size_t& dim) { return curr * dim; });
 
-	recursePrint(tensor.shape_.cbegin(), stringifiedNumbers.begin(), "", offset);
+	recursePrint(tensor._shape.cbegin(), stringifiedNumbers.begin(), "", offset);
 
 	return ostream;
 }

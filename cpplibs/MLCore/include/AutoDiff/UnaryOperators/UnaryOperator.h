@@ -15,7 +15,7 @@ class UnaryOperator : public Node
 public:
 	UnaryOperator(const NodePtr input)
 		: Node(std::vector<size_t>{})
-		, input_(input){};
+		, _input(input){};
 
 	/**
 	 * @brief Tells the operator to compute its value based om its input.
@@ -44,11 +44,11 @@ public:
 
 	NodePtr getInput() const
 	{
-		return input_;
+		return _input;
 	}
 
 protected:
-	NodePtr input_;
+	NodePtr _input;
 };
 
 using UnaryOperatorPtr = std::shared_ptr<UnaryOperator>;

@@ -31,36 +31,36 @@ class Node
 public:
 	Node() = delete;
 	Node(const Tensor& tensor)
-		: index_(nodesCount_++)
-		, value_(tensor){};
+		: _index(nodesCount_++)
+		, _value(tensor){};
 
 	virtual ~Node() = default;
 
 	Tensor& getValue()
 	{
-		return value_;
+		return _value;
 	}
 
 	const uint64_t& getIndex() const
 	{
-		return index_;
+		return _index;
 	}
 
 	const std::string& getName() const
 	{
-		return name_;
+		return _name;
 	}
 
 	void setName(const std::string& name)
 	{
-		name_ = name;
+		_name = name;
 	}
 
 protected:
-	uint64_t index_;
+	uint64_t _index;
 	static inline uint64_t nodesCount_ = 0;
-	Tensor value_;
-	std::string name_ = "";
+	Tensor _value;
+	std::string _name;
 };
 
 /**

@@ -60,7 +60,7 @@ public:
 	 * @param args Object to pack.
 	 */
 	SerializationPack(const ArgTypes&... args)
-		: args_(std::list<std::any, std::allocator<std::any>>{std::decay_t<ArgTypes>(args)...})
+		: _args(std::list<std::any, std::allocator<std::any>>{std::decay_t<ArgTypes>(args)...})
 	{}
 
 	template <typename... PackArgTypes>
@@ -77,9 +77,9 @@ private:
 	template <typename CastedType>
 	std::decay_t<CastedType> _popSingleArg() const
 	{
-		const auto& frontArg = *(std::next(args_.cbegin(), static_cast<int64_t>(poppedArgIndex_)));
+		const auto& frontArg = *(std::next(_args.cbegin(), static_cast<int64_t>(_poppedArgIndex)));
 
-		poppedArgIndex_++;
+		_poppedArgIndex++;
 
 		return std::any_cast<std::decay_t<CastedType>>(frontArg);
 	}
@@ -91,14 +91,14 @@ private:
 	 */
 	void _packToStream(std::ostream& out) const
 	{
-		poppedArgIndex_ = 0;
+		_poppedArgIndex = 0;
 
 		(out << ... << detail::makeBytes(_popSingleArg<ArgTypes>()));
 	}
 
 private:
-	std::list<std::any> args_;
-	mutable size_t poppedArgIndex_ = 0;
+	std::list<std::any> _args;
+	mutable size_t _poppedArgIndex = 0;
 };
 
 /**

@@ -26,8 +26,10 @@
 namespace utilities::detail
 {
 
+// NOLINTBEGIN
 REGISTER_MAKEBYTES_CHARS(const char* const)
 REGISTER_MAKEBYTES_CHARS(char* const)
+// NOLINTEND
 
 REGISTER_MAKEBYTES_NUMERIC(uint8_t)
 REGISTER_MAKEBYTES_NUMERIC(uint16_t)

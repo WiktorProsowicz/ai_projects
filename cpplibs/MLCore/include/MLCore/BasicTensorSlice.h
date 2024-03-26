@@ -181,10 +181,10 @@ private:
 	size_t _computeSliceSize() const;
 
 	/// Reference to the tensor spanned by the slice.
-	std::reference_wrapper<mlCore::BasicTensor<ValueType>> tensor_;
-	SliceIndices indices_;
+	std::reference_wrapper<mlCore::BasicTensor<ValueType>> _tensor;
+	SliceIndices _indices;
 	/// Contiguous data chunks spanned by the slice. Each chunk has size determined by the indices.
-	std::unique_ptr<std::vector<ValueType*>> dataChunks_;
+	std::unique_ptr<std::vector<ValueType*>> _dataChunks;
 };
 
 using TensorSlice = BasicTensorSlice<double>;

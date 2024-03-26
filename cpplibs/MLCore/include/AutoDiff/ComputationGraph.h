@@ -34,7 +34,7 @@ public:
 	 */
 	bool isActive() const noexcept
 	{
-		return isActive_;
+		return _isActive;
 	}
 
 	/**
@@ -43,8 +43,8 @@ public:
 	 */
 	void reset() noexcept
 	{
-		nodes_.clear();
-		gradients_.clear();
+		_nodes.clear();
+		_gradients.clear();
 	}
 
 	/**
@@ -53,7 +53,7 @@ public:
 	 */
 	void clearGradients()
 	{
-		gradients_.clear();
+		_gradients.clear();
 	}
 
 	/**
@@ -62,7 +62,7 @@ public:
 	 */
 	void activate() noexcept
 	{
-		isActive_ = true;
+		_isActive = true;
 	}
 
 	/**
@@ -71,7 +71,7 @@ public:
 	 */
 	void deactivate() noexcept
 	{
-		isActive_ = false;
+		_isActive = false;
 	}
 
 	/**
@@ -128,10 +128,10 @@ private:
 	void _sortNodes();
 
 private:
-	bool isActive_ = false;
-	std::vector<NodePtr> nodes_ = {};
-	std::map<NodePtr, Tensor> gradients_ = {};
-	bool areNodesSorted_ = true;
+	bool _isActive = false;
+	std::vector<NodePtr> _nodes;
+	std::map<NodePtr, Tensor> _gradients;
+	bool _areNodesSorted = true;
 };
 } // namespace mlCore::autoDiff
 

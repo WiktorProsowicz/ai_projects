@@ -57,9 +57,9 @@ class TestTensorOperations : public testing::Test
 {
 
 protected:
-	const std::vector<size_t> testedTensorShape{3, 3, 3};
+	const std::vector<size_t> _testedTensorShape{3, 3, 3};
 
-	static void compareTensors(const mlCore::Tensor& checked, const mlCore::Tensor& expected)
+	static void _compareTensors(const mlCore::Tensor& checked, const mlCore::Tensor& expected)
 	{
 		ASSERT_EQ(checked.shape(), expected.shape());
 
@@ -76,33 +76,33 @@ protected:
 	}
 
 	template <UnaryTensorOperation Operation>
-	void performUnaryOperationAndCompare(const UnaryTestParams& params, Operation operation) const
+	void _performUnaryOperationAndCompare(const UnaryTestParams& params, Operation operation) const
 	{
-		mlCore::Tensor expectedTensor(testedTensorShape);
+		mlCore::Tensor expectedTensor(_testedTensorShape);
 		expectedTensor.fill(params.expectedValues.begin(), params.expectedValues.end());
 
-		mlCore::Tensor testedTensor(testedTensorShape);
+		mlCore::Tensor testedTensor(_testedTensorShape);
 		testedTensor.fill(*params.initializer);
 		testedTensor = operation(testedTensor);
 
-		compareTensors(testedTensor, expectedTensor);
+		_compareTensors(testedTensor, expectedTensor);
 	}
 
 	template <BinaryTensorOperation Operation>
-	void performBinaryOperationAndCompare(const BinaryTestParams& params, Operation operation) const
+	void _performBinaryOperationAndCompare(const BinaryTestParams& params, Operation operation) const
 	{
-		mlCore::Tensor expectedTensor(testedTensorShape);
+		mlCore::Tensor expectedTensor(_testedTensorShape);
 		expectedTensor.fill(params.expectedValues.begin(), params.expectedValues.end());
 
-		mlCore::Tensor leftTensorInput(testedTensorShape);
+		mlCore::Tensor leftTensorInput(_testedTensorShape);
 		leftTensorInput.fill(*params.leftInitializer);
 
-		mlCore::Tensor rightTensorInput(testedTensorShape);
+		mlCore::Tensor rightTensorInput(_testedTensorShape);
 		rightTensorInput.fill(*params.rightInitializer);
 
 		const auto testedTensor = operation(leftTensorInput, rightTensorInput);
 
-		compareTensors(testedTensor, expectedTensor);
+		_compareTensors(testedTensor, expectedTensor);
 	}
 };
 
@@ -123,7 +123,7 @@ TEST_F(TestTensorOperations, testNaturalLogarithm)
 											  2.944, 2.996, 3.045, 3.091, 3.135, 3.178, 3.219, 3.258, 3.296}};
 	// NOLINTEND
 
-	performUnaryOperationAndCompare(params, mlCore::TensorOperations::ln);
+	_performUnaryOperationAndCompare(params, mlCore::TensorOperations::ln);
 }
 
 TEST_F(TestTensorOperations, testRelu)
@@ -134,7 +134,7 @@ TEST_F(TestTensorOperations, testRelu)
 											  0.0, 0.0, 0.0, 0.0, 1.0,	2.0,  3.0,	4.0,  5.0,
 											  6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0}};
 
-	performUnaryOperationAndCompare(params, mlCore::TensorOperations::relu);
+	_performUnaryOperationAndCompare(params, mlCore::TensorOperations::relu);
 }
 
 TEST_F(TestTensorOperations, testSigmoid)
@@ -147,7 +147,7 @@ TEST_F(TestTensorOperations, testSigmoid)
 											  0.73106, 0.81757, 0.88080, 0.92414, 0.95257, 0.97069, 0.98201,
 											  0.98901, 0.99331, 0.99593, 0.99753, 0.99850, 0.99909}};
 
-	performUnaryOperationAndCompare(params, mlCore::TensorOperations::sigmoid);
+	_performUnaryOperationAndCompare(params, mlCore::TensorOperations::sigmoid);
 }
 
 TEST_F(TestTensorOperations, testPower)
@@ -163,7 +163,7 @@ TEST_F(TestTensorOperations, testPower)
 											   12155.062,	 48558.704,	  201135.719, 861979.333, 3814697.266,
 											   17403307.346, 81721509.398}};
 
-	performBinaryOperationAndCompare(params, mlCore::TensorOperations::power);
+	_performBinaryOperationAndCompare(params, mlCore::TensorOperations::power);
 }
 
 TEST_F(TestTensorOperations, testMakeTensor)
@@ -188,7 +188,7 @@ TEST_F(TestTensorOperations, testMakeTensor)
 	mlCore::Tensor expectedTensor({2, 3, 4});
 	expectedTensor.fill(mlCore::tensorInitializers::RangeTensorInitializer<double>(0.0, 1.0));
 
-	compareTensors(createdTensor, expectedTensor);
+	_compareTensors(createdTensor, expectedTensor);
 }
 
 TEST_F(TestTensorOperations, testMakeTensorWithInconsistentShape)

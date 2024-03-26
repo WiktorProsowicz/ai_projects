@@ -41,21 +41,21 @@ public:
 	/// Tells if the queue is empty.
 	bool empty() const
 	{
-		std::shared_lock<std::shared_mutex> lock(mutex_);
+		std::shared_lock<std::shared_mutex> lock(_mutex);
 		return std::queue<T>::empty();
 	}
 
 	/// Tells the number of contained elements.
 	size_t size() const
 	{
-		std::shared_lock<std::shared_mutex> lock(mutex_);
+		std::shared_lock<std::shared_mutex> lock(_mutex);
 		return std::queue<T>::size();
 	}
 
 	/// Erases the contained elements.
 	void clear()
 	{
-		std::unique_lock<std::shared_mutex> lock(mutex_);
+		std::unique_lock<std::shared_mutex> lock(_mutex);
 
 		while(!std::queue<T>::empty())
 		{
@@ -66,7 +66,7 @@ public:
 	/// Adds the `object` to the queue.
 	void push(const T& object)
 	{
-		std::unique_lock<std::shared_mutex> lock(mutex_);
+		std::unique_lock<std::shared_mutex> lock(_mutex);
 		std::queue<T>::push(object);
 	}
 
@@ -74,7 +74,7 @@ public:
 	template <typename... Args>
 	void emplace(Args&&... args)
 	{
-		std::unique_lock<std::shared_mutex> lock(mutex_);
+		std::unique_lock<std::shared_mutex> lock(_mutex);
 		std::queue<T>::emplace(std::forward<Args>(args)...);
 	}
 
@@ -87,7 +87,7 @@ public:
 	 */
 	bool tryPop(T& holder)
 	{
-		std::unique_lock<std::shared_mutex> lock(mutex_);
+		std::unique_lock<std::shared_mutex> lock(_mutex);
 
 		if(std::queue<T>::empty())
 		{
@@ -100,7 +100,7 @@ public:
 	}
 
 private:
-	mutable std::shared_mutex mutex_{};
+	mutable std::shared_mutex _mutex;
 };
 } // namespace utilities
 

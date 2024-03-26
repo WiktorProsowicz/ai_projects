@@ -118,8 +118,8 @@ private:
 
 private:
 	streamWrappers::IStreamWrapperPtr _defaultStream;
-	std::map<std::string, streamWrappers::IStreamWrapperPtr> _namedStreamsMap{};
-	std::mutex _streamingMutex{};
+	std::map<std::string, streamWrappers::IStreamWrapperPtr> _namedStreamsMap;
+	std::mutex _streamingMutex;
 
 	const static inline std::map<LogType, const char*> colorfulFramesMap{
 		{LogType::INFO, "\033[34m"}, {LogType::WARN, "\033[1;33m"}, {LogType::ERROR, "\033[1;31m"}};

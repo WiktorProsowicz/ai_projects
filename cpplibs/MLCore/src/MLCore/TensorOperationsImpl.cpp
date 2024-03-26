@@ -16,22 +16,22 @@
 
 // Computes operation between two tensors with same shape and assigns result to the left one
 #define COMPAT_SHAPES_OPERATION(lhs, rhs, oper)                                                              \
-	if(lhs.shape_ == rhs.shape_)                                                                             \
+	if(lhs._shape == rhs._shape)                                                                             \
 	{                                                                                                        \
-		for(size_t dataPos = 0; dataPos < lhs.length_; dataPos++)                                            \
+		for(size_t dataPos = 0; dataPos < lhs._length; dataPos++)                                            \
 		{                                                                                                    \
-			lhs.data_[dataPos] = oper(lhs.data_[dataPos], rhs.data_[dataPos]);                               \
+			lhs._data[dataPos] = oper(lhs._data[dataPos], rhs._data[dataPos]);                               \
 		}                                                                                                    \
 		return;                                                                                              \
 	}
 
 // Used when one of the tensors is scalar type and expensive broadcasting could be avoided
 #define OPERATION_WITH_SCALAR(lhs, rhs, oper)                                                                \
-	if(rhs.shape_.empty())                                                                                   \
+	if(rhs._shape.empty())                                                                                   \
 	{                                                                                                        \
-		for(size_t dataPos = 0; dataPos < lhs.length_; dataPos++)                                            \
+		for(size_t dataPos = 0; dataPos < lhs._length; dataPos++)                                            \
 		{                                                                                                    \
-			lhs.data_[dataPos] = oper(lhs.data_[dataPos], rhs.data_[0]);                                     \
+			lhs._data[dataPos] = oper(lhs._data[dataPos], rhs._data[0]);                                     \
 		}                                                                                                    \
 		return;                                                                                              \
 	}
@@ -55,12 +55,12 @@
                                                                                                              \
 	size_t elementsProcessed = 0;                                                                            \
                                                                                                              \
-	while(elementsProcessed < dst.length_)                                                                   \
+	while(elementsProcessed < dst._length)                                                                   \
 	{                                                                                                        \
-		COMPUTE_ELEMENT_POSITION(dstTreePath, dst.shape_, dstElemPos)                                        \
+		COMPUTE_ELEMENT_POSITION(dstTreePath, dst._shape, dstElemPos)                                        \
 		COMPUTE_ELEMENT_POSITION(srcTreePath, srcPaddedShape, srcElemPos)                                    \
                                                                                                              \
-		dst.data_[dstElemPos] = oper(dst.data_[dstElemPos], src.data_[srcElemPos]);                          \
+		dst._data[dstElemPos] = oper(dst._data[dstElemPos], src._data[srcElemPos]);                          \
                                                                                                              \
 		elementsProcessed++;                                                                                 \
 		for(size_t i = 0; i < dst.nDimensions(); i++)                                                        \
@@ -74,7 +74,7 @@
 				srcTreePath[pathPos]++;                                                                      \
 			}                                                                                                \
                                                                                                              \
-			if(dstTreePath[pathPos] < dst.shape_[pathPos])                                                   \
+			if(dstTreePath[pathPos] < dst._shape[pathPos])                                                   \
 			{                                                                                                \
 				break;                                                                                       \
 			}                                                                                                \
@@ -86,12 +86,12 @@
 
 // Generic operation between tensors with incompatible shapes - result assigned to the left one
 #define BROADCASTED_TENSOR_OPERATION(lhs, rhs, oper)                                                         \
-	checkShapesForBroadcasting(lhs.shape_, rhs.shape_);                                                      \
+	checkShapesForBroadcasting(lhs._shape, rhs._shape);                                                      \
                                                                                                              \
-	const auto biggerSize = std::max(lhs.shape_.size(), rhs.shape_.size());                                  \
+	const auto biggerSize = std::max(lhs._shape.size(), rhs._shape.size());                                  \
                                                                                                              \
-	const auto paddedLeftShape = padShapeFromLeft(lhs.shape_, biggerSize);                                   \
-	const auto paddedRightShape = padShapeFromLeft(rhs.shape_, biggerSize);                                  \
+	const auto paddedLeftShape = padShapeFromLeft(lhs._shape, biggerSize);                                   \
+	const auto paddedRightShape = padShapeFromLeft(rhs._shape, biggerSize);                                  \
                                                                                                              \
 	const auto retShape = deduceBroadcastedShape(paddedLeftShape, paddedRightShape);                         \
                                                                                                              \

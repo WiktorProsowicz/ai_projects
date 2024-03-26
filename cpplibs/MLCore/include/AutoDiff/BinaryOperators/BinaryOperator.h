@@ -17,8 +17,8 @@ class BinaryOperator : public Node
 public:
 	BinaryOperator(const NodePtr lhsInput, const NodePtr rhsInput)
 		: Node(std::vector<size_t>{})
-		, lhsInput_(lhsInput)
-		, rhsInput_(rhsInput){};
+		, _lhsInput(lhsInput)
+		, _rhsInput(rhsInput){};
 
 	/**
 	 * @brief Tells the operator to compute its value based on its inputs.
@@ -48,12 +48,12 @@ public:
 
 	std::pair<NodePtr, NodePtr> getInputs() const
 	{
-		return {lhsInput_, rhsInput_};
+		return {_lhsInput, _rhsInput};
 	}
 
 protected:
-	const NodePtr lhsInput_;
-	const NodePtr rhsInput_;
+	const NodePtr _lhsInput;
+	const NodePtr _rhsInput;
 };
 
 using BinaryOperatorPtr = std::shared_ptr<BinaryOperator>;

@@ -120,31 +120,31 @@ public:
 	/// Gets tensor's shape.
 	const std::vector<size_t>& shape() const noexcept
 	{
-		return shape_;
+		return _shape;
 	}
 
 	/// Gets number of tensor's dimensions.
 	size_t nDimensions() const noexcept
 	{
-		return shape_.size();
+		return _shape.size();
 	}
 
 	/// Gets number of tensor's elements.
 	size_t size() const noexcept
 	{
-		return length_;
+		return _length;
 	}
 
 	/// Gets beginning tensor's iterator.
 	TensorIterator<ValueType> begin() const
 	{
-		return TensorIterator<ValueType>(data_);
+		return TensorIterator<ValueType>(_data);
 	}
 
 	/// Gets ending tensor's iterator.
 	TensorIterator<ValueType> end() const
 	{
-		return TensorIterator<ValueType>(data_ + length_);
+		return TensorIterator<ValueType>(_data + _length);
 	}
 
 	/**
@@ -252,7 +252,7 @@ public:
 		}
 
 		InputIter collectionIter = first;
-		for(size_t i = 0; i < length_; i++)
+		for(size_t i = 0; i < _length; i++)
 		{
 
 			if(collectionIter >= last)
@@ -260,7 +260,7 @@ public:
 				collectionIter = first;
 			}
 
-			data_[i] = *collectionIter;
+			_data[i] = *collectionIter;
 			collectionIter++;
 		}
 	}
@@ -294,9 +294,9 @@ private:
 	void _checkShapeCompatible(const std::vector<size_t>& shape) const;
 
 private:
-	size_t length_;
-	std::vector<size_t> shape_;
-	ValueType* data_;
+	size_t _length{};
+	std::vector<size_t> _shape;
+	ValueType* _data{};
 };
 
 template <typename TensorValueType>

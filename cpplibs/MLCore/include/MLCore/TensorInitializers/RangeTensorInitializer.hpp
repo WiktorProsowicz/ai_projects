@@ -26,9 +26,9 @@ public:
 	explicit RangeTensorInitializer(ValueType firstValue,
 									ValueType step = 1,
 									ValueType maxValue = std::numeric_limits<ValueType>::max())
-		: currentValue_(firstValue)
-		, maxValue_(maxValue)
-		, step_(step)
+		: _currentValue(firstValue)
+		, _maxValue(maxValue)
+		, _step(step)
 
 	{}
 
@@ -46,20 +46,20 @@ public:
 			throw std::out_of_range("Cannot obtain value from RangeTensorYielder.");
 		}
 
-		ValueType out = currentValue_;
-		currentValue_ += step_;
+		ValueType out = _currentValue;
+		_currentValue += _step;
 		return out;
 	}
 
 	bool canYield() const override
 	{
-		return currentValue_ <= maxValue_;
+		return _currentValue <= _maxValue;
 	}
 
 private:
-	mutable ValueType currentValue_;
-	ValueType maxValue_;
-	ValueType step_;
+	mutable ValueType _currentValue;
+	ValueType _maxValue;
+	ValueType _step;
 };
 } // namespace mlCore::tensorInitializers
 

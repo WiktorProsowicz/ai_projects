@@ -71,25 +71,25 @@ public:
 
 	void registerMetric(mlCore::models::IMetricPtr metric) override
 	{
-		metrics_.push_back(metric);
+		_metrics.push_back(metric);
 	}
 
 	void unregisterMetric(mlCore::models::IMetricPtr metric) override
 	{
-		metrics_.erase(std::remove_if(metrics_.begin(),
-									  metrics_.end(),
+		_metrics.erase(std::remove_if(_metrics.begin(),
+									  _metrics.end(),
 									  [&metric](const auto met) { return met == metric; }),
-					   metrics_.end());
+					   _metrics.end());
 	}
 
 	bool hasMetric(std::shared_ptr<mlCore::models::IMetric> metric) const override
 	{
-		return std::find(metrics_.cbegin(), metrics_.cend(), metric) != metrics_.end();
+		return std::find(_metrics.cbegin(), _metrics.cend(), metric) != _metrics.end();
 	}
 
 	void notifyMetrics() override
 	{
-		for(auto metric : metrics_)
+		for(auto metric : _metrics)
 		{
 			auto context = std::make_shared<mlCore::models::MetricContext>();
 
@@ -103,7 +103,7 @@ public:
 	}
 
 private:
-	std::vector<mlCore::models::IMetricPtr> metrics_{};
+	std::vector<mlCore::models::IMetricPtr> _metrics;
 };
 
 /// Test class for checking IMetric code building
@@ -113,7 +113,7 @@ public:
 	TestMetric() = default;
 	~TestMetric() override = default;
 
-	void notify(mlCore::models::MetricContextPtr) override
+	void notify(mlCore::models::MetricContextPtr /*context*/) override
 	{
 		notified = true;
 	}

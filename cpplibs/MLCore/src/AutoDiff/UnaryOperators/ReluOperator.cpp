@@ -6,7 +6,7 @@ namespace mlCore::autoDiff::unaryOperators
 {
 void ReluOperator::updateValue()
 {
-	value_ = TensorOperations::relu(input_->getValue());
+	_value = TensorOperations::relu(_input->getValue());
 }
 
 Tensor ReluOperator::computeDerivative(const Tensor& outerDerivative) const
@@ -17,7 +17,7 @@ Tensor ReluOperator::computeDerivative(const Tensor& outerDerivative) const
 
 Tensor ReluOperator::computeDirectDerivative() const
 {
-	auto inputCopy = input_->getValue();
+	auto inputCopy = _input->getValue();
 
 	for(auto& val : inputCopy)
 	{

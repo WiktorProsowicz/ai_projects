@@ -45,8 +45,8 @@ public:
 	BinaryOperatorDecorator(const mlCore::autoDiff::binaryOperators::BinaryOperatorPtr oper,
 							const std::shared_ptr<std::map<WrapperLogChannel, std::vector<std::string>>> logs)
 		: BinaryOperator(wrapNode(oper->getInputs().first, logs), wrapNode(oper->getInputs().second, logs))
-		, oper_(oper)
-		, logs_(logs)
+		, _oper(oper)
+		, _logs(logs)
 
 	{
 		setName(oper->getName());
@@ -54,13 +54,13 @@ public:
 
 	void updateValue() override
 	{
-		oper_->updateValue();
-		value_ = oper_->getValue();
+		_oper->updateValue();
+		_value = _oper->getValue();
 
 		const auto& [lhs, rhs] = getInputs();
 
-		(*logs_)[WrapperLogChannel::UPDATE_VALUE].push_back(lhs->getName() + " -> " + getName());
-		(*logs_)[WrapperLogChannel::UPDATE_VALUE].push_back(rhs->getName() + " -> " + getName());
+		(*_logs)[WrapperLogChannel::UPDATE_VALUE].push_back(lhs->getName() + " -> " + getName());
+		(*_logs)[WrapperLogChannel::UPDATE_VALUE].push_back(rhs->getName() + " -> " + getName());
 	}
 
 	std::pair<mlCore::Tensor, mlCore::Tensor>
@@ -69,20 +69,20 @@ public:
 
 		const auto& [lhs, rhs] = getInputs();
 
-		(*logs_)[WrapperLogChannel::COMPUTE_DERIVATIVE].push_back(lhs->getName() + " <- " + getName());
-		(*logs_)[WrapperLogChannel::COMPUTE_DERIVATIVE].push_back(rhs->getName() + " <- " + getName());
+		(*_logs)[WrapperLogChannel::COMPUTE_DERIVATIVE].push_back(lhs->getName() + " <- " + getName());
+		(*_logs)[WrapperLogChannel::COMPUTE_DERIVATIVE].push_back(rhs->getName() + " <- " + getName());
 
-		return oper_->computeDerivative(outerDerivative);
+		return _oper->computeDerivative(outerDerivative);
 	}
 
 	std::pair<mlCore::Tensor, mlCore::Tensor> computeDirectDerivative() const override
 	{
-		return oper_->computeDirectDerivative();
+		return _oper->computeDirectDerivative();
 	}
 
 private:
-	mlCore::autoDiff::binaryOperators::BinaryOperatorPtr oper_;
-	std::shared_ptr<std::map<WrapperLogChannel, std::vector<std::string>>> logs_;
+	mlCore::autoDiff::binaryOperators::BinaryOperatorPtr _oper;
+	std::shared_ptr<std::map<WrapperLogChannel, std::vector<std::string>>> _logs;
 };
 
 class UnaryOperatorDecorator : public mlCore::autoDiff::unaryOperators::UnaryOperator
@@ -91,8 +91,8 @@ public:
 	UnaryOperatorDecorator(const mlCore::autoDiff::unaryOperators::UnaryOperatorPtr oper,
 						   const std::shared_ptr<std::map<WrapperLogChannel, std::vector<std::string>>> logs)
 		: UnaryOperator(wrapNode(oper->getInput(), logs))
-		, oper_(oper)
-		, logs_(logs)
+		, _oper(oper)
+		, _logs(logs)
 
 	{
 		setName(oper->getName());
@@ -100,27 +100,27 @@ public:
 
 	void updateValue() override
 	{
-		oper_->updateValue();
-		value_ = oper_->getValue();
+		_oper->updateValue();
+		_value = _oper->getValue();
 
-		(*logs_)[WrapperLogChannel::UPDATE_VALUE].push_back(getInput()->getName() + " -> " + getName());
+		(*_logs)[WrapperLogChannel::UPDATE_VALUE].push_back(getInput()->getName() + " -> " + getName());
 	}
 
 	mlCore::Tensor computeDerivative(const mlCore::Tensor& outerDerivative) const override
 	{
-		(*logs_)[WrapperLogChannel::COMPUTE_DERIVATIVE].push_back(getInput()->getName() + " <- " + getName());
+		(*_logs)[WrapperLogChannel::COMPUTE_DERIVATIVE].push_back(getInput()->getName() + " <- " + getName());
 
-		return oper_->computeDerivative(outerDerivative);
+		return _oper->computeDerivative(outerDerivative);
 	}
 
 	mlCore::Tensor computeDirectDerivative() const override
 	{
-		return oper_->computeDirectDerivative();
+		return _oper->computeDirectDerivative();
 	}
 
 private:
-	mlCore::autoDiff::unaryOperators::UnaryOperatorPtr oper_;
-	std::shared_ptr<std::map<WrapperLogChannel, std::vector<std::string>>> logs_;
+	mlCore::autoDiff::unaryOperators::UnaryOperatorPtr _oper;
+	std::shared_ptr<std::map<WrapperLogChannel, std::vector<std::string>>> _logs;
 };
 
 struct BackPropagationConfig
@@ -336,7 +336,7 @@ class TestComputationGraph : public testing::Test
 protected:
 	void SetUp() override
 	{
-		graph_ = std::make_shared<mlCore::autoDiff::ComputationGraph>();
+		_graph = std::make_shared<mlCore::autoDiff::ComputationGraph>();
 	}
 
 	/**
@@ -345,7 +345,7 @@ protected:
 	 * @param root Root node of the traversed tree.
 	 * @return All of the nodes present in the tree.
 	 */
-	static std::set<mlCore::autoDiff::NodePtr> flattenTree(const mlCore::autoDiff::NodePtr root)
+	static std::set<mlCore::autoDiff::NodePtr> _flattenTree(const mlCore::autoDiff::NodePtr root)
 	{
 		using namespace mlCore::autoDiff;
 
@@ -382,7 +382,7 @@ protected:
 	 * @return Created feed map with random generated inputs.
 	 */
 	static std::map<mlCore::autoDiff::PlaceholderPtr, mlCore::Tensor>
-	createFeedMap(const std::set<mlCore::autoDiff::PlaceholderPtr>& inputs)
+	_createFeedMap(const std::set<mlCore::autoDiff::PlaceholderPtr>& inputs)
 	{
 		using namespace mlCore::autoDiff;
 
@@ -408,7 +408,7 @@ protected:
 	 * perspective.
 	 * @param root Node from whose perspective the relations are collected.
 	 */
-	static void checkNodesRelationships(const std::set<std::pair<uint64_t, uint64_t>>& expectedRelations,
+	static void _checkNodesRelationships(const std::set<std::pair<uint64_t, uint64_t>>& expectedRelations,
 										mlCore::autoDiff::NodePtr root)
 	{
 		using namespace mlCore::autoDiff;
@@ -455,23 +455,23 @@ protected:
 	 *
 	 * @param tree Root node of the tree to construct the graph from.
 	 */
-	void checkBackPropagation(const BackPropagationConfig& config)
+	void _checkBackPropagation(const BackPropagationConfig& config)
 	{
 		using namespace mlCore::autoDiff;
 
-		const auto nodes = flattenTree(config.tree);
+		const auto nodes = _flattenTree(config.tree);
 
-		graph_ = std::make_shared<ComputationGraph>();
+		_graph = std::make_shared<ComputationGraph>();
 
-		graph_->activate();
+		_graph->activate();
 
 		for(const auto& node : nodes)
 		{
-			graph_->addNode(node);
+			_graph->addNode(node);
 		}
 
-		graph_->forwardPass();
-		graph_->computeGradients(config.tree);
+		_graph->forwardPass();
+		_graph->computeGradients(config.tree);
 
 		for(const auto& [logChannel, logs] : config.expectedLogs)
 		{
@@ -497,47 +497,47 @@ protected:
 	 * @param trainableWeights Weights to be updated with gradient.
 	 * @param input Input layer for feed map.
 	 */
-	void performGradientDescent(const mlCore::autoDiff::NodePtr tree,
+	void _performGradientDescent(const mlCore::autoDiff::NodePtr tree,
 								const std::set<mlCore::autoDiff::NodePtr>& trainableWeights,
 								mlCore::autoDiff::PlaceholderPtr input)
 	{
 		using namespace mlCore::autoDiff;
 
-		graph_ = std::make_shared<ComputationGraph>();
-		graph_->activate();
+		_graph = std::make_shared<ComputationGraph>();
+		_graph->activate();
 
-		const auto nodes = flattenTree(tree);
+		const auto nodes = _flattenTree(tree);
 
 		for(const auto& node : nodes)
 		{
-			graph_->addNode(node);
+			_graph->addNode(node);
 		}
 
 		for(uint8_t batchNumber = 0; batchNumber < 16; batchNumber++)
 		{
-			graph_->clearGradients();
+			_graph->clearGradients();
 
 			for(uint8_t loopCount = 0; loopCount < 32; loopCount++)
 			{
-				const auto feedMap = createFeedMap({input});
+				const auto feedMap = _createFeedMap({input});
 
 				std::cout << feedMap.at(input) << std::endl;
 
-				graph_->forwardPass(feedMap);
+				_graph->forwardPass(feedMap);
 			}
 
-			graph_->computeGradients(tree);
+			_graph->computeGradients(tree);
 
 			for(auto weight : trainableWeights)
 			{
-				const auto& derivative = graph_->getGradientByNodeId(weight->getIndex());
+				const auto& derivative = _graph->getGradientByNodeId(weight->getIndex());
 				weight->getValue() -= (derivative * .1);
 			}
 		}
 	}
 
 protected:
-	std::shared_ptr<mlCore::autoDiff::ComputationGraph> graph_ = nullptr;
+	std::shared_ptr<mlCore::autoDiff::ComputationGraph> _graph = nullptr;
 };
 
 /*****************************
@@ -568,7 +568,7 @@ TEST_F(TestComputationGraph, testGraphStructureBuilding)
 
 	auto [tree, relations] = constructTree(config);
 
-	checkNodesRelationships(relations, tree);
+	_checkNodesRelationships(relations, tree);
 }
 
 TEST_F(TestComputationGraph, testBackPropagation)
@@ -637,7 +637,7 @@ TEST_F(TestComputationGraph, testBackPropagation)
 	BackPropagationConfig config{
 		.tree = wrapNode(tree, wrappersLogs), .expectedLogs = expectedLogs, .sharedLogs = wrappersLogs};
 
-	checkBackPropagation(config);
+	_checkBackPropagation(config);
 }
 
 TEST_F(TestComputationGraph, testGradientDescentSimulation)
@@ -670,7 +670,7 @@ TEST_F(TestComputationGraph, testGradientDescentSimulation)
 	std::set<NodePtr> trainableWeights;
 	PlaceholderPtr input;
 
-	for(const auto& node : flattenTree(wrappedTree))
+	for(const auto& node : _flattenTree(wrappedTree))
 	{
 		constexpr static std::array<const char*, 6> kTrainableNames = {
 			"L1W", "L1B", "L2W", "L2B", "L3W", "L3B"};
@@ -687,7 +687,7 @@ TEST_F(TestComputationGraph, testGradientDescentSimulation)
 		}
 	}
 
-	performGradientDescent(wrappedTree, trainableWeights, input);
+	_performGradientDescent(wrappedTree, trainableWeights, input);
 }
 
 } // namespace

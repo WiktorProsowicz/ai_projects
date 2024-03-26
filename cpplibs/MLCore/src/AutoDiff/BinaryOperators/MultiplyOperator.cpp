@@ -4,7 +4,7 @@ namespace mlCore::autoDiff::binaryOperators
 {
 void MultiplyOperator::updateValue()
 {
-	value_ = lhsInput_->getValue() * rhsInput_->getValue();
+	_value = _lhsInput->getValue() * _rhsInput->getValue();
 }
 
 std::pair<Tensor, Tensor> MultiplyOperator::computeDerivative(const Tensor& outerDerivative) const
