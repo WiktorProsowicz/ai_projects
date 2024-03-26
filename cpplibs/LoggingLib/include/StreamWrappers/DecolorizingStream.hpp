@@ -21,21 +21,21 @@ public:
 	 *
 	 * @param stream Stream to pass to the base stream wrapper.
 	 */
-	explicit DecolorizingStream(IStreamWrapperPtr wrappedStream)
-		: wrappedStream_(wrappedStream)
+	explicit DecolorizingStream(const IStreamWrapperPtr& wrappedStream)
+		: _wrappedStream(wrappedStream)
 	{}
 
 	~DecolorizingStream() override = default; /// Default destructor.
 
 	void putCharString(const char* charString) override
 	{
-		wrappedStream_->putCharString(std::regex_replace(charString, coloringRegex_, "").c_str());
+		_wrappedStream->putCharString(std::regex_replace(charString, _coloringRegex, "").c_str());
 	}
 
 private:
-	static inline const std::regex coloringRegex_{"\\\033\\[\\d+;?\\d*m"};
+	static inline const std::regex _coloringRegex{"\\\033\\[\\d+;?\\d*m"};
 
-	IStreamWrapperPtr wrappedStream_;
+	IStreamWrapperPtr _wrappedStream;
 };
 } // namespace streamWrappers
 

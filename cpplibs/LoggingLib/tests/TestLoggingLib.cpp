@@ -6,11 +6,13 @@
  * by Wiktor Prosowicz
  **********************/
 
-#include <ranges>
+#include <stdexcept>
+#include <string>
+#include <strstream>
 #include <vector>
 
 #include <LoggingLib/LoggingLib.hpp>
-#include <fmt/format.h>
+#include <fmt/core.h>
 #include <gtest/gtest.h>
 
 namespace
@@ -73,12 +75,12 @@ TEST_F(TestLoggingLib, testDefaultStreamLogging)
 
 	EXPECT_THROW(LOG_ERROR("Channel 2", "Message number 6"), std::runtime_error);
 
-	std::vector<std::string> expectedLogs{"\033[1;33m[ WARN][Channel 1] Message number 1\033[0m",
-										  "\033[34m[ INFO][Channel 1] Message number 2\033[0m",
-										  "\033[1;31m[ERROR][Channel 1] Message number 3\033[0m",
-										  "\033[1;33m[ WARN][Channel 2] Message number 4\033[0m",
-										  "\033[34m[ INFO][Channel 2] Message number 5\033[0m",
-										  "\033[1;31m[ERROR][Channel 2] Message number 6\033[0m"};
+	const std::vector<std::string> expectedLogs{"\033[1;33m[ WARN][Channel 1] Message number 1\033[0m",
+												"\033[34m[ INFO][Channel 1] Message number 2\033[0m",
+												"\033[1;31m[ERROR][Channel 1] Message number 3\033[0m",
+												"\033[1;33m[ WARN][Channel 2] Message number 4\033[0m",
+												"\033[34m[ INFO][Channel 2] Message number 5\033[0m",
+												"\033[1;31m[ERROR][Channel 2] Message number 6\033[0m"};
 
 	checkHarvestedLogs(defaultStream.str(), expectedLogs);
 }

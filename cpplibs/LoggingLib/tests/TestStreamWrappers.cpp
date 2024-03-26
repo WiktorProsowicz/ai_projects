@@ -6,11 +6,14 @@
  * by Wiktor Prosowicz
  **********************/
 
+#include <memory>
+#include <string>
+#include <strstream>
 #include <vector>
 
 #include <StreamWrappers/BaseStreamWrapper.hpp>
 #include <StreamWrappers/DecolorizingStream.hpp>
-#include <fmt/format.h>
+#include <fmt/core.h>
 #include <gtest/gtest.h>
 
 namespace

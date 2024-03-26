@@ -25,10 +25,13 @@ enum class LogType : uint8_t
 class Logger
 {
 public:
-	Logger(const Logger&) = delete;			   // Copy constructor
-	Logger(Logger&&) = delete;				   // Move constructor
+	Logger(const Logger&) = delete; // Copy constructor
+	Logger(Logger&&) = delete;		// Move constructor
+
 	Logger& operator=(const Logger&) = delete; // Copy assignment
 	Logger& operator=(Logger&&) = delete;	   // Move assignment
+
+	~Logger() = default;
 
 	/**
 	 * @brief Returns the global logger instance.
@@ -70,7 +73,7 @@ public:
 	void setDefaultStream(std::ostream& stream);
 
 	/// @overload
-	void setDefaultStream(streamWrappers::IStreamWrapperPtr stream);
+	void setDefaultStream(const streamWrappers::IStreamWrapperPtr& stream);
 
 	/**
 	 * @brief Sets the stream associated to the name of a specific channel.
@@ -98,9 +101,7 @@ private:
 	 *
 	 */
 	Logger()
-		: defaultStream_(std::make_shared<streamWrappers::BaseStreamWrapper>(std::cout))
-		, namedStreamsMap_()
-		, streamingMutex_()
+		: _defaultStream(std::make_shared<streamWrappers::BaseStreamWrapper>(std::cout))
 	{}
 
 	/**
@@ -113,12 +114,12 @@ private:
 	 * @param channelName Name of the log channel.
 	 * @param logContent Message content.
 	 */
-	void logOnChannel(LogType logType, const char* channelName, const char* logContent);
+	void _logOnChannel(LogType logType, const char* channelName, const char* logContent);
 
 private:
-	streamWrappers::IStreamWrapperPtr defaultStream_;
-	std::map<std::string, streamWrappers::IStreamWrapperPtr> namedStreamsMap_;
-	std::mutex streamingMutex_;
+	streamWrappers::IStreamWrapperPtr _defaultStream;
+	std::map<std::string, streamWrappers::IStreamWrapperPtr> _namedStreamsMap{};
+	std::mutex _streamingMutex{};
 
 	const static inline std::map<LogType, const char*> colorfulFramesMap{
 		{LogType::INFO, "\033[34m"}, {LogType::WARN, "\033[1;33m"}, {LogType::ERROR, "\033[1;31m"}};

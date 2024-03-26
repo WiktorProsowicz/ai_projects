@@ -38,8 +38,13 @@ public:
 	 * @param stream
 	 */
 	explicit BaseStreamWrapper(std::ostream& stream)
-		: stream_(stream)
+		: _stream(stream)
 	{}
+
+	BaseStreamWrapper(const BaseStreamWrapper&) = default;
+	BaseStreamWrapper(BaseStreamWrapper&&) = default;
+	BaseStreamWrapper& operator=(const BaseStreamWrapper&) = default;
+	BaseStreamWrapper& operator=(BaseStreamWrapper&&) = default;
 
 	~BaseStreamWrapper() override = default; /// Default virtual destructor.
 
@@ -56,9 +61,9 @@ public:
 	template <typename StreamedType>
 	void put(StreamedType&& content)
 	{
-		stream_ << content;
+		_stream << content;
 
-		stream_.flush();
+		_stream.flush();
 	}
 
 	/**
@@ -68,11 +73,11 @@ public:
 	 */
 	std::ostream& getStream()
 	{
-		return stream_;
+		return _stream;
 	}
 
 private:
-	std::ostream& stream_;
+	std::ostream& _stream;
 };
 
 } // namespace streamWrappers
