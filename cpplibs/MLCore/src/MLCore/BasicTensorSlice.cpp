@@ -42,8 +42,8 @@ namespace
  *
  * @example
  * 	shape: {4, 5, 6, 7, 8}
- * 	indices: {(2, 3), (3, 4), (0, 6), (0, 7)}
- * 	Result: 2
+ * 	indices: {(2, 3), (3, 4), (2, 5), (0, 7), (0, 8)}
+ * 	Result: 3
  *
  * @param shape Shape to divide.
  * @param indices Indices referring to the spanned part of the shape.
@@ -53,17 +53,18 @@ namespace
 size_t getPivotShapeElement(const std::vector<size_t>& shape,
 							const std::vector<std::pair<size_t, size_t>>& indices)
 {
-	int64_t shapeIndex = shape.size() - 1;
 
-	for(; shapeIndex >= 0; shapeIndex--)
+	for(auto [shapeIt, indicesIt] = std::tuple{shape.crbegin(), indices.crbegin()};
+		(shapeIt < shape.crend()) && (indicesIt < indices.crend());
+		shapeIt++, indicesIt++)
 	{
-		if((indices.at(shapeIndex).first != 0) || (indices.at(shapeIndex).second != shape.at(shapeIndex)))
+		if((indicesIt->first != 0) || (indicesIt->second != *shapeIt))
 		{
-			break;
+			return static_cast<size_t>(std::distance(shapeIt, shape.crend()));
 		}
 	}
 
-	return shapeIndex + 1;
+	return shape.size();
 }
 } // namespace
 
@@ -348,23 +349,23 @@ std::vector<size_t> truncateShape(const std::vector<size_t>& shape, const size_t
 	return truncatedShape;
 }
 
+/// Returns position of an element specified by `indices` within data organized by the `shape`.
 size_t getFlattenedIndex(const std::vector<size_t>& shape, const std::vector<size_t>& indices)
 {
-	size_t offset = 1;
-	size_t flattenedIndex = 0;
+	size_t offset = std::accumulate(shape.cbegin(), shape.cend(), size_t{1}, std::multiplies<>{});
 
-	for(int64_t shapeIdx = shape.size() - 1; shapeIdx >= 0; shapeIdx--)
-	{
-		flattenedIndex += indices.at(shapeIdx) * offset;
-		offset *= shape.at(shapeIdx);
-	}
+	auto shapeIt = shape.cbegin();
 
-	return flattenedIndex;
+	return std::accumulate(indices.cbegin(),
+						   indices.cend(),
+						   size_t{0},
+						   [&offset, &shapeIt](const auto& curr, const auto& index)
+						   { return curr + (offset /= *(shapeIt++)) * index; });
 }
 
 size_t computeNElementsInShape(const std::span<const size_t>& shape)
 {
-	return std::accumulate(shape.begin(), shape.end(), 1, std::multiplies<>());
+	return std::accumulate(shape.begin(), shape.end(), size_t{1}, std::multiplies<>());
 }
 } // namespace
 

@@ -43,8 +43,8 @@ public:
 
 	BaseStreamWrapper(const BaseStreamWrapper&) = default;
 	BaseStreamWrapper(BaseStreamWrapper&&) = default;
-	BaseStreamWrapper& operator=(const BaseStreamWrapper&) = default;
-	BaseStreamWrapper& operator=(BaseStreamWrapper&&) = default;
+	BaseStreamWrapper& operator=(const BaseStreamWrapper&) = delete;
+	BaseStreamWrapper& operator=(BaseStreamWrapper&&) = delete;
 
 	~BaseStreamWrapper() override = default; /// Default virtual destructor.
 
