@@ -24,6 +24,7 @@ Checks: >
   bugprone-terminating-continue,
   clang-diagnostic-*,
   -clang-diagnostic-unknown-warning-option,
+  -clang-diagnostic-unused-function,
   clang-analyzer-*,
   cppcoreguidelines-avoid-do-while,
   cppcoreguidelines-avoid-goto,
@@ -64,10 +65,13 @@ Checks: >
   -readability-magic-numbers,
   -readability-function-cognitive-complexity,
   -readability-identifier-length,
+  -readability-redundant-member-init
 
 WarningsAsErrors: "*"
 HeaderFilterRegex: ".*"
 FormatStyle: none
+HeaderFileExtensions: ['', 'h','hh','hpp','hxx']
+ImplementationFileExtensions: ['c','cc','cpp','cxx']
 
 # https://releases.llvm.org/16.0.0/tools/clang/tools/extra/docs/clang-tidy/checks/readability/identifier-naming.html
 CheckOptions:
@@ -91,8 +95,6 @@ CheckOptions:
     value: ""
   - key: readability-identifier-naming.ClassSuffix
     value: ""
-  - key: readability-identifier-naming.ClassMethodCase
-    value: camelBack
   - key: readability-identifier-naming.NamespaceCase
     value: camelBack
   - key: readability-identifier-naming.TypedefCase
@@ -121,19 +123,23 @@ CheckOptions:
     value: camelBack
   - key: readability-identifier-naming.PrivateMethodCase
     value: camelBack
-  - key: readability-identifier-naming.PrivateMethodPrefix
-    value: "_"
   - key: readability-identifier-naming.PublicMemberCase
     value: camelBack
   - key: readability-identifier-naming.ProtectedMemberCase
     value: camelBack
   - key: readability-identifier-naming.PrivateMemberCase
     value: camelBack
-  - key: readability-identifier-naming.PrivateMemberPrefix
-    value: "_"
   - key: readability-identifier-naming.LocalVariableCase
     value: camelBack
   - key: readability-identifier-naming.EnumConstantCase
     value: UPPER_CASE
   - key: readability-identified-naming.TemplateParameterCase
     value: CamelCase
+  - key: readability-identifier-naming.ProtectedMethodPrefix
+    value: "_"
+  - key: readability-identifier-naming.PrivateMethodPrefix
+    value: "_"
+  - key: readability-identifier-naming.ProtectedMemberPrefix
+    value: "_"
+  - key: readability-identifier-naming.PrivateMemberPrefix
+    value: "_"
