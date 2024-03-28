@@ -10,12 +10,10 @@ import os
 import pathlib
 import subprocess
 import venv
+import sys
 from os import path
 
-from pymodules.utilities import logging_utils
-
 HOME_PATH = pathlib.Path(__file__).absolute().parent.as_posix()
-
 
 def setup_venv():
     """Sets up the virtual environment."""
@@ -128,13 +126,37 @@ def run_unit_tests():
             'Unit test run failed: %s', proc_error
         )
 
+def _is_run_from_venv():
+    """Tells whether the user runs the script from a vierual environment."""
+
+    return sys.prefix != sys.base_prefix
+
+def _get_available_functions():
+    """Returns a list of callable setup functions.
+
+    The set of available functions depends on whether the file is run
+    inside of a virtual environment or globally (i.e. first time in
+    order to setup a venv).
+    """
+
+    available_functions_env = [setup_venv, build_project, clean_project,
+                               install_dependencies, run_unit_tests]
+
+    available_functions_glob = [
+        setup_venv
+    ]
+
+    if _is_run_from_venv():
+        return available_functions_env
+
+    return available_functions_glob
+
 
 def _get_arg_parser() -> argparse.ArgumentParser:
     """Returns an argument parser for the script."""
 
     functions_descriptions = "\n".join(
-        [f"{func.__name__}: {func.__doc__.splitlines()[0]}" for func in [
-            setup_venv, build_project, clean_project, install_dependencies, run_unit_tests]]
+        [f"{func.__name__}: {func.__doc__.splitlines()[0]}" for func in _get_available_functions()]
     )
 
     program_desc = (
@@ -163,8 +185,7 @@ def main(function: str, *args):
         function (str): Name of the function to be called.
     """
 
-    for available_func in [setup_venv, build_project, clean_project,
-                           install_dependencies, run_unit_tests]:
+    for available_func in _get_available_functions():
         if available_func.__name__ == function:
             available_func(*args)  # type: ignore
             return
@@ -177,6 +198,8 @@ if __name__ == "__main__":
     parser = _get_arg_parser()
     arguments, left_args = parser.parse_known_args()
 
-    logging_utils.setup_logging()
+    if _is_run_from_venv():
+        from pymodules.utilities import logging_utils
+        logging_utils.setup_logging()
 
     main(arguments.function_name, *(arguments.args + left_args))
