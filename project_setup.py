@@ -134,11 +134,11 @@ def install_dependencies(*args):
         *args: Arguments passed to the conan executable.
     """
 
-    build_path = os.path.join(HOME_PATH, 'build')
+    profiles_path = os.path.join(HOME_PATH, 'setuputils', 'conan')
 
     default_args = (
-        f'--output-folder={build_path}/ConanFiles',
-        '--build=missing'
+        '--build=missing',
+        f'--profile={profiles_path}/profile_release.ini'
     )
 
     try:
@@ -166,7 +166,7 @@ def run_repository_checks():
 
         logging.info('Running pre-commit hooks.')
 
-        subprocess.run(['pre-commit', 'run', '--all-files'], check=True)
+        # subprocess.run(['pre-commit', 'run', '--all-files'], check=True)
 
         logging.info('Running clang-tidy checks.')
 

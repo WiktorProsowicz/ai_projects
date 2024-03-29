@@ -30,7 +30,7 @@ pip install -r requirements.txt
 - install external C++ dependencies
 
 ```bash
-python project_setup.py install_dependencies --profile=setuputils/conan/profile_release.ini
+python project_setup.py install_dependencies -o setup_mode=release
 ```
 
 - build C++ libs
@@ -50,7 +50,7 @@ In order to properly contribute to the project, read the above guide and follow 
 
 ```bash
 pip install -r requirements-dev.txt
-python project_setup.py install_dependencies --profile=setuputils/conan/profile_dev.ini
+python project_setup.py install_dependencies -o setup_mode=dev
 ```
 
 - install pre-commit configuration in order to enable checks before committing
