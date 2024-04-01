@@ -50,7 +50,7 @@ In order to properly contribute to the project, read the above guide and follow 
 
 ```bash
 pip install -r requirements-dev.txt
-python project_setup.py install_dependencies -o setup_mode=dev
+python project_setup.py install_dependencies [--build_debug] -o setup_mode=dev
 ```
 
 - install pre-commit configuration in order to enable checks before committing

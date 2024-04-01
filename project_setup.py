@@ -8,6 +8,7 @@ import json
 import logging
 import os
 import pathlib
+import re
 import subprocess
 import venv
 from os import path
@@ -128,18 +129,39 @@ def clean_project():
 def install_dependencies(*args):
     """Downloads and builds external libraries.
 
-    The used libraries are specified by the `conanfile.py`.
+    The used libraries are specified by the `conanfile.py`. The function used Conan package manager
+    executable. The user may provide custom options to the executable using syntax.
+        -o OPTION_NAME=OPTION_VALUE
+    The supported options are listed in the `conanfile.py` in the `options` class member.
 
     Args:
-        *args: Arguments passed to the conan executable.
+        *args: Variable number of command-line arguments. Acceptable are:
+            - --build_debug: Flag telling whether the installed libs should be compiled as debug.
+            - Arguments passed to the Conan executable. Profile-specifying args shall be omitted.
+
+    Example:
+        install_dependencies('--build_debug', '-v', '-o', 'setup_mode=dev')
     """
 
-    profiles_path = os.path.join(HOME_PATH, 'setuputils', 'conan')
+    conan_profile_re = re.compile('(-pr.*|--profile.*)')
 
-    default_args = (
-        '--build=missing',
-        f'--profile={profiles_path}/profile_release.ini'
-    )
+    build_debug = any(map(lambda arg: arg == '--build_debug', args))
+
+    args = filter(lambda arg: arg != '--build_debug', args)
+    args = filter(lambda arg: not conan_profile_re.match(arg), args)
+
+    default_args = ('--build=missing',)
+
+    if build_debug:
+        default_args += (
+            '--profile:host=setuputils/conan/profile_debug.ini',
+            '--profile:build=setuputils/conan/profile_debug.ini',
+        )
+    else:
+        default_args += (
+            '--profile:host=setuputils/conan/profile_release.ini',
+            '--profile:build=setuputils/conan/profile_release.ini',
+        )
 
     try:
         subprocess.run(
