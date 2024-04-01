@@ -39,6 +39,7 @@ Checks: >
   cppcoreguidelines-special-member-functions,
   cppcoreguidelines-virtual-class-destructor,
   cppcoreguidelines-narrowing-conversions,
+  -cppcoreguidelines-owning-memory,
   google-default-arguments,
   google-runtime-int,
   google-explicit-constructor,
@@ -50,6 +51,7 @@ Checks: >
   -misc-confusable-identifiers,
   -misc-no-recursion,
   -misc-non-private-member-variables-in-classes,
+  -misc-include-cleaner,
   modernize-*,
   -modernize-avoid-c-arrays,
   -modernize-concat-nested-namespaces,
@@ -65,7 +67,8 @@ Checks: >
   -readability-magic-numbers,
   -readability-function-cognitive-complexity,
   -readability-identifier-length,
-  -readability-redundant-member-init
+  -readability-redundant-member-init,
+  -readability-redundant-casting
 
 WarningsAsErrors: "*"
 HeaderFilterRegex: ".*"
