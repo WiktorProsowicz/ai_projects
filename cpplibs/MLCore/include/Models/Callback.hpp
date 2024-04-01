@@ -29,6 +29,15 @@ class Callback
 	using CMType = std::underlying_type_t<CallbackMode>;
 
 public:
+	Callback() = default;
+
+	Callback(const Callback&) = default;
+	Callback(Callback&&) = default;
+	Callback& operator=(const Callback&) = default;
+	Callback& operator=(Callback&&) = default;
+
+	virtual ~Callback() = default;
+
 	/**
 	 * @brief Tells the callback to execute its task.
 	 *
@@ -52,8 +61,6 @@ public:
 	{
 		return (_mode & static_cast<CMType>(mode)) != 0;
 	}
-
-	virtual ~Callback() = default;
 
 private:
 	CMType _mode = 0;

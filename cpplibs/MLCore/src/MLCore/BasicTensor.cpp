@@ -1,10 +1,23 @@
 #include "MLCore/BasicTensor.h"
 
+#include <climits>
+#include <cstddef>
+#include <functional>
+#include <initializer_list>
 #include <iomanip>
+#include <iterator>
+#include <ostream>
+#include <stdexcept>
+#include <tuple>
+#include <utility>
+#include <vector>
 
+#include <LoggingLib/LoggingLib.hpp>
 #include <fmt/format.h>
 
+#include "MLCore/TensorInitializers/ITensorInitializer.hpp"
 #include "MLCore/TensorOperationsImpl.h"
+#include "MLCore/Utilities.h"
 
 namespace mlCore
 {
@@ -17,10 +30,9 @@ template std::ostream& operator<<(std::ostream& ostream, const BasicTensor<doubl
 template <typename ValueType>
 BasicTensor<ValueType>::BasicTensor()
 	: _length(1)
-	, _data()
-{
-	_data = new ValueType[1];
-}
+	, _shape()
+	, _data(new ValueType[1])
+{}
 
 template <typename ValueType>
 BasicTensor<ValueType>::BasicTensor(ValueType initVal)
@@ -85,7 +97,7 @@ BasicTensor<ValueType>::BasicTensor(const std::vector<size_t>& shape)
 
 	_length = std::accumulate(_shape.begin(),
 							  _shape.end(),
-							  size_t(1),
+							  size_t{1},
 							  [](const auto current, const auto dim) { return current * dim; });
 
 	_data = new ValueType[_length];
@@ -127,7 +139,7 @@ BasicTensor<ValueType>::BasicTensor(const BasicTensor& other)
 }
 
 template <typename ValueType>
-BasicTensor<ValueType>::BasicTensor(BasicTensor&& other)
+BasicTensor<ValueType>::BasicTensor(BasicTensor&& other) noexcept
 	: _length(other._length)
 	, _shape(std::move(other._shape))
 	, _data(other._data)
@@ -166,7 +178,7 @@ BasicTensor<ValueType>& BasicTensor<ValueType>::operator=(const BasicTensor& oth
 }
 
 template <typename ValueType>
-BasicTensor<ValueType>& BasicTensor<ValueType>::operator=(BasicTensor&& other)
+BasicTensor<ValueType>& BasicTensor<ValueType>::operator=(BasicTensor&& other) noexcept
 {
 	if(&other != this)
 	{
@@ -227,7 +239,7 @@ void BasicTensor<ValueType>::_checkShapeCompatible(const std::vector<size_t>& sh
 	const auto newLength =
 		std::accumulate(shape.begin(),
 						shape.end(),
-						size_t(0),
+						size_t{0},
 						[](const auto current, const auto axis) { return current * axis; });
 
 	if(newLength != _length)
@@ -253,7 +265,7 @@ void BasicTensor<ValueType>::_checkIndicesList(IndicesIter beg, IndicesIter end)
 		throw std::out_of_range("Indices list cannot be longer than tensor's shape.");
 	}
 
-	for(auto [indicesIt, shapeIt] = std::tuple{beg, size_t(0)}; indicesIt < end; ++indicesIt, ++shapeIt)
+	for(auto [indicesIt, shapeIt] = std::tuple{beg, size_t{0}}; indicesIt < end; ++indicesIt, ++shapeIt)
 	{
 		const auto& [lower, upper] = *indicesIt;
 
@@ -673,9 +685,9 @@ std::ostream& operator<<(std::ostream& ostream, const BasicTensor<TensorValueTyp
 		{
 			ostream << "\n" << preamble << "[";
 
-			size_t elementNr;
+			size_t elementNr = 0;
 
-			for(elementNr = 0; elementNr < (*shapeIter) - 1; elementNr++)
+			for(; elementNr < (*shapeIter) - 1; elementNr++)
 			{
 				ostream << std::setw(blockSize)
 						<< *std::next(stringifiedDataIter, static_cast<ptrdiff_t>(elementNr)) << ", ";
@@ -690,8 +702,8 @@ std::ostream& operator<<(std::ostream& ostream, const BasicTensor<TensorValueTyp
 		{
 			ostream << "\n" << preamble << "[";
 
-			size_t printNr;
-			for(printNr = 0; printNr < (*shapeIter); printNr++)
+			size_t printNr = 0;
+			for(; printNr < (*shapeIter); printNr++)
 			{
 				recursePrint(shapeIter + 1,
 							 std::next(stringifiedDataIter, static_cast<ptrdiff_t>(printNr * offset)),
@@ -706,7 +718,7 @@ std::ostream& operator<<(std::ostream& ostream, const BasicTensor<TensorValueTyp
 	// for traversing data
 	const auto offset = std::accumulate(tensor._shape.begin(),
 										tensor._shape.end(),
-										size_t(1),
+										size_t{1},
 										[](const size_t& curr, const size_t& dim) { return curr * dim; });
 
 	recursePrint(tensor._shape.cbegin(), stringifiedNumbers.begin(), "", offset);

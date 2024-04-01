@@ -28,7 +28,7 @@ public:
 
 	Task() = delete;
 
-	Task(size_t taskId, size_t waitingInterval = 1000)
+	explicit Task(size_t taskId, size_t waitingInterval = 1000)
 		: _waitingInterval(waitingInterval)
 		, _id(taskId)
 	{}
@@ -143,7 +143,7 @@ protected:
 
 TEST_F(TestThreadPool, testTasksProcessing)
 {
-	std::vector<std::pair<size_t, size_t>> tasksParams{{5, 1000}, {10, 500}, {20, 250}};
+	const std::vector<std::pair<size_t, size_t>> tasksParams{{5, 1000}, {10, 500}, {20, 250}};
 
 	for(const auto& [nTasks, interval] : tasksParams)
 	{

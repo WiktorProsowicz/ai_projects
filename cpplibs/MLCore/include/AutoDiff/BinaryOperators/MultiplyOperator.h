@@ -8,7 +8,7 @@ namespace mlCore::autoDiff::binaryOperators
 class MultiplyOperator final : public BinaryOperator
 {
 public:
-	MultiplyOperator(const NodePtr lhsInput, const NodePtr rhsInput)
+	MultiplyOperator(const NodePtr& lhsInput, const NodePtr& rhsInput)
 		: BinaryOperator(lhsInput, rhsInput){};
 
 	void updateValue() override;

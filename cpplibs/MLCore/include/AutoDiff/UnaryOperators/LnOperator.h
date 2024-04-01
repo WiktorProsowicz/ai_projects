@@ -12,7 +12,7 @@ namespace mlCore::autoDiff::unaryOperators
 class LnOperator final : public UnaryOperator
 {
 public:
-	LnOperator(const NodePtr input)
+	explicit LnOperator(const NodePtr& input)
 		: UnaryOperator(input){};
 
 	void updateValue() override;

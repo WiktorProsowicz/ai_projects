@@ -1,9 +1,22 @@
 #include "AutoDiff/ComputationGraph.h"
 
+#include <algorithm>
+#include <cstddef>
+#include <functional>
+#include <iterator>
+#include <map>
+#include <memory>
 #include <set>
+#include <string>
+#include <utility>
+#include <vector>
+
+#include <LoggingLib/LoggingLib.hpp>
 
 #include "AutoDiff/BinaryOperators/BinaryOperator.h"
+#include "AutoDiff/GraphNodes.hpp"
 #include "AutoDiff/UnaryOperators/UnaryOperator.h"
+#include "MLCore/BasicTensor.h"
 
 namespace mlCore::autoDiff
 {
@@ -42,7 +55,7 @@ const Tensor& ComputationGraph::getGradientByNodeName(const std::string& nodeNam
 		->second;
 }
 
-void ComputationGraph::addNode(const NodePtr node)
+void ComputationGraph::addNode(const NodePtr& node)
 {
 	if(!_isActive)
 	{
@@ -86,8 +99,8 @@ void ComputationGraph::_sortNodes()
 
 	// recursively goes down the tree in a DFS manner and adds nodes to newNodes so that all inputs can be
 	// assigned before the operators
-	std::function<void(const NodePtr)> traverseTree;
-	traverseTree = [&traverseTree, &newNodes](const NodePtr node)
+	std::function<void(const NodePtr&)> traverseTree;
+	traverseTree = [&traverseTree, &newNodes](const NodePtr& node)
 	{
 		if(const auto castedBinaryOp = std::dynamic_pointer_cast<binaryOperators::BinaryOperator>(node))
 		{
@@ -141,17 +154,17 @@ void ComputationGraph::forwardPass(const std::map<PlaceholderPtr, Tensor>& feedD
 	}
 }
 
-void ComputationGraph::computeGradients(const NodePtr root)
+void ComputationGraph::computeGradients(const NodePtr& root)
 {
 	if(!_areNodesSorted)
 	{
 		_sortNodes();
 	}
 
-	std::function<void(const NodePtr, const Tensor&)> backPropagate;
+	std::function<void(const NodePtr&, const Tensor&)> backPropagate;
 
 	// traverses the nodes tree and computes gradient in regard of every node
-	backPropagate = [&backPropagate, this](const NodePtr node, const Tensor& cumulatedGradient)
+	backPropagate = [&backPropagate, this](const NodePtr& node, const Tensor& cumulatedGradient)
 	{
 		if(this->_gradients.find(node) == this->_gradients.end())
 		{

@@ -1,5 +1,7 @@
 #include "AutoDiff/BinaryOperators/PowerOperator.h"
 
+#include <utility>
+
 #include "MLCore/TensorOperations.h"
 
 namespace mlCore::autoDiff::binaryOperators

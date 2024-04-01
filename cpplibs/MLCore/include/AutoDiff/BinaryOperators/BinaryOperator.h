@@ -15,10 +15,10 @@ namespace mlCore::autoDiff::binaryOperators
 class BinaryOperator : public Node
 {
 public:
-	BinaryOperator(const NodePtr lhsInput, const NodePtr rhsInput)
+	BinaryOperator(NodePtr lhsInput, NodePtr rhsInput)
 		: Node(std::vector<size_t>{})
-		, _lhsInput(lhsInput)
-		, _rhsInput(rhsInput){};
+		, _lhsInput(std::move(lhsInput))
+		, _rhsInput(std::move(rhsInput)){};
 
 	/**
 	 * @brief Tells the operator to compute its value based on its inputs.

@@ -16,6 +16,15 @@ namespace mlCore::models
 class ILayer
 {
 public:
+	ILayer() = default;
+
+	ILayer(const ILayer&) = default;
+	ILayer(ILayer&&) = default;
+	ILayer& operator=(const ILayer&) = default;
+	ILayer& operator=(ILayer&&) = default;
+
+	virtual ~ILayer() = default;
+
 	/**
 	 * @brief Initializes the layer's parameters based on the specifically defined configuration.
 	 *
@@ -50,8 +59,6 @@ public:
 	 * @return Textual description of the layer.
 	 */
 	virtual std::string getDescription() const = 0;
-
-	virtual ~ILayer() = default;
 };
 
 using ILayerPtr = std::shared_ptr<ILayer>;

@@ -1,8 +1,16 @@
 #include "MLCore/TensorOperations.h"
 
 #include <cmath>
+#include <cstddef>
+#include <iterator>
+#include <map>
+#include <vector>
+
+#include <LoggingLib/LoggingLib.hpp>
+#include <fmt/core.h>
 
 #include "MLCore/TensorOperationsImpl.h"
+#include "MLCore/Utilities.h"
 
 namespace mlCore
 {
@@ -121,17 +129,18 @@ public:
 	std::vector<size_t> getShape() const
 	{
 		std::vector<size_t> collectedShape;
+		collectedShape.reserve(_collectedShapeIndices.size());
 
-		for(const auto& [axis, index] : _collectedShapeIndices)
-		{
-			collectedShape.push_back(index);
-		}
+		std::transform(_collectedShapeIndices.cbegin(),
+					   _collectedShapeIndices.cend(),
+					   std::back_inserter(collectedShape),
+					   [](const auto& axisIndex) { return axisIndex.second; });
 
 		return collectedShape;
 	}
 
 private:
-	std::map<size_t, size_t> _collectedShapeIndices;
+	std::map<size_t, size_t> _collectedShapeIndices{};
 	size_t _currentLevel = 0;
 };
 } // namespace detail

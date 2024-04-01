@@ -21,6 +21,12 @@ class TestLayer : public mlCore::models::ILayer
 {
 public:
 	TestLayer() = default;
+
+	TestLayer(const TestLayer&) = default;
+	TestLayer(TestLayer&&) = default;
+	TestLayer& operator=(const TestLayer&) = default;
+	TestLayer& operator=(TestLayer&&) = default;
+
 	~TestLayer() override = default;
 
 	mlCore::autoDiff::NodePtr build() override
@@ -54,6 +60,12 @@ class TestOptimizer : public mlCore::models::IOptimizer
 {
 public:
 	TestOptimizer() = default;
+
+	TestOptimizer(const TestOptimizer&) = default;
+	TestOptimizer(TestOptimizer&&) = default;
+	TestOptimizer& operator=(const TestOptimizer&) = default;
+	TestOptimizer& operator=(TestOptimizer&&) = default;
+
 	~TestOptimizer() override = default;
 
 	void applyGradient(mlCore::autoDiff::NodePtr weight, mlCore::Tensor derivative) override
@@ -67,6 +79,12 @@ class TestMeasurable : public mlCore::models::IMeasurable
 {
 public:
 	TestMeasurable() = default;
+
+	TestMeasurable(const TestMeasurable&) = default;
+	TestMeasurable(TestMeasurable&&) = default;
+	TestMeasurable& operator=(const TestMeasurable&) = default;
+	TestMeasurable& operator=(TestMeasurable&&) = default;
+
 	~TestMeasurable() override = default;
 
 	void registerMetric(mlCore::models::IMetricPtr metric) override
@@ -89,7 +107,7 @@ public:
 
 	void notifyMetrics() override
 	{
-		for(auto metric : _metrics)
+		for(const auto& metric : _metrics)
 		{
 			auto context = std::make_shared<mlCore::models::MetricContext>();
 
@@ -111,6 +129,12 @@ class TestMetric : public mlCore::models::IMetric
 {
 public:
 	TestMetric() = default;
+
+	TestMetric(const TestMetric&) = default;
+	TestMetric(TestMetric&&) = default;
+	TestMetric& operator=(const TestMetric&) = default;
+	TestMetric& operator=(TestMetric&&) = default;
+
 	~TestMetric() override = default;
 
 	void notify(mlCore::models::MetricContextPtr /*context*/) override
@@ -126,6 +150,12 @@ class TestCallback : public mlCore::models::Callback
 {
 public:
 	TestCallback() = default;
+
+	TestCallback(const TestCallback&) = default;
+	TestCallback(TestCallback&&) = default;
+	TestCallback& operator=(const TestCallback&) = default;
+	TestCallback& operator=(TestCallback&&) = default;
+
 	~TestCallback() override = default;
 
 	void call() override {}
@@ -139,15 +169,15 @@ public:
 
 TEST(TestModels, testTestLayer)
 {
-	TestLayer layer;
+	const TestLayer layer;
 }
 
 TEST(TestModels, testTestOptimizer)
 {
-	mlCore::models::IOptimizerPtr optimizer = std::make_shared<TestOptimizer>();
+	const mlCore::models::IOptimizerPtr optimizer = std::make_shared<TestOptimizer>();
 
 	auto node = std::make_shared<mlCore::autoDiff::Node>(mlCore::Tensor(std::vector<size_t>{}));
-	mlCore::Tensor tensor({}, 0);
+	const mlCore::Tensor tensor({}, 0);
 
 	optimizer->applyGradient(node, tensor);
 }

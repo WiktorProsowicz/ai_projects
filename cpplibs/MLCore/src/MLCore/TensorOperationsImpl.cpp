@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-#include <fmt/format.h>
+#include <fmt/core.h>
 
 #include "MLCore/BasicTensor.h"
 #include "MLCore/Utilities.h"

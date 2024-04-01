@@ -16,6 +16,15 @@ namespace mlCore::models
 class IMeasurable
 {
 public:
+	IMeasurable() = default;
+
+	IMeasurable(const IMeasurable&) = default;
+	IMeasurable(IMeasurable&&) = default;
+	IMeasurable& operator=(const IMeasurable&) = default;
+	IMeasurable& operator=(IMeasurable&&) = default;
+
+	virtual ~IMeasurable() = default;
+
 	/**
 	 * @brief Subscribes the publisher and adds the metrics to its subscribers.
 	 *
@@ -51,8 +60,6 @@ public:
 	 * @return Value identifying the measurable.
 	 */
 	virtual std::string getIdentifier() = 0;
-
-	virtual ~IMeasurable() = default;
 };
 
 using IMeasurablePtr = std::shared_ptr<IMeasurable>;

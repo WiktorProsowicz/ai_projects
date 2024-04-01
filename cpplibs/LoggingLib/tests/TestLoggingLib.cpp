@@ -6,9 +6,9 @@
  * by Wiktor Prosowicz
  **********************/
 
+#include <sstream>
 #include <stdexcept>
 #include <string>
-#include <strstream>
 #include <vector>
 
 #include <LoggingLib/LoggingLib.hpp>
@@ -111,14 +111,14 @@ TEST_F(TestLoggingLib, testNamedChannelsLogging)
 	LOG_INFO("Channel 2", "Message 8");
 
 	_checkHarvestedLogs(defaultStream.str(),
-					   {"\033[34m[ INFO][Unnamed] Message 1\033[0m",
-						"\033[34m[ INFO][Unnamed] Message 4\033[0m",
-						"\033[34m[ INFO][Channel 2] Message 8\033[0m"});
+						{"\033[34m[ INFO][Unnamed] Message 1\033[0m",
+						 "\033[34m[ INFO][Unnamed] Message 4\033[0m",
+						 "\033[34m[ INFO][Channel 2] Message 8\033[0m"});
 
 	_checkHarvestedLogs(firstChannelStream.str(),
-					   {"\033[34m[ INFO][Channel 1] Message 2\033[0m",
-						"\033[34m[ INFO][Channel 1] Message 3\033[0m",
-						"\033[34m[ INFO][Channel 1] Message 6\033[0m"});
+						{"\033[34m[ INFO][Channel 1] Message 2\033[0m",
+						 "\033[34m[ INFO][Channel 1] Message 3\033[0m",
+						 "\033[34m[ INFO][Channel 1] Message 6\033[0m"});
 
 	_checkHarvestedLogs(
 		secondChannelStream.str(),

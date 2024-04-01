@@ -13,6 +13,15 @@ template <typename ValueType>
 class ITensorInitializer
 {
 public:
+	ITensorInitializer() = default;
+
+	ITensorInitializer(const ITensorInitializer&) = default;
+	ITensorInitializer(ITensorInitializer&&) = default;
+	ITensorInitializer& operator=(const ITensorInitializer&) = default;
+	ITensorInitializer& operator=(ITensorInitializer&&) = default;
+
+	virtual ~ITensorInitializer() = default;
+
 	/**
 	 * @brief Generates a value based on the concrete type of the initializer.
 	 *
@@ -27,8 +36,6 @@ public:
 	 * @return false In opposite case.
 	 */
 	virtual bool canYield() const = 0;
-
-	virtual ~ITensorInitializer() = default;
 };
 } // namespace mlCore::tensorInitializers
 

@@ -263,7 +263,7 @@ TEST_F(TestBasicTensor, testCopy)
 	mlCore::Tensor tensor1(std::vector<size_t>{2, 3, 4});
 
 	tensor1.fill(RangeTensorInitializer<double>(0));
-	mlCore::Tensor tensor2 = tensor1;
+	const mlCore::Tensor tensor2 = tensor1;
 
 	_checkTensorEquality(tensor1, tensor2);
 
@@ -284,7 +284,7 @@ TEST_F(TestBasicTensor, testMove)
 	mlCore::Tensor tensorBase1 = tensorBase;
 	mlCore::Tensor tensorBase2 = tensorBase;
 
-	mlCore::Tensor tensorMovedByConstructor = std::move(tensorBase1);
+	const mlCore::Tensor tensorMovedByConstructor = std::move(tensorBase1);
 
 	_checkTensorEquality(tensorMovedByConstructor, tensorBase);
 	_isTensorEmpty(tensorBase1);
@@ -390,7 +390,7 @@ TEST_F(TestBasicTensor, testOperatorsWithBroadcasting)
 	mlCore::Tensor tensor2(shape2);
 	tensor2.fill({1, 2, 3});
 
-	mlCore::Tensor resTensor = tensor1 + tensor2;
+	const mlCore::Tensor resTensor = tensor1 + tensor2;
 
 	ASSERT_EQ(resTensor.shape(), resShape);
 	const std::vector<double> resValues{2,	3,	4,	5,	6,	7,	8,	3,	4,	5,	6,	7,	8,	9,
@@ -453,7 +453,7 @@ TEST_F(TestBasicTensor, testMatrixMultiplicationClassicMatrices)
 	firstTensor.fill(RangeTensorInitializer<double>(1));
 	secondTensor.fill(RangeTensorInitializer<double>(1));
 
-	mlCore::Tensor resultTensor = firstTensor.matmul(secondTensor);
+	const mlCore::Tensor resultTensor = firstTensor.matmul(secondTensor);
 
 	const std::vector<double> expectedValues{11, 14, 17, 20, 23, 30, 37, 44, 35, 46, 57, 68};
 

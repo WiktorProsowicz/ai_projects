@@ -14,6 +14,13 @@ namespace streamWrappers
 class IStreamWrapper
 {
 public:
+	IStreamWrapper() = default;
+
+	IStreamWrapper(const IStreamWrapper&) = default;
+	IStreamWrapper(IStreamWrapper&&) = default;
+	IStreamWrapper& operator=(const IStreamWrapper&) = default;
+	IStreamWrapper& operator=(IStreamWrapper&&) = default;
+
 	virtual ~IStreamWrapper() = default; // Virtual destructor.
 
 	/**

@@ -30,9 +30,14 @@ class Node
 {
 public:
 	Node() = delete;
-	Node(const Tensor& tensor)
+	explicit Node(Tensor tensor)
 		: _index(nodesCount_++)
-		, _value(tensor){};
+		, _value(std::move(tensor)){};
+
+	Node(const Node&) = default;
+	Node(Node&&) = default;
+	Node& operator=(const Node&) = default;
+	Node& operator=(Node&&) = default;
 
 	virtual ~Node() = default;
 
@@ -60,7 +65,7 @@ protected:
 	uint64_t _index;
 	static inline uint64_t nodesCount_ = 0;
 	Tensor _value;
-	std::string _name;
+	std::string _name{};
 };
 
 /**
@@ -72,7 +77,7 @@ class Variable : public Node
 public:
 	Variable()
 		: Node(std::vector<size_t>{}){};
-	Variable(const Tensor& tensor)
+	explicit Variable(const Tensor& tensor)
 		: Node(tensor){};
 };
 
@@ -84,7 +89,7 @@ class Constant : public Node
 {
 public:
 	Constant() = delete;
-	Constant(const Tensor& tensor)
+	explicit Constant(const Tensor& tensor)
 		: Node(tensor){};
 };
 
@@ -95,7 +100,7 @@ public:
 class Placeholder : public Node
 {
 public:
-	Placeholder(const std::vector<size_t>& shape = {})
+	explicit Placeholder(const std::vector<size_t>& shape = {})
 		: Node(shape){};
 };
 

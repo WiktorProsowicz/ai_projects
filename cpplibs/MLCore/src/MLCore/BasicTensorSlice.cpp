@@ -1,8 +1,19 @@
 #include "MLCore/BasicTensorSlice.h"
 
+#include <cstddef>
+#include <functional>
 #include <iomanip>
+#include <iterator>
+#include <ostream>
+#include <span>
+#include <stdexcept>
+#include <string>
+#include <tuple>
+#include <utility>
+#include <vector>
 
 #include "MLCore/BasicTensor.h"
+#include "MLCore/SlicedTensorIterator.hpp"
 
 #define OPERATION_WITH_SCALAR_RHS(op, rhs)                                                                   \
 	const auto chunkLength = _computeChunkLength();                                                          \
@@ -64,7 +75,7 @@ size_t getPivotShapeElement(const std::vector<size_t>& shape,
 		}
 	}
 
-	return shape.size();
+	return 0;
 }
 } // namespace
 
@@ -318,7 +329,7 @@ bool isShapeBroadcastable(const std::vector<size_t>& shapeFrom, const std::vecto
 
 /// Modifies the `shape` so that the indices after the `pivotElement` are merged into a single dimension.
 std::vector<size_t>
-mergeShape(const std::vector<size_t> shape, const size_t pivotElement, const size_t chunkLength)
+mergeShape(const std::vector<size_t>& shape, const size_t pivotElement, const size_t chunkLength)
 {
 	if(pivotElement == shape.size())
 	{
@@ -439,22 +450,29 @@ BasicTensorSlice<ValueType>::_determineBroadcastedDataPointers(const BasicTensor
 		zippedDataPointers.push_back(
 			{dataPointersThis.at(flattenedIndexThis), dataPointersOther.at(flattenedIndexOther)});
 
-		for(int64_t shapeIdx = indicesPathThis.size() - 1; shapeIdx >= 0; shapeIdx--)
-		{
-			indicesPathThis.at(shapeIdx)++;
+		auto [pathThisIt, pathOtherIt, shapeThisIt, shapeOtherIt] = std::tuple{indicesPathThis.rbegin(),
+																			   indicesPathOther.rbegin(),
+																			   mergedShapeThis.crbegin(),
+																			   mergedShapeOther.crbegin()};
 
-			if((mergedShapeOther.at(shapeIdx) != 1) &&
-			   (static_cast<uint64_t>(shapeIdx) != (indicesPathThis.size() - 1)))
+		for(; (pathThisIt < indicesPathThis.rend()) && (pathOtherIt < indicesPathOther.rend()) &&
+			  (shapeThisIt < mergedShapeThis.crend()) && (shapeOtherIt < mergedShapeOther.crend());
+			pathThisIt++, pathOtherIt++, shapeThisIt++, shapeOtherIt++)
+		{
+			(*pathThisIt)++;
+
+			if((*shapeOtherIt != 1) && (shapeOtherIt != mergedShapeOther.crbegin()))
 			{
-				indicesPathOther.at(shapeIdx)++;
+				(*pathOtherIt)++;
 			}
 
-			if(indicesPathThis.at(shapeIdx) < mergedShapeThis.at(shapeIdx))
+			if(*pathThisIt < *shapeThisIt)
 			{
 				break;
 			}
-			indicesPathThis.at(shapeIdx) = 0;
-			indicesPathOther.at(shapeIdx) = 0;
+
+			*pathThisIt = 0;
+			*pathOtherIt = 0;
 		}
 	}
 
@@ -497,15 +515,15 @@ void serializeContiguousMemory(std::ostream& ostream,
 		}
 		else
 		{
-			const auto offset = std::distance(dataBeg, dataEnd) / *shapeIter;
+			const auto offset = static_cast<size_t>(std::distance(dataBeg, dataEnd)) / *shapeIter;
 
 			ostream << "\n" << preamble << "[";
 
 			for(size_t dimIdx = 0; dimIdx < *shapeIter; dimIdx++)
 			{
-				recurseSerialize(shapeIter + 1,
-								 dataBeg + (dimIdx * offset),
-								 dataBeg + ((dimIdx + 1) * offset),
+				recurseSerialize(std::next(shapeIter),
+								 std::next(dataBeg, static_cast<ptrdiff_t>(dimIdx * offset)),
+								 std::next(dataBeg, static_cast<ptrdiff_t>((dimIdx + 1) * offset)),
 								 preamble + " ");
 			}
 
@@ -568,24 +586,25 @@ std::ostream& operator<<(std::ostream& ostream, const BasicTensorSlice<SliceValu
 	{
 		if(shapeIter == std::prev(mergedShape.end()))
 		{
-			serializeContiguousMemory(
-				ostream,
-				std::span(*dataBeg, chunkLength),
-				preamble,
-				std::span(tShape.begin() + mergedShape.size() - 1, tShape.size() - mergedShape.size() + 1),
-				blockLength);
+			const std::span<size_t> leftShape(
+				std::next(tShape.begin(), static_cast<ptrdiff_t>(mergedShape.size() - 1)),
+				tShape.size() - mergedShape.size() + 1);
+
+			const std::span<SliceValueType> memory(*dataBeg, chunkLength);
+
+			serializeContiguousMemory(ostream, memory, preamble, leftShape, blockLength);
 		}
 		else
 		{
-			const auto offset = std::distance(dataBeg, dataEnd) / *shapeIter;
+			const auto offset = static_cast<size_t>(std::distance(dataBeg, dataEnd)) / *shapeIter;
 
 			ostream << "\n" << preamble << "[";
 
 			for(size_t dimIdx = 0; dimIdx < *shapeIter; dimIdx++)
 			{
 				recursePrint(shapeIter + 1,
-							 dataBeg + (dimIdx * offset),
-							 dataBeg + ((dimIdx + 1) * offset),
+							 std::next(dataBeg, static_cast<ptrdiff_t>(dimIdx * offset)),
+							 std::next(dataBeg, static_cast<ptrdiff_t>((dimIdx + 1) * offset)),
 							 preamble + " ");
 			}
 

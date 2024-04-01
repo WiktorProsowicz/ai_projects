@@ -28,8 +28,8 @@ class UnaryOperatorDecorator;
 enum class WrapperLogChannel : uint8_t;
 
 mlCore::autoDiff::NodePtr
-wrapNode(mlCore::autoDiff::NodePtr node,
-		 std::shared_ptr<std::map<WrapperLogChannel, std::vector<std::string>>> logs);
+wrapNode(const mlCore::autoDiff::NodePtr& node,
+		 const std::shared_ptr<std::map<WrapperLogChannel, std::vector<std::string>>>& logs);
 
 // Enum specifying type of log made by computation graph node wrappers.
 enum class WrapperLogChannel : uint8_t
@@ -42,8 +42,9 @@ class BinaryOperatorDecorator : public mlCore::autoDiff::binaryOperators::Binary
 {
 
 public:
-	BinaryOperatorDecorator(const mlCore::autoDiff::binaryOperators::BinaryOperatorPtr oper,
-							const std::shared_ptr<std::map<WrapperLogChannel, std::vector<std::string>>> logs)
+	BinaryOperatorDecorator(
+		const mlCore::autoDiff::binaryOperators::BinaryOperatorPtr& oper,
+		const std::shared_ptr<std::map<WrapperLogChannel, std::vector<std::string>>>& logs)
 		: BinaryOperator(wrapNode(oper->getInputs().first, logs), wrapNode(oper->getInputs().second, logs))
 		, _oper(oper)
 		, _logs(logs)
@@ -88,8 +89,8 @@ private:
 class UnaryOperatorDecorator : public mlCore::autoDiff::unaryOperators::UnaryOperator
 {
 public:
-	UnaryOperatorDecorator(const mlCore::autoDiff::unaryOperators::UnaryOperatorPtr oper,
-						   const std::shared_ptr<std::map<WrapperLogChannel, std::vector<std::string>>> logs)
+	UnaryOperatorDecorator(const mlCore::autoDiff::unaryOperators::UnaryOperatorPtr& oper,
+						   const std::shared_ptr<std::map<WrapperLogChannel, std::vector<std::string>>>& logs)
 		: UnaryOperator(wrapNode(oper->getInput(), logs))
 		, _oper(oper)
 		, _logs(logs)
@@ -138,8 +139,8 @@ struct BackPropagationConfig
 
 /// Decorates input `node` or returns it if it is not of operator type.
 mlCore::autoDiff::NodePtr
-wrapNode(mlCore::autoDiff::NodePtr node,
-		 std::shared_ptr<std::map<WrapperLogChannel, std::vector<std::string>>> logs)
+wrapNode(const mlCore::autoDiff::NodePtr& node,
+		 const std::shared_ptr<std::map<WrapperLogChannel, std::vector<std::string>>>& logs)
 {
 	using namespace mlCore::autoDiff;
 
@@ -249,7 +250,7 @@ constructTree(const std::vector<std::pair<std::string, std::string>>& config)
 				shape.push_back(std::stoull(shapeItem));
 			}
 
-			mlCore::Tensor value(shape);
+			const mlCore::Tensor value(shape);
 			auto node = std::make_shared<Node>(value);
 
 			node->setName(name);
@@ -345,7 +346,7 @@ protected:
 	 * @param root Root node of the traversed tree.
 	 * @return All of the nodes present in the tree.
 	 */
-	static std::set<mlCore::autoDiff::NodePtr> _flattenTree(const mlCore::autoDiff::NodePtr root)
+	static std::set<mlCore::autoDiff::NodePtr> _flattenTree(const mlCore::autoDiff::NodePtr& root)
 	{
 		using namespace mlCore::autoDiff;
 
@@ -353,7 +354,7 @@ protected:
 
 		std::function<void(const NodePtr)> flattenTree;
 
-		flattenTree = [&nodes, &flattenTree](const NodePtr node)
+		flattenTree = [&nodes, &flattenTree](const NodePtr& node)
 		{
 			nodes.insert(node);
 
@@ -390,7 +391,7 @@ protected:
 
 		for(const auto& input : inputs)
 		{
-			mlCore::tensorInitializers::GaussianInitializer<double> initializer;
+			const mlCore::tensorInitializers::GaussianInitializer<double> initializer;
 			mlCore::Tensor inputTensor(input->getValue().shape());
 
 			inputTensor.fill(initializer);
@@ -409,15 +410,15 @@ protected:
 	 * @param root Node from whose perspective the relations are collected.
 	 */
 	static void _checkNodesRelationships(const std::set<std::pair<uint64_t, uint64_t>>& expectedRelations,
-										mlCore::autoDiff::NodePtr root)
+										 const mlCore::autoDiff::NodePtr& root)
 	{
 		using namespace mlCore::autoDiff;
 
 		std::set<std::pair<uint64_t, uint64_t>> collectedRelations;
 
-		std::function<void(const NodePtr)> traverseTree;
+		std::function<void(const NodePtr&)> traverseTree;
 
-		traverseTree = [&traverseTree, &collectedRelations](const NodePtr node)
+		traverseTree = [&traverseTree, &collectedRelations](const NodePtr& node)
 		{
 			if(const auto casted = std::dynamic_pointer_cast<unaryOperators::UnaryOperator>(node))
 			{
@@ -497,9 +498,9 @@ protected:
 	 * @param trainableWeights Weights to be updated with gradient.
 	 * @param input Input layer for feed map.
 	 */
-	void _performGradientDescent(const mlCore::autoDiff::NodePtr tree,
-								const std::set<mlCore::autoDiff::NodePtr>& trainableWeights,
-								mlCore::autoDiff::PlaceholderPtr input)
+	void _performGradientDescent(const mlCore::autoDiff::NodePtr& tree,
+								 const std::set<mlCore::autoDiff::NodePtr>& trainableWeights,
+								 const mlCore::autoDiff::PlaceholderPtr& input)
 	{
 		using namespace mlCore::autoDiff;
 
@@ -521,14 +522,14 @@ protected:
 			{
 				const auto feedMap = _createFeedMap({input});
 
-				std::cout << feedMap.at(input) << std::endl;
+				std::cout << feedMap.at(input) << '\n';
 
 				_graph->forwardPass(feedMap);
 			}
 
 			_graph->computeGradients(tree);
 
-			for(auto weight : trainableWeights)
+			for(const auto& weight : trainableWeights)
 			{
 				const auto& derivative = _graph->getGradientByNodeId(weight->getIndex());
 				weight->getValue() -= (derivative * .1);
@@ -634,7 +635,7 @@ TEST_F(TestComputationGraph, testBackPropagation)
 		  "L1W <- Layer1",
 		  "Input <- Layer1"}}};
 
-	BackPropagationConfig config{
+	const BackPropagationConfig config{
 		.tree = wrapNode(tree, wrappersLogs), .expectedLogs = expectedLogs, .sharedLogs = wrappersLogs};
 
 	_checkBackPropagation(config);

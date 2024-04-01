@@ -13,9 +13,9 @@ namespace mlCore::autoDiff::unaryOperators
 class UnaryOperator : public Node
 {
 public:
-	UnaryOperator(const NodePtr input)
+	explicit UnaryOperator(NodePtr input)
 		: Node(std::vector<size_t>{})
-		, _input(input){};
+		, _input(std::move(input)){};
 
 	/**
 	 * @brief Tells the operator to compute its value based om its input.

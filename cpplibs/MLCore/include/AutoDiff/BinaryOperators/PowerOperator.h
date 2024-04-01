@@ -8,7 +8,7 @@ namespace mlCore::autoDiff::binaryOperators
 class PowerOperator final : public BinaryOperator
 {
 public:
-	PowerOperator(const NodePtr lhsInput, const NodePtr rhsInput)
+	PowerOperator(const NodePtr& lhsInput, const NodePtr& rhsInput)
 		: BinaryOperator(lhsInput, rhsInput){};
 
 	void updateValue() override;

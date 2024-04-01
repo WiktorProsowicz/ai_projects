@@ -4,13 +4,31 @@
 #include <any>
 #include <list>
 #include <ostream>
+#include <span>
 #include <string>
 #include <vector>
+
+#include <fmt/format.h>
+#include <fmt/ranges.h>
 
 namespace utilities
 {
 namespace detail
 {
+template <typename T>
+concept UnhandledSerializable = requires(T object) {
+	requires !std::is_same_v<const char*, T>;
+	requires !std::is_same_v<char*, T>;
+	requires !std::ranges::range<T>;
+};
+
+template <typename Type>
+std::string makeBytes(Type* object)
+	requires std::disjunction_v<std::is_same<Type, const char>, std::is_same<Type, char>>;
+
+template <std::ranges::range Type>
+std::string makeBytes(const Type& object);
+
 /**
  * @brief Template function used to define custom conversion-to-bytes mechanics for chosen types.
  * Purpose of the function is to provide means of representing objects as byte-arrays containing data
@@ -20,21 +38,8 @@ namespace detail
  * @param object Object to be serialized.
  * @return Short-char string containing bytes extracted from the `object`.
  */
-template <typename Type>
+template <UnhandledSerializable Type>
 std::string makeBytes(Type object);
-
-template <typename VectorItemType>
-std::string makeBytes(const std::vector<VectorItemType>& object)
-{
-	std::string strComposer;
-
-	for(const auto& item : object)
-	{
-		strComposer += makeBytes(item);
-	}
-
-	return strComposer;
-}
 
 } // namespace detail
 
@@ -49,9 +54,11 @@ class SerializationPack
 public:
 	SerializationPack() = delete;									 // Default constructor.
 	SerializationPack(const SerializationPack&) = delete;			 // Copy constructor.
-	SerializationPack(SerializationPack&) = delete;					 // Move constructor.
+	SerializationPack(SerializationPack&&) = delete;				 // Move constructor.
 	SerializationPack& operator=(const SerializationPack&) = delete; // Copy assignment.
 	SerializationPack& operator=(SerializationPack&&) = delete;		 // Move assignment.
+
+	~SerializationPack() = default;
 
 	/**
 	 * @brief Constructs the SerializationPack from given arguments and initializes the internal objects pack,
@@ -59,7 +66,7 @@ public:
 	 *
 	 * @param args Object to pack.
 	 */
-	SerializationPack(const ArgTypes&... args)
+	explicit SerializationPack(const ArgTypes&... args)
 		: _args(std::list<std::any, std::allocator<std::any>>{std::decay_t<ArgTypes>(args)...})
 	{}
 
@@ -116,6 +123,38 @@ std::ostream& operator<<(std::ostream& out, const SerializationPack<ArgTypes...>
 
 	return out;
 }
+
+namespace detail
+{
+
+template <typename Type>
+std::string makeBytes(Type* const object)
+	requires std::disjunction_v<std::is_same<Type, const char>, std::is_same<Type, char>>
+{
+	return object;
+}
+
+template <std::ranges::range Type>
+std::string makeBytes(const Type& object)
+{
+	std::ostringstream strComposer;
+
+	for(const auto& item : object)
+	{
+		strComposer << makeBytes(item);
+	}
+
+	return strComposer.str();
+}
+
+template <UnhandledSerializable Type>
+std::string makeBytes(Type object)
+{
+	const std::span<uint8_t> underlyingMemory(reinterpret_cast<uint8_t*>(&object), sizeof(object));
+
+	return {underlyingMemory.begin(), underlyingMemory.end()};
+}
+} // namespace detail
 
 } // namespace utilities
 

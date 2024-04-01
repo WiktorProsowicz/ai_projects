@@ -20,7 +20,7 @@ namespace detail
 {
 template <typename ValueType>
 class TensorOperationsImpl;
-}
+} // namespace detail
 
 /**
  * @brief Class implements a concept of tensor, support basic operation, transposition etc.
@@ -40,6 +40,7 @@ class BasicTensor
 	friend class BasicTensorSlice;
 
 public:
+	// NOLINTBEGIN(google-explicit-constructor)
 	/**
 	 * @brief Constructs a new scalar-type tensor.
 	 *
@@ -70,7 +71,7 @@ public:
 	 *
 	 * @param other Tensor to move.
 	 */
-	BasicTensor(BasicTensor&& other);
+	BasicTensor(BasicTensor&& other) noexcept;
 
 	/**
 	 * @brief Construct a new tensor with given shape.
@@ -95,6 +96,8 @@ public:
 	 */
 	BasicTensor(const std::vector<size_t>& shape, std::initializer_list<ValueType> initValues);
 
+	// NOLINTEND(google-explicit-constructor)
+
 	/**
 	 * @brief Tensor's destructor releasing the resources.
 	 *
@@ -115,7 +118,7 @@ public:
 	 * @param other Tensor to move.
 	 * @return BasicTensor&
 	 */
-	BasicTensor& operator=(BasicTensor&& other);
+	BasicTensor& operator=(BasicTensor&& other) noexcept;
 
 	/// Gets tensor's shape.
 	const std::vector<size_t>& shape() const noexcept
@@ -294,9 +297,9 @@ private:
 	void _checkShapeCompatible(const std::vector<size_t>& shape) const;
 
 private:
-	size_t _length{};
+	size_t _length;
 	std::vector<size_t> _shape;
-	ValueType* _data{};
+	ValueType* _data;
 };
 
 template <typename TensorValueType>

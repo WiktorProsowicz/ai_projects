@@ -55,7 +55,7 @@ public:
 	/// Erases the contained elements.
 	void clear()
 	{
-		std::unique_lock<std::shared_mutex> lock(_mutex);
+		const std::unique_lock<std::shared_mutex> lock(_mutex);
 
 		while(!std::queue<T>::empty())
 		{
@@ -74,7 +74,7 @@ public:
 	template <typename... Args>
 	void emplace(Args&&... args)
 	{
-		std::unique_lock<std::shared_mutex> lock(_mutex);
+		const std::unique_lock<std::shared_mutex> lock(_mutex);
 		std::queue<T>::emplace(std::forward<Args>(args)...);
 	}
 
@@ -87,7 +87,7 @@ public:
 	 */
 	bool tryPop(T& holder)
 	{
-		std::unique_lock<std::shared_mutex> lock(_mutex);
+		const std::unique_lock<std::shared_mutex> lock(_mutex);
 
 		if(std::queue<T>::empty())
 		{
@@ -100,7 +100,7 @@ public:
 	}
 
 private:
-	mutable std::shared_mutex _mutex;
+	mutable std::shared_mutex _mutex{};
 };
 } // namespace utilities
 

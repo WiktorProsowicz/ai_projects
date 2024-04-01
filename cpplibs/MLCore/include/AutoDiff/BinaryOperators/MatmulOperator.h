@@ -8,7 +8,7 @@ namespace mlCore::autoDiff::binaryOperators
 class MatmulOperator final : public BinaryOperator
 {
 public:
-	MatmulOperator(const NodePtr lhsInput, const NodePtr rhsInput)
+	MatmulOperator(const NodePtr& lhsInput, const NodePtr& rhsInput)
 		: BinaryOperator(lhsInput, rhsInput){};
 
 	void updateValue() override;

@@ -12,7 +12,7 @@ namespace mlCore::autoDiff::unaryOperators
 class SigmoidOperator final : public UnaryOperator
 {
 public:
-	SigmoidOperator(const NodePtr input)
+	explicit SigmoidOperator(const NodePtr& input)
 		: UnaryOperator(input){};
 
 	void updateValue() override;

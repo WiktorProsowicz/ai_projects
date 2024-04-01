@@ -14,6 +14,15 @@ namespace mlCore::models
 class IOptimizer
 {
 public:
+	IOptimizer() = default;
+
+	IOptimizer(const IOptimizer&) = default;
+	IOptimizer(IOptimizer&&) = default;
+	IOptimizer& operator=(const IOptimizer&) = default;
+	IOptimizer& operator=(IOptimizer&&) = default;
+
+	virtual ~IOptimizer() = default;
+
 	/**
 	 * @brief Modifies the weight with respect to the derivative.
 	 *
@@ -21,8 +30,6 @@ public:
 	 * @param derivative Derivative matched to the weight.
 	 */
 	virtual void applyGradient(autoDiff::NodePtr weight, Tensor derivative) = 0;
-
-	virtual ~IOptimizer() = default;
 };
 
 using IOptimizerPtr = std::shared_ptr<IOptimizer>;

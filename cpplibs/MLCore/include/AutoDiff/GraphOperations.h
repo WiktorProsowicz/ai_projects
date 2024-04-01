@@ -37,8 +37,9 @@ concept NodeOperation = requires(NodePtrs... inputNodes, Operation oper) {
  * @return Result of the `operation` based on `inputNodes`.
  */
 template <typename Operation, typename... NodePtrs>
-NodePtr performAndAdd(Operation operation, std::shared_ptr<ComputationGraph> graph, NodePtrs... inputNodes)
-	requires NodeOperation<Operation, NodePtrs...>
+NodePtr performAndAdd(Operation operation,
+					  const std::shared_ptr<ComputationGraph>& graph,
+					  NodePtrs... inputNodes) requires NodeOperation<Operation, NodePtrs...>
 {
 	auto result = operation(inputNodes...);
 
@@ -53,25 +54,25 @@ NodePtr performAndAdd(Operation operation, std::shared_ptr<ComputationGraph> gra
 namespace binaryOperations
 {
 
-NodePtr multiply(NodePtr lNode, NodePtr rNode);
-NodePtr add(NodePtr lNode, NodePtr rNode);
-NodePtr subtract(NodePtr lNode, NodePtr rNode);
-NodePtr divide(NodePtr lNode, NodePtr rNode);
-NodePtr matmul(NodePtr lNode, NodePtr rNode);
-NodePtr power(NodePtr baseNode, NodePtr factorNode);
+NodePtr multiply(const NodePtr& lNode, const NodePtr& rNode);
+NodePtr add(const NodePtr& lNode, const NodePtr& rNode);
+NodePtr subtract(const NodePtr& lNode, const NodePtr& rNode);
+NodePtr divide(const NodePtr& lNode, const NodePtr& rNode);
+NodePtr matmul(const NodePtr& lNode, const NodePtr& rNode);
+NodePtr power(const NodePtr& baseNode, const NodePtr& factorNode);
 
 } // namespace binaryOperations
 
 namespace unaryOperations
 {
-NodePtr ln(NodePtr node);
+NodePtr ln(const NodePtr& node);
 } // namespace unaryOperations
 
 namespace nodesActivations
 {
 
-NodePtr relu(NodePtr node);
-NodePtr sigmoid(NodePtr node);
+NodePtr relu(const NodePtr& node);
+NodePtr sigmoid(const NodePtr& node);
 
 } // namespace nodesActivations
 } // namespace mlCore::autoDiff

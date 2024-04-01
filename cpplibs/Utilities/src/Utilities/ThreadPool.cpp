@@ -1,6 +1,10 @@
 #include "Utilities/ThreadPool.h"
 
+#include <cstddef>
 #include <functional>
+#include <mutex>
+#include <shared_mutex>
+#include <stdexcept>
 
 namespace utilities
 {
@@ -20,7 +24,7 @@ void ThreadPool::terminate()
 	{
 		if(_isRunning())
 		{
-			std::unique_lock<std::shared_mutex> lock(_flagsMutex);
+			const std::unique_lock<std::shared_mutex> lock(_flagsMutex);
 			_stopped = true;
 		}
 		else
@@ -40,7 +44,7 @@ void ThreadPool::terminate()
 void ThreadPool::cancel()
 {
 	{
-		std::unique_lock<std::shared_mutex> lock(_mainMutex);
+		const std::unique_lock<std::shared_mutex> lock(_mainMutex);
 		if(_isRunning())
 		{
 			_cancelled = true;
@@ -77,15 +81,15 @@ void ThreadPool::_spawn(size_t workerId)
 							{
 								obtainedATask = _tasks.tryPop(runTask);
 
-								std::shared_lock<std::shared_mutex> flagsLock(_flagsMutex);
-								std::shared_lock<std::shared_mutex> stopFlagsLock(_stopFlagsMutex);
+								const std::shared_lock<std::shared_mutex> flagsLock(_flagsMutex);
+								const std::shared_lock<std::shared_mutex> stopFlagsLock(_stopFlagsMutex);
 
 								return _cancelled || _stopped || obtainedATask || _stopFlags.at(workerId);
 							});
 		}
 
 		{
-			std::shared_lock<std::shared_mutex> flagsLock(_flagsMutex);
+			const std::shared_lock<std::shared_mutex> flagsLock(_flagsMutex);
 
 			// In case the whole pool has been cancelled - don't care about the following task
 			// In case the pool has been stopped - run tasks until there are any
@@ -101,7 +105,7 @@ void ThreadPool::_spawn(size_t workerId)
 		}
 
 		{
-			std::shared_lock<std::shared_mutex> stopFlagsLock(_stopFlagsMutex);
+			const std::shared_lock<std::shared_mutex> stopFlagsLock(_stopFlagsMutex);
 
 			// Closing the individual thread only after possible processing of the task
 			if(_stopFlags.at(workerId))
@@ -122,7 +126,7 @@ void ThreadPool::resize(size_t numThreads)
 	if(numThreads < size())
 	{
 		{
-			std::unique_lock<std::shared_mutex> stopFlagsMutex(_stopFlagsMutex);
+			const std::unique_lock<std::shared_mutex> stopFlagsMutex(_stopFlagsMutex);
 
 			for(size_t threadNum = numThreads; threadNum < _workers.size(); threadNum++)
 			{
@@ -146,8 +150,8 @@ void ThreadPool::resize(size_t numThreads)
 	if(numThreads > size())
 	{
 		{
-			std::unique_lock<std::shared_mutex> lock(_mainMutex);
-			std::unique_lock<std::shared_mutex> stopFlagsMutex(_stopFlagsMutex);
+			const std::unique_lock<std::shared_mutex> lock(_mainMutex);
+			const std::unique_lock<std::shared_mutex> stopFlagsMutex(_stopFlagsMutex);
 
 			_workers.reserve(numThreads);
 			_stopFlags.reserve(numThreads);

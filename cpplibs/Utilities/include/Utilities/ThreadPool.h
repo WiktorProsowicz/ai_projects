@@ -21,7 +21,7 @@ public:
 	 *
 	 * @param numThreads Initial number of working threads.
 	 */
-	ThreadPool(size_t numThreads)
+	explicit ThreadPool(size_t numThreads)
 	{
 		init(numThreads);
 	}
@@ -72,7 +72,7 @@ public:
 	 */
 	bool initted() const
 	{
-		std::shared_lock<std::shared_mutex> lock(_mainMutex);
+		const std::shared_lock<std::shared_mutex> lock(_mainMutex);
 		return _initted;
 	}
 
@@ -94,7 +94,7 @@ public:
 	 */
 	size_t size() const
 	{
-		std::shared_lock<std::shared_mutex> lock(_mainMutex);
+		const std::shared_lock<std::shared_mutex> lock(_mainMutex);
 		return _workers.size();
 	}
 
@@ -115,7 +115,7 @@ public:
 		using PackagedTask = std::packaged_task<ReturnType()>;
 
 		{
-			std::shared_lock<std::shared_mutex> lock(_flagsMutex);
+			const std::shared_lock<std::shared_mutex> lock(_flagsMutex);
 			if(_stopped || _cancelled)
 			{
 				throw std::runtime_error("Cannot add a new job to thread pool that has been terminated.");
@@ -141,7 +141,7 @@ private:
 	/// Tells if the pool is active.
 	bool _isRunning() const
 	{
-		std::shared_lock<std::shared_mutex> lock(_flagsMutex);
+		const std::shared_lock<std::shared_mutex> lock(_flagsMutex);
 		return _initted && !_stopped && !_cancelled;
 	}
 
@@ -149,21 +149,21 @@ private:
 	void _spawn(size_t workerId);
 
 private:
-	mutable std::shared_mutex _mainMutex;
-	std::vector<std::thread> _workers;
+	mutable std::shared_mutex _mainMutex{};
+	std::vector<std::thread> _workers{};
 
-	std::shared_mutex _stopFlagsMutex;
-	std::vector<bool> _stopFlags;
+	std::shared_mutex _stopFlagsMutex{};
+	std::vector<bool> _stopFlags{};
 
-	mutable ThreadSafeQueue<std::function<void()>> _tasks;
+	mutable ThreadSafeQueue<std::function<void()>> _tasks{};
 
-	mutable std::shared_mutex _flagsMutex;
+	mutable std::shared_mutex _flagsMutex{};
 	bool _initted = false;
 	bool _cancelled = false;
 	bool _stopped = false;
 
-	std::once_flag _once;
-	mutable std::condition_variable_any _condition;
+	std::once_flag _once{};
+	mutable std::condition_variable_any _condition{};
 };
 } // namespace utilities
 

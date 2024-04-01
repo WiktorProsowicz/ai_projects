@@ -26,6 +26,8 @@ public:
 	ComputationGraph(const ComputationGraph&) = delete;			   // Copy ctor
 	ComputationGraph(ComputationGraph&&) = delete;				   // Move ctor
 
+	~ComputationGraph() = default;
+
 	/**
 	 * @brief Gets status of the graph
 	 *
@@ -115,14 +117,14 @@ public:
 	 *
 	 * @param root Starting node - the back-propagation will occur relatively to it
 	 */
-	void computeGradients(NodePtr root);
+	void computeGradients(const NodePtr& root);
 
 	/**
 	 * @brief Adds new node to the graph.
 	 *
 	 * @param node Node to be added.
 	 */
-	void addNode(NodePtr node);
+	void addNode(const NodePtr& node);
 
 private:
 	void _sortNodes();

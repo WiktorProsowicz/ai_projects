@@ -21,9 +21,14 @@ public:
 	 *
 	 * @param stream Stream to pass to the base stream wrapper.
 	 */
-	explicit DecolorizingStream(const IStreamWrapperPtr& wrappedStream)
-		: _wrappedStream(wrappedStream)
+	explicit DecolorizingStream(IStreamWrapperPtr wrappedStream)
+		: _wrappedStream(std::move(wrappedStream))
 	{}
+
+	DecolorizingStream(const DecolorizingStream&) = default;
+	DecolorizingStream(DecolorizingStream&&) = default;
+	DecolorizingStream& operator=(const DecolorizingStream&) = default;
+	DecolorizingStream& operator=(DecolorizingStream&&) = default;
 
 	~DecolorizingStream() override = default; /// Default destructor.
 

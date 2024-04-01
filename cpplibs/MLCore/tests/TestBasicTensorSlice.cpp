@@ -24,7 +24,7 @@ class TestBasicTensorSlice : public ::testing::Test
 protected:
 	/// Makes tensor based on provided indices and checks if it is serialized correctly.
 	static ::testing::AssertionResult _correctlyPrints(const std::vector<std::pair<size_t, size_t>>& indices,
-													  const std::string& expectedSerialization)
+													   const std::string& expectedSerialization)
 	{
 		auto tensor = _spawnTestTensor323();
 		const auto slice = tensor.slice(indices);
@@ -44,8 +44,8 @@ protected:
 	/// consecutive `expectedValues` with the values referenced by the iterator.
 	static ::testing::AssertionResult
 	_incrementingIteratorProducesCorrectValues(mlCore::SlicedTensorIterator<double>& startIter,
-											  const size_t offset,
-											  const std::vector<double>& expectedValues)
+											   const ptrdiff_t offset,
+											   const std::vector<double>& expectedValues)
 	{
 		for(const auto& expectedValue : expectedValues)
 		{
@@ -63,7 +63,7 @@ protected:
 
 	/// Creates tensor slice according to `indices` and compares its values with `expectedValues`.
 	static ::testing::AssertionResult _spansCorrectValues(const mlCore::BasicTensorSlice<double>& slice,
-														 const std::vector<double>& expectedValues)
+														  const std::vector<double>& expectedValues)
 	{
 		for(auto [sliceIter, expIter, itemIdx] = std::tuple{slice.begin(), expectedValues.cbegin(), 0};
 			sliceIter < slice.end() && expIter < expectedValues.cend();
@@ -85,8 +85,8 @@ protected:
 	/// See incrementingIteratorProducesCorrectValues.
 	static ::testing::AssertionResult
 	_decrementingIteratorProducesCorrectValues(mlCore::SlicedTensorIterator<double>& startIter,
-											  const size_t offset,
-											  const std::vector<double>& expectedValues)
+											   const ptrdiff_t offset,
+											   const std::vector<double>& expectedValues)
 	{
 		for(const auto& expectedValue : expectedValues)
 		{
@@ -104,7 +104,7 @@ protected:
 
 	/// Checks if a given tensor has expected values.
 	static ::testing::AssertionResult _tensorHasExpectedValues(const mlCore::Tensor& tensor,
-															  const std::vector<double>& values)
+															   const std::vector<double>& values)
 	{
 		if(tensor.size() != values.size())
 		{
@@ -130,8 +130,8 @@ protected:
 	/// spanned tensor's values are the same as expected.
 	static ::testing::AssertionResult
 	_performsAssignmentProperly(const mlCore::SliceIndices& lhsIndices,
-							   const mlCore::BasicTensorSlice<double>& rhsSlice,
-							   const std::vector<double>& expectedValues)
+								const mlCore::BasicTensorSlice<double>& rhsSlice,
+								const std::vector<double>& expectedValues)
 	{
 		auto lhsTensor = _spawnTestTensor222();
 
@@ -243,8 +243,8 @@ TEST_F(TestBasicTensorSlice, IteratorIncrementsProperly)
 		{
 			auto sliceIter = slice.begin();
 
-			EXPECT_TRUE(
-				_incrementingIteratorProducesCorrectValues(sliceIter, 3, {12.12, 17.17, 20.20, 23.23, 26.26}));
+			EXPECT_TRUE(_incrementingIteratorProducesCorrectValues(
+				sliceIter, 3, {12.12, 17.17, 20.20, 23.23, 26.26}));
 		}
 	}
 
@@ -301,10 +301,10 @@ TEST_F(TestBasicTensorSlice, IteratorDecrementsProperly)
 TEST_F(TestBasicTensorSlice, SpansCorrectValues)
 {
 	EXPECT_TRUE(_spansCorrectValues(_spawnTestTensor325().slice({{0, 3}, {0, 2}, {1, 2}}),
-								   {2.2, 7.7, 12.12, 17.17, 22.22, 27.27}));
+									{2.2, 7.7, 12.12, 17.17, 22.22, 27.27}));
 
 	EXPECT_TRUE(_spansCorrectValues(_spawnTestTensor325().slice({{0, 2}, {1, 2}, {3, 5}}),
-								   {9.9, 10.10, 19.19, 20.20, 29.29, 30.30}));
+									{9.9, 10.10, 19.19, 20.20, 29.29, 30.30}));
 }
 
 TEST_F(TestBasicTensorSlice, IsSerializationCorrect)

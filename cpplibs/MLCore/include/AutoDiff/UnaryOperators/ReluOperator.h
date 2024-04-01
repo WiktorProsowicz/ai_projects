@@ -12,7 +12,7 @@ namespace mlCore::autoDiff::unaryOperators
 class ReluOperator final : public UnaryOperator
 {
 public:
-	ReluOperator(const NodePtr input)
+	explicit ReluOperator(const NodePtr& input)
 		: UnaryOperator(input){};
 
 	void updateValue() override;

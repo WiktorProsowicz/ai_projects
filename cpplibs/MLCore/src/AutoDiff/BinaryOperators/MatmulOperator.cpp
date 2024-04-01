@@ -1,5 +1,7 @@
 #include "AutoDiff/BinaryOperators/MatmulOperator.h"
 
+#include <utility>
+
 namespace mlCore::autoDiff::binaryOperators
 {
 void MatmulOperator::updateValue()

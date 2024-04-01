@@ -7,8 +7,8 @@
  **********************/
 
 #include <memory>
+#include <sstream>
 #include <string>
-#include <strstream>
 #include <vector>
 
 #include <StreamWrappers/BaseStreamWrapper.hpp>
@@ -84,9 +84,9 @@ TEST_F(TestStreamWrappers, testDecolorizingStream)
 	decolorizingStream->putCharString("\033[33m[ERROR][Unnamed] Message number 3\033[0m\n");
 
 	_checkHarvestedLogs(strStream.str(),
-					   {"[ WARN][Unnamed] Message number 1",
-						"[ INFO][Unnamed] Message number 2",
-						"[ERROR][Unnamed] Message number 3"});
+						{"[ WARN][Unnamed] Message number 1",
+						 "[ INFO][Unnamed] Message number 2",
+						 "[ERROR][Unnamed] Message number 3"});
 }
 
 } // namespace
