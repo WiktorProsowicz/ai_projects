@@ -30,7 +30,7 @@ pip install -r requirements.txt
 - install external C++ dependencies
 
 ```bash
-python project_setup.py install_dependencies --profile=setuputils/conan/profile_release.ini
+python project_setup.py install_dependencies --profile:build=setuputils/conan/profile_release.ini --profile:host=setuputils/conan/profile_release.ini
 ```
 
 - build C++ libs

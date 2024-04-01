@@ -3,3 +3,4 @@ build
 venv
 CMakeUserPresets.json
 **/__pycache__/**
+.mypy_cache

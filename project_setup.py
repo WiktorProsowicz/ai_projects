@@ -15,6 +15,8 @@ from os import path
 
 HOME_PATH = pathlib.Path(__file__).absolute().parent.as_posix()
 
+logging.getLogger().setLevel(logging.NOTSET)
+
 def setup_venv():
     """Sets up the virtual environment."""
 

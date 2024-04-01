@@ -18,7 +18,9 @@
 				"mhutchie.git-graph",
 				"ms-python.autopep8",
 				"xaver.clang-format",
-				"brobeson.ctest-lab"
+				"brobeson.ctest-lab",
+				"ms-python.pylint",
+				"eamodio.gitlens"
 			]
 		}
 	}
