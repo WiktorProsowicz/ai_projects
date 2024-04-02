@@ -3,7 +3,9 @@
 {
 	"name": "Ubuntu 22.04",
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	"build": { "dockerfile": "Dockerfile" },
+	"build": { "dockerfile": "Dockerfile", "options": [
+		"-t", "ai_projects-devcontainer"
+	] },
 	"customizations": {
 		"vscode": {
 			"extensions": [
@@ -20,7 +22,8 @@
 				"xaver.clang-format",
 				"brobeson.ctest-lab",
 				"ms-python.pylint",
-				"eamodio.gitlens"
+				"eamodio.gitlens",
+				"ms-vscode.cpptools-themes"
 			]
 		}
 	}

@@ -17,4 +17,4 @@ RUN apt update && \
     add-apt-repository -y ppa:deadsnakes/ppa && \
     # Main dependencies
     apt update && apt install -y \
-        python3.12 python3.12-venv gcc-12 g++-12
+        python3.12 python3.12-venv gcc-12 g++-12 git make
