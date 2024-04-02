@@ -51,7 +51,7 @@ def _run_clang_tidy():
     )
 
     subprocess.run(['clang-tidy', *tidy_args,
-                   *files_to_check], check=True)
+                    *files_to_check], check=True)
 
 
 def setup_venv():
@@ -188,13 +188,13 @@ def run_repository_checks():
 
         logging.info('Running pre-commit hooks.')
 
-        # subprocess.run(['pre-commit', 'run', '--all-files'], check=True)
+        subprocess.run(['pre-commit', 'run', '--all-files'], check=True)
 
         logging.info('Running clang-tidy checks.')
 
         _run_clang_tidy()
 
-    except subprocess.CalledProcessError:
+    except Exception:  # pylint: disable=broad-exception-caught
         logging.critical('Static checks failed!')
 
 
@@ -226,7 +226,7 @@ def _get_arg_parser() -> argparse.ArgumentParser:
         return ''
 
     functions_descriptions = '\n'.join(
-        [f"{func.__name__}: {get_basic_doc(func)}" for func in [
+        [f'{func.__name__}: {get_basic_doc(func)}' for func in [
             setup_venv, build_project, clean_project,
             install_dependencies, run_unit_tests, run_repository_checks]]
     )
@@ -234,7 +234,7 @@ def _get_arg_parser() -> argparse.ArgumentParser:
     program_desc = (
         'Script contains functions helping with project management.\n'
         + 'Available functions:\n\n'
-        + f"{functions_descriptions}"
+        + f'{functions_descriptions}'
     )
 
     arg_parser = argparse.ArgumentParser(

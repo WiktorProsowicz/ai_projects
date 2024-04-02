@@ -1,3 +1,4 @@
+---
 Checks: >
   boost-use-to-string,
   bugprone-branch-clone,
@@ -70,11 +71,11 @@ Checks: >
   -readability-redundant-member-init,
   -readability-redundant-casting
 
-WarningsAsErrors: "*"
-HeaderFilterRegex: ".*"
+WarningsAsErrors: '*'
+HeaderFilterRegex: .*
 FormatStyle: none
-HeaderFileExtensions: ['', 'h','hh','hpp','hxx']
-ImplementationFileExtensions: ['c','cc','cpp','cxx']
+HeaderFileExtensions: ['', h, hh, hpp, hxx]
+ImplementationFileExtensions: [c, cc, cpp, cxx]
 
 # https://releases.llvm.org/16.0.0/tools/clang/tools/extra/docs/clang-tidy/checks/readability/identifier-naming.html
 CheckOptions:
@@ -85,7 +86,7 @@ CheckOptions:
   - key: readability-identifier-naming.ClassHungarianPrefix
     value: Off
   - key: readability-identifier-naming.ClassIgnoredRegexp
-    value: ""
+    value: ''
   - key: readability-identifier-naming.IgnoreFailedSplit
     value: Off
   - key: readability-identifier-naming.GetConfigPerFile
@@ -95,9 +96,9 @@ CheckOptions:
   - key: readability-identifier-naming.ClassCase
     value: CamelCase
   - key: readability-identifier-naming.ClassPrefix
-    value: ""
+    value: ''
   - key: readability-identifier-naming.ClassSuffix
-    value: ""
+    value: ''
   - key: readability-identifier-naming.NamespaceCase
     value: camelBack
   - key: readability-identifier-naming.TypedefCase
@@ -139,10 +140,10 @@ CheckOptions:
   - key: readability-identified-naming.TemplateParameterCase
     value: CamelCase
   - key: readability-identifier-naming.ProtectedMethodPrefix
-    value: "_"
+    value: _
   - key: readability-identifier-naming.PrivateMethodPrefix
-    value: "_"
+    value: _
   - key: readability-identifier-naming.ProtectedMemberPrefix
-    value: "_"
+    value: _
   - key: readability-identifier-naming.PrivateMemberPrefix
-    value: "_"
+    value: _

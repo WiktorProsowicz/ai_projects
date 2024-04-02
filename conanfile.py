@@ -1,11 +1,12 @@
 """Contains class responsible for managing project C++ dependencies.
 
 This file is used from the Conan executable level. For more info, see
-project_setup.py::install_dependencies. 
+project_setup.py::install_dependencies.
 """
+# mypy: ignore-errors
 import os
 
-import conan  # type: ignore, pylint: disable=import-error
+import conan  # pylint: disable=import-error
 
 
 class AiProjectsRecipe(conan.ConanFile):
@@ -15,7 +16,7 @@ class AiProjectsRecipe(conan.ConanFile):
         options: Parameters telling how a single dependencies installing should be
             performed. Available options are:
                 - setup_mode: Indicates whether the dependencies are being installed
-                by a normal user or by a developer (In this case additional libs are required).  
+                by a normal user or by a developer (In this case additional libs are required).
     """
 
     name = 'ai_projects'
