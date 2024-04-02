@@ -7,7 +7,6 @@
 
 FROM ubuntu:22.04
 WORKDIR /app
-COPY . .
 ARG DEBIAN_FRONTEND=noninteractive
 
 # Installing the main packages required for a new project's user
@@ -19,8 +18,3 @@ RUN apt update && \
     # Main dependencies
     apt update && apt install -y \
         python3.12 python3.12-venv gcc-12 g++-12
-
-# Installing the internal project's dependencies
-RUN python3.12 project_setup.py setup_venv && \
-    source venv/bin/activate && \
-    pip install -r requirements.txt &&
