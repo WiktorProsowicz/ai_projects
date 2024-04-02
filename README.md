@@ -23,7 +23,6 @@ source venv/bin/activate
 - install primary dependencies for either python scripts or project management
 
 ```bash
-
 pip install -r requirements.txt
 ```
 
@@ -33,7 +32,7 @@ pip install -r requirements.txt
 python project_setup.py install_dependencies -o setup_mode=release
 ```
 
-- build C++ libs
+- build C++ libs (the default configuration uses `Unix Makefiles` generator, therefore ensure you have `make` installed)
 
 ```bash
 # optionally clean the project in order to change the build configuration
@@ -60,4 +59,34 @@ pre-commit install
 
 # alternatively run pre-commit once on every file
 pre-commit run --all-files [hook_id]
+```
+
+
+### Run in container
+
+An alternative way to use the project functionalities is by setting up a Docker container. This provides a stable project configuration and allows to run repository check pipelines, develop inside a container and run internal project scripts. This functionality assumes you have the Docker installed.
+
+- build a Docker image from the defined Dockerfile
+
+```bash
+docker build -t ai_projects-release .
+```
+
+- instantiate a machine from the built image
+
+```bash
+docker run -dit --name=ai_projects-release-container ai_projects-release
+```
+
+- perform basic setup inside the repository
+
+```bash
+docker exec -it ai_projects-release-container /bin/bash
+
+# inside the container
+git clone https://github.com/WiktorProsowicz/ai_projects.git ai_projects && cd ai_projects && [git checkout SHA]
+python3.12 project_setup.py setup_venv && source venv/bin/activate
+pip install -r requirements.txt
+python project_setup.py install_dependencies -o setup_mode=release
+python project_setup.py build_project -DCMAKE_BUILD_TYPE=Release
 ```
