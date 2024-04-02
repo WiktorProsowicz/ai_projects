@@ -1,7 +1,7 @@
 ---
 BasedOnStyle: WebKit
 AccessModifierOffset: -4
-AlignAfterOpenBracket: true
+AlignAfterOpenBracket: Align
 AlignArrayOfStructures: None
 AlignConsecutiveAssignments:
   Enabled: false
@@ -103,7 +103,25 @@ ForEachMacros:
   - BOOST_FOREACH
 IfMacros:
   - KJ_IF_MAYBE
-IncludeBlocks: Preserve
+SortIncludes: CaseSensitive
+IncludeBlocks: Regroup
+IncludeCategories:
+  # Headers in <> without extension.
+  - Regex: <([A-Za-z0-9\Q/-_\E])+>
+    Priority: 2
+    SortPriority: 2
+  # Headers in <> from specific external libraries.
+  - Regex: <(catch2|boost)\/
+    Priority: 1
+    SortPriority: 1
+  # Headers in <> with extension.
+  - Regex: <([A-Za-z0-9.\Q/-_\E])+>
+    Priority: 3
+    SortPriority: 3
+  # Headers in "" with extension.
+  - Regex: '"([A-Za-z0-9.\Q/-_\E])+"'
+    Priority: 4
+    SortPriority: 4
 IncludeIsMainRegex: (Test)?$
 IncludeIsMainSourceRegex: ''
 IndentAccessModifiers: false
@@ -145,7 +163,7 @@ PPIndentWidth: -1
 PackConstructorInitializers: BinPack
 PenaltyBreakAssignment: 2
 PenaltyBreakBeforeFirstCallParameter: 19
-PenaltyBreakComment: 300
+PenaltyBreakComment: 120
 PenaltyBreakFirstLessLess: 120
 PenaltyBreakOpenParenthesis: 0
 PenaltyBreakString: 1000
@@ -156,7 +174,7 @@ PenaltyReturnTypeOnItsOwnLine: 60
 PointerAlignment: Left
 QualifierAlignment: Leave
 ReferenceAlignment: Pointer
-ReflowComments: false
+ReflowComments: true
 RemoveBracesLLVM: false
 RemoveParentheses: Leave
 RemoveSemicolon: false
@@ -164,7 +182,6 @@ RequiresClausePosition: WithPreceding
 RequiresExpressionIndentation: OuterScope
 SeparateDefinitionBlocks: Always
 ShortNamespaceLines: 1
-SortIncludes: false
 SortJavaStaticImport: Before
 SortUsingDeclarations: true
 SpaceAfterCStyleCast: false

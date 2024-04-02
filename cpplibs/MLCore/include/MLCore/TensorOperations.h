@@ -1,18 +1,16 @@
 #ifndef MLCORE_INCLUDE_MLCORE_TENSOROPERATIONS_H
 #define MLCORE_INCLUDE_MLCORE_TENSOROPERATIONS_H
 
-// __C++ standard headers__
 #include <cmath>
 
-// __Own software headers__
-#include <MLCore/BasicTensor.h>
-#include <MLCore/Utilities.h>
+#include "MLCore/BasicTensor.h"
+#include "MLCore/Utilities.h"
 
 namespace mlCore
 {
 /**
- * @brief Set of both binary and unary operators for tensors 
- * 
+ * @brief Set of both binary and unary operators for tensors
+ *
  */
 template <typename ValueType>
 class BasicTensorOperations
@@ -32,7 +30,7 @@ public:
 
 	/**
 	 * @brief Creates tensor from compile-time nested initializer list form.
-	 * 
+	 *
 	 * @param tensorForm Literal-like tensor values having the desired tensor's shape.
 	 * @return Tensor created from the given `tensorForm`.
 	 */

@@ -1,20 +1,19 @@
 #include <vector>
 
-#include <gtest/gtest.h>
-
-#include <Models/ILayer.hpp>
 #include <Models/Callback.hpp>
+#include <Models/ILayer.hpp>
 #include <Models/IMeasurable.hpp>
 #include <Models/IMetric.hpp>
 #include <Models/IOptimizer.hpp>
+#include <gtest/gtest.h>
 
 namespace
 {
 
 /*********************************************
- * 
+ *
  * Classes implementing the tested interfaces
- * 
+ *
  *********************************************/
 
 /// Test class for checking ILayer code building
@@ -22,6 +21,12 @@ class TestLayer : public mlCore::models::ILayer
 {
 public:
 	TestLayer() = default;
+
+	TestLayer(const TestLayer&) = default;
+	TestLayer(TestLayer&&) = default;
+	TestLayer& operator=(const TestLayer&) = default;
+	TestLayer& operator=(TestLayer&&) = default;
+
 	~TestLayer() override = default;
 
 	mlCore::autoDiff::NodePtr build() override
@@ -55,6 +60,12 @@ class TestOptimizer : public mlCore::models::IOptimizer
 {
 public:
 	TestOptimizer() = default;
+
+	TestOptimizer(const TestOptimizer&) = default;
+	TestOptimizer(TestOptimizer&&) = default;
+	TestOptimizer& operator=(const TestOptimizer&) = default;
+	TestOptimizer& operator=(TestOptimizer&&) = default;
+
 	~TestOptimizer() override = default;
 
 	void applyGradient(mlCore::autoDiff::NodePtr weight, mlCore::Tensor derivative) override
@@ -68,27 +79,35 @@ class TestMeasurable : public mlCore::models::IMeasurable
 {
 public:
 	TestMeasurable() = default;
+
+	TestMeasurable(const TestMeasurable&) = default;
+	TestMeasurable(TestMeasurable&&) = default;
+	TestMeasurable& operator=(const TestMeasurable&) = default;
+	TestMeasurable& operator=(TestMeasurable&&) = default;
+
 	~TestMeasurable() override = default;
 
 	void registerMetric(mlCore::models::IMetricPtr metric) override
 	{
-		metrics_.push_back(metric);
+		_metrics.push_back(metric);
 	}
 
 	void unregisterMetric(mlCore::models::IMetricPtr metric) override
 	{
-		metrics_.erase(std::remove_if(metrics_.begin(), metrics_.end(), [&metric](const auto met) { return met == metric; }),
-					   metrics_.end());
+		_metrics.erase(std::remove_if(_metrics.begin(),
+									  _metrics.end(),
+									  [&metric](const auto met) { return met == metric; }),
+					   _metrics.end());
 	}
 
 	bool hasMetric(std::shared_ptr<mlCore::models::IMetric> metric) const override
 	{
-		return std::find(metrics_.cbegin(), metrics_.cend(), metric) != metrics_.end();
+		return std::find(_metrics.cbegin(), _metrics.cend(), metric) != _metrics.end();
 	}
 
 	void notifyMetrics() override
 	{
-		for(auto metric : metrics_)
+		for(const auto& metric : _metrics)
 		{
 			auto context = std::make_shared<mlCore::models::MetricContext>();
 
@@ -102,7 +121,7 @@ public:
 	}
 
 private:
-	std::vector<mlCore::models::IMetricPtr> metrics_{};
+	std::vector<mlCore::models::IMetricPtr> _metrics;
 };
 
 /// Test class for checking IMetric code building
@@ -110,9 +129,15 @@ class TestMetric : public mlCore::models::IMetric
 {
 public:
 	TestMetric() = default;
+
+	TestMetric(const TestMetric&) = default;
+	TestMetric(TestMetric&&) = default;
+	TestMetric& operator=(const TestMetric&) = default;
+	TestMetric& operator=(TestMetric&&) = default;
+
 	~TestMetric() override = default;
 
-	void notify(mlCore::models::MetricContextPtr) override
+	void notify(mlCore::models::MetricContextPtr /*context*/) override
 	{
 		notified = true;
 	}
@@ -125,28 +150,34 @@ class TestCallback : public mlCore::models::Callback
 {
 public:
 	TestCallback() = default;
+
+	TestCallback(const TestCallback&) = default;
+	TestCallback(TestCallback&&) = default;
+	TestCallback& operator=(const TestCallback&) = default;
+	TestCallback& operator=(TestCallback&&) = default;
+
 	~TestCallback() override = default;
 
-	void call() override { }
+	void call() override {}
 };
 
 /*************
- * 
+ *
  * Test cases
- * 
+ *
  *************/
 
 TEST(TestModels, testTestLayer)
 {
-	TestLayer layer;
+	const TestLayer layer;
 }
 
 TEST(TestModels, testTestOptimizer)
 {
-	mlCore::models::IOptimizerPtr optimizer = std::make_shared<TestOptimizer>();
+	const mlCore::models::IOptimizerPtr optimizer = std::make_shared<TestOptimizer>();
 
 	auto node = std::make_shared<mlCore::autoDiff::Node>(mlCore::Tensor(std::vector<size_t>{}));
-	mlCore::Tensor tensor({}, 0);
+	const mlCore::Tensor tensor({}, 0);
 
 	optimizer->applyGradient(node, tensor);
 }

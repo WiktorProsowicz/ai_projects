@@ -1,11 +1,15 @@
-// __Related headers__
-#include <LoggingLib/Logger.h>
+#include "LoggingLib/Logger.h"
 
-// __C++ standard headers__
+#include <iostream>
+#include <memory>
 #include <mutex>
+#include <ostream>
+#include <stdexcept>
+#include <string>
 
-// __External headers__
-#include <fmt/format.h>
+#include <fmt/core.h>
+
+#include "StreamWrappers/BaseStreamWrapper.hpp"
 
 namespace loggingLib
 {
@@ -18,17 +22,17 @@ Logger& Logger::getInstance()
 
 void Logger::logInfoOnChannel(const char* channelName, const char* logContent)
 {
-	logOnChannel(LogType::INFO, channelName, logContent);
+	_logOnChannel(LogType::INFO, channelName, logContent);
 }
 
 void Logger::logWarnOnChannel(const char* channelName, const char* logContent)
 {
-	logOnChannel(LogType::WARN, channelName, logContent);
+	_logOnChannel(LogType::WARN, channelName, logContent);
 }
 
 void Logger::logErrorOnChannel(const char* channelName, const char* logContent)
 {
-	logOnChannel(LogType::ERROR, channelName, logContent);
+	_logOnChannel(LogType::ERROR, channelName, logContent);
 }
 
 void Logger::setDefaultStream(std::ostream& stream)
@@ -36,11 +40,11 @@ void Logger::setDefaultStream(std::ostream& stream)
 	setDefaultStream(std::make_shared<streamWrappers::BaseStreamWrapper>(stream));
 }
 
-void Logger::setDefaultStream(const streamWrappers::IStreamWrapperPtr stream)
+void Logger::setDefaultStream(const streamWrappers::IStreamWrapperPtr& stream)
 {
-	std::lock_guard lock(streamingMutex_);
+	const std::lock_guard lock(_streamingMutex);
 
-	defaultStream_ = stream;
+	_defaultStream = stream;
 }
 
 void Logger::setNamedChannelStream(const std::string& name, std::ostream& stream)
@@ -50,25 +54,25 @@ void Logger::setNamedChannelStream(const std::string& name, std::ostream& stream
 
 void Logger::setNamedChannelStream(const std::string& name, streamWrappers::IStreamWrapperPtr stream)
 {
-	std::lock_guard lock(streamingMutex_);
+	const std::lock_guard lock(_streamingMutex);
 
-	if(namedStreamsMap_.contains(name))
+	if(_namedStreamsMap.contains(name))
 	{
-		namedStreamsMap_.at(name) = stream;
+		_namedStreamsMap.at(name) = stream;
 	}
 	else
 	{
-		namedStreamsMap_.emplace(name, stream);
+		_namedStreamsMap.emplace(name, stream);
 	}
 }
 
-void Logger::logOnChannel(LogType logType, const char* channelName, const char* logContent)
+void Logger::_logOnChannel(const LogType logType, const char* channelName, const char* logContent)
 {
 	{
-		std::lock_guard lock(streamingMutex_);
+		const std::lock_guard lock(_streamingMutex);
 
-		streamWrappers::IStreamWrapperPtr chosenStream =
-			namedStreamsMap_.contains(channelName) ? namedStreamsMap_.at(channelName) : defaultStream_;
+		const streamWrappers::IStreamWrapperPtr chosenStream =
+			_namedStreamsMap.contains(channelName) ? _namedStreamsMap.at(channelName) : _defaultStream;
 
 		const auto* frame = colorfulFramesMap.at(logType);
 
@@ -95,7 +99,7 @@ void Logger::reset()
 {
 	setDefaultStream(std::cout);
 
-	namedStreamsMap_.clear();
+	_namedStreamsMap.clear();
 }
 
 } // namespace loggingLib

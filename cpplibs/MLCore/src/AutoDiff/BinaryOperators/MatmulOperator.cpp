@@ -1,10 +1,12 @@
-#include <AutoDiff/BinaryOperators/MatmulOperator.h>
+#include "AutoDiff/BinaryOperators/MatmulOperator.h"
+
+#include <utility>
 
 namespace mlCore::autoDiff::binaryOperators
 {
 void MatmulOperator::updateValue()
 {
-	value_ = lhsInput_->getValue().matmul(rhsInput_->getValue());
+	_value = _lhsInput->getValue().matmul(_rhsInput->getValue());
 }
 
 std::pair<Tensor, Tensor> MatmulOperator::computeDerivative(const Tensor& outerDerivative) const
@@ -22,8 +24,9 @@ std::pair<Tensor, Tensor> MatmulOperator::computeDirectDerivative() const
 	const auto& leftValue = leftInputNode->getValue();
 	const auto& rightValue = rightInputNode->getValue();
 
-	const Tensor onesWithOutputShape(value_.shape(), 1.0);
+	const Tensor onesWithOutputShape(_value.shape(), 1.0);
 
-	return {onesWithOutputShape.matmul(rightValue.transposed()), leftValue.transposed().matmul(onesWithOutputShape)};
+	return {onesWithOutputShape.matmul(rightValue.transposed()),
+			leftValue.transposed().matmul(onesWithOutputShape)};
 }
 } // namespace mlCore::autoDiff::binaryOperators

@@ -1,10 +1,12 @@
-#include <AutoDiff/BinaryOperators/DivideOperator.h>
+#include "AutoDiff/BinaryOperators/DivideOperator.h"
+
+#include <utility>
 
 namespace mlCore::autoDiff::binaryOperators
 {
 void DivideOperator::updateValue()
 {
-	value_ = lhsInput_->getValue() / rhsInput_->getValue();
+	_value = _lhsInput->getValue() / _rhsInput->getValue();
 }
 
 std::pair<Tensor, Tensor> DivideOperator::computeDerivative(const Tensor& outerDerivative) const

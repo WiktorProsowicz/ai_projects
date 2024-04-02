@@ -1,11 +1,12 @@
-#include <AutoDiff/UnaryOperators/LnOperator.h>
-#include <MLCore/TensorOperations.h>
+#include "AutoDiff/UnaryOperators/LnOperator.h"
+
+#include "MLCore/TensorOperations.h"
 
 namespace mlCore::autoDiff::unaryOperators
 {
 void LnOperator::updateValue()
 {
-	value_ = TensorOperations::ln(input_->getValue());
+	_value = TensorOperations::ln(_input->getValue());
 }
 
 Tensor LnOperator::computeDerivative(const Tensor& outerDerivative) const
@@ -15,7 +16,7 @@ Tensor LnOperator::computeDerivative(const Tensor& outerDerivative) const
 
 Tensor LnOperator::computeDirectDerivative() const
 {
-	auto inputCopy = input_->getValue();
+	auto inputCopy = _input->getValue();
 
 	for(auto& val : inputCopy)
 	{

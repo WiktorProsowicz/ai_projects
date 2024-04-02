@@ -1,8 +1,6 @@
 #ifndef MLCORE_SRC_INCLUDE_MLCORE_TENSOROPERATIONSIMPL_H
 #define MLCORE_SRC_INCLUDE_MLCORE_TENSOROPERATIONSIMPL_H
 
-// #include <MLCore/BasicTensor.h>
-
 namespace mlCore
 {
 

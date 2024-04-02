@@ -2,7 +2,9 @@
 # Contains libraries crucial for the project development, in particular:
 # - CI workflow related libs
 # - Testing tools
-# - Linting and static analysis tools to be integrated with IDE 
+# - Linting and static analysis tools to be integrated with IDE
 # ----------------------------------------------------------------------
 
+clang-tidy==18.1.1
 pre-commit==3.6.2
+pylint==3.1.0

@@ -1,19 +1,19 @@
 #ifndef AUTODIFF_GRAPHOPERATIONS_H
 #define AUTODIFF_GRAPHOPERATIONS_H
 
-#include <AutoDiff/ComputationGraph.h>
-#include <AutoDiff/GraphNodes.hpp>
+#include "AutoDiff/ComputationGraph.h"
+#include "AutoDiff/GraphNodes.hpp"
 
 /**
  * @brief Algorithms operating on GraphNodes.
-*/
+ */
 namespace mlCore::autoDiff
 {
 
-/// Concept for functions taking any number of shared pointers of types inheriting from Node and returning analogous type
+/// Concept for functions taking any number of shared pointers of types inheriting from Node and returning
+/// analogous type
 template <typename Operation, typename... NodePtrs>
-concept NodeOperation = requires(NodePtrs... inputNodes, Operation oper)
-{
+concept NodeOperation = requires(NodePtrs... inputNodes, Operation oper) {
 	// input types are shared pointers
 	(... && std::is_same_v<std::shared_ptr<decltype(*inputNodes)>, decltype(inputNodes)>);
 
@@ -28,8 +28,9 @@ concept NodeOperation = requires(NodePtrs... inputNodes, Operation oper)
 };
 
 /**
- * @brief Performs given operation on input nodes returning NodePtr and adds the result to ComputationGraph if provided. 
- * 
+ * @brief Performs given operation on input nodes returning NodePtr and adds the result to ComputationGraph if
+ * provided.
+ *
  * @param operation Operation complying with NodeOperation concept.
  * @param graph Pointer to computation graph instance to which the result will be added.
  * @param inputNodes Arguments for `operation`.
@@ -37,7 +38,7 @@ concept NodeOperation = requires(NodePtrs... inputNodes, Operation oper)
  */
 template <typename Operation, typename... NodePtrs>
 NodePtr performAndAdd(Operation operation,
-					  std::shared_ptr<ComputationGraph> graph,
+					  const std::shared_ptr<ComputationGraph>& graph,
 					  NodePtrs... inputNodes) requires NodeOperation<Operation, NodePtrs...>
 {
 	auto result = operation(inputNodes...);
@@ -53,25 +54,25 @@ NodePtr performAndAdd(Operation operation,
 namespace binaryOperations
 {
 
-NodePtr multiply(NodePtr lNode, NodePtr rNode);
-NodePtr add(NodePtr lNode, NodePtr rNode);
-NodePtr subtract(NodePtr lNode, NodePtr rNode);
-NodePtr divide(NodePtr lNode, NodePtr rNode);
-NodePtr matmul(NodePtr lNode, NodePtr rNode);
-NodePtr power(NodePtr baseNode, NodePtr factorNode);
+NodePtr multiply(const NodePtr& lNode, const NodePtr& rNode);
+NodePtr add(const NodePtr& lNode, const NodePtr& rNode);
+NodePtr subtract(const NodePtr& lNode, const NodePtr& rNode);
+NodePtr divide(const NodePtr& lNode, const NodePtr& rNode);
+NodePtr matmul(const NodePtr& lNode, const NodePtr& rNode);
+NodePtr power(const NodePtr& baseNode, const NodePtr& factorNode);
 
 } // namespace binaryOperations
 
 namespace unaryOperations
 {
-NodePtr ln(NodePtr node);
+NodePtr ln(const NodePtr& node);
 } // namespace unaryOperations
 
 namespace nodesActivations
 {
 
-NodePtr relu(NodePtr node);
-NodePtr sigmoid(NodePtr node);
+NodePtr relu(const NodePtr& node);
+NodePtr sigmoid(const NodePtr& node);
 
 } // namespace nodesActivations
 } // namespace mlCore::autoDiff

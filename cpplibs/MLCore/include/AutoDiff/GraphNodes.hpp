@@ -1,12 +1,13 @@
 #ifndef MLCORE_GRAPHNODES_H
 #define MLCORE_GRAPHNODES_H
 
-#include <MLCore/BasicTensor.h>
 #include <memory>
+
+#include "MLCore/BasicTensor.h"
 
 /**
  * @brief Classes representing nodes in ComputationGraphs. Nodes hold tensors and can be linked to each other.
- * 
+ *
  */
 namespace mlCore::autoDiff
 {
@@ -23,78 +24,83 @@ using ConstantPtr = std::shared_ptr<Constant>;
 
 /**
  * @brief Mother class of computation graph nodes.
- * 
+ *
  */
 class Node
 {
 public:
 	Node() = delete;
-	Node(const Tensor& tensor)
-		: index_(nodesCount_++)
-		, value_(tensor){};
+	explicit Node(Tensor tensor)
+		: _index(nodesCount_++)
+		, _value(std::move(tensor)){};
+
+	Node(const Node&) = default;
+	Node(Node&&) = default;
+	Node& operator=(const Node&) = default;
+	Node& operator=(Node&&) = default;
 
 	virtual ~Node() = default;
 
 	Tensor& getValue()
 	{
-		return value_;
+		return _value;
 	}
 
 	const uint64_t& getIndex() const
 	{
-		return index_;
+		return _index;
 	}
 
 	const std::string& getName() const
 	{
-		return name_;
+		return _name;
 	}
 
 	void setName(const std::string& name)
 	{
-		name_ = name;
+		_name = name;
 	}
 
 protected:
-	uint64_t index_;
+	uint64_t _index;
 	static inline uint64_t nodesCount_ = 0;
-	Tensor value_;
-	std::string name_ = "";
+	Tensor _value;
+	std::string _name{};
 };
 
 /**
  * @brief A class to be inserted as i.e. weight matrix, bias etc
- * 
+ *
  */
 class Variable : public Node
 {
 public:
 	Variable()
 		: Node(std::vector<size_t>{}){};
-	Variable(const Tensor& tensor)
+	explicit Variable(const Tensor& tensor)
 		: Node(tensor){};
 };
 
 /**
  * @brief Its value cannot be assigned, changed. Computed derivative is always zero.
- * 
+ *
  */
 class Constant : public Node
 {
 public:
 	Constant() = delete;
-	Constant(const Tensor& tensor)
+	explicit Constant(const Tensor& tensor)
 		: Node(tensor){};
 };
 
 /**
  * @brief Created to provide proper semantics for graph element holding external data.
- * 
+ *
  */
 class Placeholder : public Node
 {
 public:
-	Placeholder(const std::vector<size_t>& shape = {})
+	explicit Placeholder(const std::vector<size_t>& shape = {})
 		: Node(shape){};
 };
 

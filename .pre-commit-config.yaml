@@ -12,27 +12,16 @@ repos:
       - id: check-shebang-scripts-are-executable
       - id: detect-private-key
       - id: double-quote-string-fixer
-      - id: end-of-file-fixer
       - id: forbid-submodules
-      - id: trailing-whitespace
       - id: requirements-txt-fixer
-
-  # C++ related hooks
-  - repo: https://github.com/pocc/pre-commit-hooks
-    rev: v1.3.5
-    hooks:
-      - id: clang-tidy
-        args: [--config-file=setuputils/.clang-tidy, -p=build]
-      - id: cppcheck
-      - id: cpplint
-        args: ['--filter=-whitespace/tab,-whitespace/braces,-whitespace/comments,-whitespace/indent,-whitespace/line_length,-readability/braces,-build/include_order']
 
   # Ensures C++/C files are formatted using clang-format
   - repo: https://github.com/pre-commit/mirrors-clang-format
     rev: v17.0.6
     hooks:
       - id: clang-format
-        args: [-style=file:setuputils/.clang-format]
+        args:
+          - -style=file:setuputils/.clang-format
         types_or: [c++, c]
 
   # Ensures Python files are formatted using autopep8 formatter
@@ -47,6 +36,7 @@ repos:
     rev: v1.8.0
     hooks:
       - id: mypy
+        args: [--explicit-package-bases, --python-executable, venv/bin/python]
 
   # Ensures python files are written using modern syntax
   - repo: https://github.com/asottile/pyupgrade
@@ -61,8 +51,7 @@ repos:
       - id: reorder-python-imports
 
   # Ensures python files pass pylint checks
-  - repo: https://github.com/pycqa/pylint
-    rev: v3.1.0
+  - repo: local
     hooks:
       - id: pylint
         name: pylint

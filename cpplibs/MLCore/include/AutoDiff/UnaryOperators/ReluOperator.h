@@ -1,18 +1,18 @@
 #ifndef UNARYOPERATORS_RELUOPERATOR_H
 #define UNARYOPERATORS_RELUOPERATOR_H
 
-#include <AutoDiff/UnaryOperators/UnaryOperator.h>
+#include "AutoDiff/UnaryOperators/UnaryOperator.h"
 
 namespace mlCore::autoDiff::unaryOperators
 {
 /**
  * @brief ReluOperator represents REctified Linear Unit tensor operation
- * 
+ *
  */
 class ReluOperator final : public UnaryOperator
 {
 public:
-	ReluOperator(const NodePtr input)
+	explicit ReluOperator(const NodePtr& input)
 		: UnaryOperator(input){};
 
 	void updateValue() override;

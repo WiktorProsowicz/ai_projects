@@ -1,28 +1,26 @@
 /**********************
  * Test suite for 'ai_projects'
- * 
+ *
  * Copyright (c) 2023
- * 
+ *
  * by Wiktor Prosowicz
  **********************/
 
-#include <MLCore/BasicTensor.h>
-
 #include <iostream>
 
-#include <gtest/gtest.h>
-#include <fmt/format.h>
-
 #include <LoggingLib/LoggingLib.hpp>
+#include <MLCore/BasicTensor.h>
 #include <MLCore/TensorInitializers/RangeTensorInitializer.hpp>
+#include <fmt/format.h>
+#include <gtest/gtest.h>
 
 namespace
 {
 
 /*****************************
- * 
+ *
  * Test Fixture
- * 
+ *
  *****************************/
 
 class TestBasicTensor : public testing::Test
@@ -30,11 +28,11 @@ class TestBasicTensor : public testing::Test
 protected:
 	/**
 	 * @brief Checks if tensor objects have equal contents
-	 * 
-	 * @param tensor1 
-	 * @param tensor2 
+	 *
+	 * @param tensor1
+	 * @param tensor2
 	 */
-	static void checkTensorEquality(const mlCore::Tensor& tensor1, const mlCore::Tensor& tensor2)
+	static void _checkTensorEquality(const mlCore::Tensor& tensor1, const mlCore::Tensor& tensor2)
 	{
 		ASSERT_EQ(tensor1.nDimensions(), tensor2.nDimensions());
 		ASSERT_EQ(tensor1.size(), tensor2.size());
@@ -50,10 +48,10 @@ protected:
 
 	/**
 	 * @brief Checks if given tensor is a dead empty object
-	 * 
-	 * @param tensor Checked object that is expected to behave as if its content has been moved 
+	 *
+	 * @param tensor Checked object that is expected to behave as if its content has been moved
 	 */
-	static void isTensorEmpty(const mlCore::Tensor& tensor)
+	static void _isTensorEmpty(const mlCore::Tensor& tensor)
 	{
 		// NOLINTBEGIN(clang-analyzer-cplusplus.Move)
 		ASSERT_EQ(tensor.shape(), std::vector<size_t>{});
@@ -64,11 +62,11 @@ protected:
 
 	/**
 	 * @brief Checks whether the given tensor has expected values.
-	 * 
+	 *
 	 * @param tensor Tensor object whose values are checked
 	 * @param values Expected values that the tensor should contain
 	 */
-	static void checkTensorValues(const mlCore::Tensor& tensor, const std::vector<double>& values)
+	static void _checkTensorValues(const mlCore::Tensor& tensor, const std::vector<double>& values)
 	{
 		ASSERT_EQ(tensor.size(), values.size());
 
@@ -85,16 +83,17 @@ protected:
 };
 
 /*****************************
- * 
+ *
  * Particular test calls
- * 
+ *
  *****************************/
 
 TEST_F(TestBasicTensor, testConstructorWithShape)
 {
 
 	constexpr uint8_t nTestCases = 5;
-	const std::vector<std::vector<uint64_t>> shapes{{1, 1, 2, 3, 4}, {50, 2, 50}, {3, 5, 3, 1, 3, 5, 6, 7, 5, 3, 2}, {1}, {}};
+	const std::vector<std::vector<uint64_t>> shapes{
+		{1, 1, 2, 3, 4}, {50, 2, 50}, {3, 5, 3, 1, 3, 5, 6, 7, 5, 3, 2}, {1}, {}};
 	const std::vector<uint64_t> sizes{24, 5000, 850500, 1, 1};
 
 	for(uint8_t i = 0; i < nTestCases; i++)
@@ -129,10 +128,11 @@ TEST_F(TestBasicTensor, testFillingTensor)
 {
 	// properly filled tensor
 	mlCore::Tensor tensorProperlyFilled(std::vector<size_t>{1, 2, 3, 4});
-	const std::vector<double> values{{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}};
+	const std::vector<double> values{
+		{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}};
 	tensorProperlyFilled.fill(values.begin(), values.end());
 
-	checkTensorValues(tensorProperlyFilled, values);
+	_checkTensorValues(tensorProperlyFilled, values);
 
 	// tensor filled with too few values
 	mlCore::Tensor tensorUnderfilled(std::vector<size_t>{10});
@@ -144,7 +144,7 @@ TEST_F(TestBasicTensor, testFillingTensor)
 
 	const std::vector<double> wrappedValues{1, 2, 1, 2, 1, 2};
 
-	checkTensorValues(tensorWithWrappedValues, wrappedValues);
+	_checkTensorValues(tensorWithWrappedValues, wrappedValues);
 }
 
 TEST_F(TestBasicTensor, testDisplayingTensor)
@@ -154,8 +154,9 @@ TEST_F(TestBasicTensor, testDisplayingTensor)
 	const std::vector<std::vector<size_t>> shapes{{2, 2, 3}, {3, 3, 3, 1}, {}, {5}};
 
 	const std::vector<std::vector<double>> tensorsValues{{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12},
-														 {.1,  .2,	.3,	 .4,  .5,  .6,	.7,	 .8,  .9,  .10, .11, .12, .13, .14,
-														  .15, .16, .17, .18, .19, .20, .21, .22, .23, .24, .25, .26, .27},
+														 {.1,  .2,	.3,	 .4,  .5,  .6,	.7,	 .8,  .9,
+														  .10, .11, .12, .13, .14, .15, .16, .17, .18,
+														  .19, .20, .21, .22, .23, .24, .25, .26, .27},
 														 {10},
 														 {1, 2, 3, 4, 5}};
 
@@ -262,14 +263,14 @@ TEST_F(TestBasicTensor, testCopy)
 	mlCore::Tensor tensor1(std::vector<size_t>{2, 3, 4});
 
 	tensor1.fill(RangeTensorInitializer<double>(0));
-	mlCore::Tensor tensor2 = tensor1;
+	const mlCore::Tensor tensor2 = tensor1;
 
-	checkTensorEquality(tensor1, tensor2);
+	_checkTensorEquality(tensor1, tensor2);
 
 	mlCore::Tensor tensor3(std::vector<size_t>{});
 	tensor3 = tensor1;
 
-	checkTensorEquality(tensor1, tensor3);
+	_checkTensorEquality(tensor1, tensor3);
 }
 
 TEST_F(TestBasicTensor, testMove)
@@ -280,19 +281,19 @@ TEST_F(TestBasicTensor, testMove)
 	mlCore::Tensor tensorBase(std::vector<size_t>{2, 3, 4});
 
 	tensorBase.fill(RangeTensorInitializer<double>(0));
-	mlCore::Tensor tensorBase_1 = tensorBase;
-	mlCore::Tensor tensorBase_2 = tensorBase;
+	mlCore::Tensor tensorBase1 = tensorBase;
+	mlCore::Tensor tensorBase2 = tensorBase;
 
-	mlCore::Tensor tensorMovedByConstructor = std::move(tensorBase_1);
+	const mlCore::Tensor tensorMovedByConstructor = std::move(tensorBase1);
 
-	checkTensorEquality(tensorMovedByConstructor, tensorBase);
-	isTensorEmpty(tensorBase_1);
+	_checkTensorEquality(tensorMovedByConstructor, tensorBase);
+	_isTensorEmpty(tensorBase1);
 
 	mlCore::Tensor tensorMovedByAssignment(std::vector<size_t>{});
-	tensorMovedByAssignment = std::move(tensorBase_2);
+	tensorMovedByAssignment = std::move(tensorBase2);
 
-	checkTensorEquality(tensorMovedByAssignment, tensorBase);
-	isTensorEmpty(tensorBase_2);
+	_checkTensorEquality(tensorMovedByAssignment, tensorBase);
+	_isTensorEmpty(tensorBase2);
 	// NOLINTEND(bugprone-use-after-move)
 }
 
@@ -302,21 +303,22 @@ TEST_F(TestBasicTensor, testAssignFunction)
 	const std::vector<std::vector<size_t>> shapes{{2, 3}, {5, 2}};
 	const std::vector<std::vector<double>> initialValues{{1, 1, 1, 1, 1, 1}, {10, 9, 8, 7, 6, 5, 4, 3, 2, 1}};
 
-	const std::vector<std::vector<double>> endValues{{10, 11, 12, 13, 14, 15}, {10, 9, 8, 7, 0, 5, 0, 3, 2, 1}};
+	const std::vector<std::vector<double>> endValues{{10, 11, 12, 13, 14, 15},
+													 {10, 9, 8, 7, 0, 5, 0, 3, 2, 1}};
 
 	mlCore::Tensor tensor1(shapes[0]);
 	tensor1.fill(initialValues[0].begin(), initialValues[0].end());
 
 	tensor1.assign({{0, 2}, {0, 3}}, {10, 11, 12, 13, 14, 15});
 
-	checkTensorValues(tensor1, endValues[0]);
+	_checkTensorValues(tensor1, endValues[0]);
 
 	mlCore::Tensor tensor2(shapes[1]);
 	tensor2.fill(initialValues[1].begin(), initialValues[1].end());
 
 	tensor2.assign({{2, 4}, {0, 1}}, {0, 0});
 
-	checkTensorValues(tensor2, endValues[1]);
+	_checkTensorValues(tensor2, endValues[1]);
 }
 
 TEST_F(TestBasicTensor, testOperatorsWithoutBroadcasting)
@@ -335,16 +337,16 @@ TEST_F(TestBasicTensor, testOperatorsWithoutBroadcasting)
 	const mlCore::Tensor factorTensor(shape, 2);
 
 	modifiedTensor = modifiedTensor + factorTensor;
-	checkTensorValues(modifiedTensor, values2);
+	_checkTensorValues(modifiedTensor, values2);
 
 	modifiedTensor = modifiedTensor / factorTensor;
-	checkTensorValues(modifiedTensor, values3);
+	_checkTensorValues(modifiedTensor, values3);
 
 	modifiedTensor = modifiedTensor - factorTensor;
-	checkTensorValues(modifiedTensor, values4);
+	_checkTensorValues(modifiedTensor, values4);
 
 	modifiedTensor = modifiedTensor * factorTensor;
-	checkTensorValues(modifiedTensor, values5);
+	_checkTensorValues(modifiedTensor, values5);
 }
 
 TEST_F(TestBasicTensor, testOperatorsWithoutBroadcastingInPlace)
@@ -363,16 +365,16 @@ TEST_F(TestBasicTensor, testOperatorsWithoutBroadcastingInPlace)
 	const mlCore::Tensor factorTensor(shape, 2);
 
 	modifiedTensor += factorTensor;
-	checkTensorValues(modifiedTensor, values2);
+	_checkTensorValues(modifiedTensor, values2);
 
 	modifiedTensor /= factorTensor;
-	checkTensorValues(modifiedTensor, values3);
+	_checkTensorValues(modifiedTensor, values3);
 
 	modifiedTensor -= factorTensor;
-	checkTensorValues(modifiedTensor, values4);
+	_checkTensorValues(modifiedTensor, values4);
 
 	modifiedTensor *= factorTensor;
-	checkTensorValues(modifiedTensor, values5);
+	_checkTensorValues(modifiedTensor, values5);
 }
 
 TEST_F(TestBasicTensor, testOperatorsWithBroadcasting)
@@ -388,13 +390,14 @@ TEST_F(TestBasicTensor, testOperatorsWithBroadcasting)
 	mlCore::Tensor tensor2(shape2);
 	tensor2.fill({1, 2, 3});
 
-	mlCore::Tensor resTensor = tensor1 + tensor2;
+	const mlCore::Tensor resTensor = tensor1 + tensor2;
 
 	ASSERT_EQ(resTensor.shape(), resShape);
-	const std::vector<double> resValues{2, 3,  4,  5,  6,  7,  8,  3,  4,  5,  6,  7,  8,  9,  4,  5,  6,  7,  8,  9,  10,
-										9, 10, 11, 12, 13, 14, 15, 10, 11, 12, 13, 14, 15, 16, 11, 12, 13, 14, 15, 16, 17};
+	const std::vector<double> resValues{2,	3,	4,	5,	6,	7,	8,	3,	4,	5,	6,	7,	8,	9,
+										4,	5,	6,	7,	8,	9,	10, 9,	10, 11, 12, 13, 14, 15,
+										10, 11, 12, 13, 14, 15, 16, 11, 12, 13, 14, 15, 16, 17};
 
-	checkTensorValues(resTensor, resValues);
+	_checkTensorValues(resTensor, resValues);
 }
 
 TEST_F(TestBasicTensor, testOperatorsWithBroadcastingInPlace)
@@ -413,10 +416,11 @@ TEST_F(TestBasicTensor, testOperatorsWithBroadcastingInPlace)
 	tensor1 += tensor2;
 
 	ASSERT_EQ(tensor1.shape(), resShape);
-	const std::vector<double> resValues{2, 3,  4,  5,  6,  7,  8,  3,  4,  5,  6,  7,  8,  9,  4,  5,  6,  7,  8,  9,  10,
-										9, 10, 11, 12, 13, 14, 15, 10, 11, 12, 13, 14, 15, 16, 11, 12, 13, 14, 15, 16, 17};
+	const std::vector<double> resValues{2,	3,	4,	5,	6,	7,	8,	3,	4,	5,	6,	7,	8,	9,
+										4,	5,	6,	7,	8,	9,	10, 9,	10, 11, 12, 13, 14, 15,
+										10, 11, 12, 13, 14, 15, 16, 11, 12, 13, 14, 15, 16, 17};
 
-	checkTensorValues(tensor1, resValues);
+	_checkTensorValues(tensor1, resValues);
 }
 
 TEST_F(TestBasicTensor, testOperationsWithScalarTensor)
@@ -436,7 +440,7 @@ TEST_F(TestBasicTensor, testOperationsWithScalarTensor)
 
 	const std::vector<double> expectedValues{3, 4, 5, 6, 7, 8};
 
-	checkTensorValues(tensor, expectedValues);
+	_checkTensorValues(tensor, expectedValues);
 }
 
 TEST_F(TestBasicTensor, testMatrixMultiplicationClassicMatrices)
@@ -449,11 +453,11 @@ TEST_F(TestBasicTensor, testMatrixMultiplicationClassicMatrices)
 	firstTensor.fill(RangeTensorInitializer<double>(1));
 	secondTensor.fill(RangeTensorInitializer<double>(1));
 
-	mlCore::Tensor resultTensor = firstTensor.matmul(secondTensor);
+	const mlCore::Tensor resultTensor = firstTensor.matmul(secondTensor);
 
 	const std::vector<double> expectedValues{11, 14, 17, 20, 23, 30, 37, 44, 35, 46, 57, 68};
 
-	checkTensorValues(resultTensor, expectedValues);
+	_checkTensorValues(resultTensor, expectedValues);
 }
 
 TEST_F(TestBasicTensor, testMatrixMultiplicationExtended)
@@ -468,11 +472,11 @@ TEST_F(TestBasicTensor, testMatrixMultiplicationExtended)
 
 	auto result = firstTensor.matmul(secondTensor);
 
-	const std::vector<double> expectedValues{13,  16,  19, 22,	25,	 27,  34,  41,	48,	 55,  41,  52, 63,	74,
-											 85,  55,  70, 85,	100, 115, 69,  88,	107, 126, 145, 83, 106, 129,
-											 152, 175, 97, 124, 151, 178, 205, 111, 142, 173, 204, 235};
+	const std::vector<double> expectedValues{
+		13, 16, 19,	 22,  25,  27, 34,	41,	 48,  55,  41, 52,	63,	 74,  85,  55,	70,	 85,  100, 115,
+		69, 88, 107, 126, 145, 83, 106, 129, 152, 175, 97, 124, 151, 178, 205, 111, 142, 173, 204, 235};
 
-	checkTensorValues(result, expectedValues);
+	_checkTensorValues(result, expectedValues);
 }
 
 TEST_F(TestBasicTensor, testTransposition)
@@ -492,9 +496,10 @@ TEST_F(TestBasicTensor, testTransposition)
 	// 2  7  12  17
 	// 3  8  13  18
 	// 4  9  14  19
-	const std::vector<double> expectedValues{0, 5, 10, 15, 1, 6, 11, 16, 2, 7, 12, 17, 3, 8, 13, 18, 4, 9, 14, 19};
+	const std::vector<double> expectedValues{0,	 5,	 10, 15, 1,	 6,	 11, 16, 2,	 7,
+											 12, 17, 3,	 8,	 13, 18, 4,	 9,	 14, 19};
 
-	checkTensorValues(tensor.transposed(), expectedValues);
+	_checkTensorValues(tensor.transposed(), expectedValues);
 }
 
 } // namespace

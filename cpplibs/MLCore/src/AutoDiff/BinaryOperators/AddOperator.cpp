@@ -1,10 +1,12 @@
-#include <AutoDiff/BinaryOperators/AddOperator.h>
+#include "AutoDiff/BinaryOperators/AddOperator.h"
+
+#include <utility>
 
 namespace mlCore::autoDiff::binaryOperators
 {
 void AddOperator::updateValue()
 {
-	value_ = lhsInput_->getValue() + rhsInput_->getValue();
+	_value = _lhsInput->getValue() + _rhsInput->getValue();
 }
 
 std::pair<Tensor, Tensor> AddOperator::computeDerivative(const Tensor& outerDerivative) const

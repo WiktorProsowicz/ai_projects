@@ -1,30 +1,24 @@
 /**********************
  * Test suite for 'ai_projects'
- * 
+ *
  * Copyright (c) 2023
- * 
+ *
  * by Wiktor Prosowicz
  **********************/
 
-// __Tested headers__
-#include <Utilities/ThreadPool.h>
-
-// __CPP headers__
 #include <chrono>
 
-// __External software__
-#include <gtest/gtest.h>
-#include <fmt/format.h>
-
-// __Own software__
 #include <LoggingLib/LoggingLib.hpp>
+#include <Utilities/ThreadPool.h>
+#include <fmt/format.h>
+#include <gtest/gtest.h>
 
 namespace
 {
 /*************************
- * 
+ *
  * Common data structures
- * 
+ *
  *************************/
 
 class Task
@@ -33,74 +27,76 @@ public:
 	using TimePoint = std::chrono::system_clock::time_point;
 
 	Task() = delete;
-	Task(size_t taskId, size_t waitingInterval = 1000)
-		: waitingInterval_(waitingInterval)
-		, id_(taskId)
-	{ }
+
+	explicit Task(size_t taskId, size_t waitingInterval = 1000)
+		: _waitingInterval(waitingInterval)
+		, _id(taskId)
+	{}
 
 	void run()
 	{
-		startTime_ = std::chrono::system_clock::now();
+		_startTime = std::chrono::system_clock::now();
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(waitingInterval_));
+		std::this_thread::sleep_for(std::chrono::milliseconds(_waitingInterval));
 
-		endTime_ = std::chrono::system_clock::now();
+		_endTime = std::chrono::system_clock::now();
 
 		// LOG_INFO("TestThreadPool",
 		// 		 fmt::format("Task number {} worked between {} and {}. ({}ms)",
 		// 					 id_,
 		// 					 std::chrono::duration_cast<std::chrono::milliseconds>(startTime_.time_since_epoch()).count(),
 		// 					 std::chrono::duration_cast<std::chrono::milliseconds>(endTime_.time_since_epoch()).count(),
-		// 					 std::chrono::duration_cast<std::chrono::milliseconds>(endTime_ - startTime_).count()));
+		// 					 std::chrono::duration_cast<std::chrono::milliseconds>(endTime_ -
+		// startTime_).count()));
 
-		hasBeenRun_ = true;
+		_hasBeenRun = true;
 	}
 
 	TimePoint getStart() const
 	{
-		return startTime_;
+		return _startTime;
 	}
 
 	TimePoint getEnd() const
 	{
-		return endTime_;
+		return _endTime;
 	}
 
 	bool hasBeenRun() const
 	{
-		return hasBeenRun_;
+		return _hasBeenRun;
 	}
 
 	size_t getId() const
 	{
-		return id_;
+		return _id;
 	}
 
 private:
-	size_t waitingInterval_;
-	size_t id_;
-	bool hasBeenRun_ = false;
+	size_t _waitingInterval;
+	size_t _id;
+	bool _hasBeenRun = false;
 
-	TimePoint startTime_{};
-	TimePoint endTime_{};
+	TimePoint _startTime;
+	TimePoint _endTime;
 };
 
 /*****************************
- * 
+ *
  * Test Fixture
- * 
+ *
  *****************************/
 class TestThreadPool : public testing::Test
 {
 protected:
 	/**
 	 * @brief Creates a vector of tasks.
-	 * 
+	 *
 	 * @param numberOfTasks Number of tasks to create.
 	 * @param waitingInterval Number of miliseconds each task need to wait when run.
 	 * @return Created tasks.
 	 */
-	static std::vector<Task> createTasks(size_t numberOfTasks, size_t waitingInterval)
+	static std::vector<Task> _createTasks(size_t numberOfTasks, size_t waitingInterval)
 	{
 		std::vector<Task> tasks;
 
@@ -114,39 +110,45 @@ protected:
 
 	/**
 	 * @brief Computes duration of the run tasks.
-	 * 
+	 *
 	 * @param tasks Vector of tasks that have been run.
 	 * @return Time span between the start of the earliest task and the end of the latest one.
 	 */
-	static auto getDuration(const std::vector<Task>& tasks)
+	static auto _getDuration(const std::vector<Task>& tasks)
 	{
-		auto minTime = std::min_element(tasks.cbegin(), tasks.cend(), [](const auto& task1, const auto& task2) {
-			return task1.getStart().time_since_epoch() < task2.getStart().time_since_epoch();
-		});
+		auto minTime = std::min_element(
+			tasks.cbegin(),
+			tasks.cend(),
+			[](const auto& task1, const auto& task2)
+			{ return task1.getStart().time_since_epoch() < task2.getStart().time_since_epoch(); });
 
-		auto maxTime = std::max_element(tasks.cbegin(), tasks.cend(), [](const auto& task1, const auto& task2) {
-			return task1.getEnd().time_since_epoch() < task2.getEnd().time_since_epoch();
-		});
+		auto maxTime =
+			std::max_element(tasks.cbegin(),
+							 tasks.cend(),
+							 [](const auto& task1, const auto& task2) {
+								 return task1.getEnd().time_since_epoch() < task2.getEnd().time_since_epoch();
+							 });
 
-		return std::chrono::duration_cast<std::chrono::milliseconds>(maxTime->getEnd() - minTime->getStart()).count();
+		return std::chrono::duration_cast<std::chrono::milliseconds>(maxTime->getEnd() - minTime->getStart())
+			.count();
 	}
 };
 } // namespace
 
 /*****************************
- * 
+ *
  * Particular test calls
- * 
+ *
  *****************************/
 
 TEST_F(TestThreadPool, testTasksProcessing)
 {
-	std::vector<std::pair<size_t, size_t>> tasksParams{{5, 1000}, {10, 500}, {20, 250}};
+	const std::vector<std::pair<size_t, size_t>> tasksParams{{5, 1000}, {10, 500}, {20, 250}};
 
 	for(const auto& [nTasks, interval] : tasksParams)
 	{
 
-		auto synchronousTasks = createTasks(nTasks, interval);
+		auto synchronousTasks = _createTasks(nTasks, interval);
 
 		LOG_INFO("TestThreadPool", "Running synchronous tasks...");
 
@@ -155,7 +157,7 @@ TEST_F(TestThreadPool, testTasksProcessing)
 			task.run();
 		}
 
-		auto asynchronousTasks = createTasks(nTasks, interval);
+		auto asynchronousTasks = _createTasks(nTasks, interval);
 
 		{
 			utilities::ThreadPool pool;
@@ -173,14 +175,14 @@ TEST_F(TestThreadPool, testTasksProcessing)
 
 		LOG_INFO("TestThreadPool",
 				 fmt::format("Asynchronous tasks took {}ms and synchronous {}ms\n",
-							 getDuration(asynchronousTasks),
-							 getDuration(synchronousTasks)));
+							 _getDuration(asynchronousTasks),
+							 _getDuration(synchronousTasks)));
 
-		ASSERT_LT(getDuration(asynchronousTasks), getDuration(synchronousTasks))
-			<< fmt::format("While comparing the run of the {} tasks, each {}ms long, synchronous tasks unexpectedly "
-						   "took less time than asynchronous ones.",
-						   nTasks,
-						   interval);
+		ASSERT_LT(_getDuration(asynchronousTasks), _getDuration(synchronousTasks)) << fmt::format(
+			"While comparing the run of the {} tasks, each {}ms long, synchronous tasks unexpectedly "
+			"took less time than asynchronous ones.",
+			nTasks,
+			interval);
 	}
 }
 
@@ -193,7 +195,7 @@ TEST_F(TestThreadPool, testResizing)
 	static constexpr size_t kNumTasks = 30;
 	static constexpr size_t kInterval = 100;
 
-	auto asynchronousTasks = createTasks(kNumTasks, kInterval);
+	auto asynchronousTasks = _createTasks(kNumTasks, kInterval);
 
 	for(auto& task : asynchronousTasks)
 	{

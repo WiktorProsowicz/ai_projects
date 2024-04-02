@@ -1,11 +1,14 @@
-#include <AutoDiff/BinaryOperators/PowerOperator.h>
-#include <MLCore/TensorOperations.h>
+#include "AutoDiff/BinaryOperators/PowerOperator.h"
+
+#include <utility>
+
+#include "MLCore/TensorOperations.h"
 
 namespace mlCore::autoDiff::binaryOperators
 {
 void PowerOperator::updateValue()
 {
-	value_ = TensorOperations::power(lhsInput_->getValue(), rhsInput_->getValue());
+	_value = TensorOperations::power(_lhsInput->getValue(), _rhsInput->getValue());
 }
 
 std::pair<Tensor, Tensor> PowerOperator::computeDerivative(const Tensor& outerDerivative) const

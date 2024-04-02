@@ -1,71 +1,81 @@
-// __Related headers__
-#include <MLCore/BasicTensorSlice.h>
+#include "MLCore/BasicTensorSlice.h"
 
-// __Standard library headers__
+#include <cstddef>
+#include <functional>
 #include <iomanip>
+#include <iterator>
+#include <ostream>
+#include <span>
+#include <stdexcept>
+#include <string>
+#include <tuple>
+#include <utility>
+#include <vector>
 
-// __Own software headers__
-#include <MLCore/BasicTensor.h>
+#include "MLCore/BasicTensor.h"
+#include "MLCore/SlicedTensorIterator.hpp"
 
-#define OPERATION_WITH_SCALAR_RHS(op, rhs)                                                                                       \
-	const auto chunkLength = _computeChunkLength();                                                                              \
-	for(auto* dataPtr : *dataChunks_)                                                                                            \
-	{                                                                                                                            \
-		for(size_t dataIdx = 0; dataIdx < chunkLength; dataIdx++)                                                                \
-		{                                                                                                                        \
-			dataPtr[dataIdx] op rhs;                                                                                             \
-		}                                                                                                                        \
+#define OPERATION_WITH_SCALAR_RHS(op, rhs)                                                                   \
+	const auto chunkLength = _computeChunkLength();                                                          \
+	for(auto* dataPtr : *_dataChunks)                                                                        \
+	{                                                                                                        \
+		for(size_t dataIdx = 0; dataIdx < chunkLength; dataIdx++)                                            \
+		{                                                                                                    \
+			dataPtr[dataIdx] op rhs;                                                                         \
+		}                                                                                                    \
 	}
 
-#define OPERATION_WITH_ARRAY_RHS(op)                                                                                             \
-	const auto chunkLength = _computeChunkLength();                                                                              \
-	const auto sliceSize = _computeSliceSize();                                                                                  \
-                                                                                                                                 \
-	if((sliceSize < data.size()) || (sliceSize % data.size()) != 0)                                                              \
-	{                                                                                                                            \
-		throw std::invalid_argument("Cannot align provided elements with the slice's spanned data.");                            \
-	}                                                                                                                            \
-                                                                                                                                 \
-	auto dataPtr = data.data();                                                                                                  \
-	size_t dataIdx = 0;                                                                                                          \
-                                                                                                                                 \
-	for(auto* tensorDataPtr : *dataChunks_)                                                                                      \
-	{                                                                                                                            \
-		for(size_t chunkIdx = 0; chunkIdx < chunkLength; ++chunkIdx, dataIdx = (dataIdx + 1) % data.size())                      \
-		{                                                                                                                        \
-			tensorDataPtr[chunkIdx] op dataPtr[dataIdx];                                                                         \
-		}                                                                                                                        \
+#define OPERATION_WITH_ARRAY_RHS(op)                                                                         \
+	const auto chunkLength = _computeChunkLength();                                                          \
+	const auto sliceSize = _computeSliceSize();                                                              \
+                                                                                                             \
+	if((sliceSize < data.size()) || (sliceSize % data.size()) != 0)                                          \
+	{                                                                                                        \
+		throw std::invalid_argument("Cannot align provided elements with the slice's spanned data.");        \
+	}                                                                                                        \
+                                                                                                             \
+	auto dataPtr = data.data();                                                                              \
+	size_t dataIdx = 0;                                                                                      \
+                                                                                                             \
+	for(auto* tensorDataPtr : *_dataChunks)                                                                  \
+	{                                                                                                        \
+		for(size_t chunkIdx = 0; chunkIdx < chunkLength; ++chunkIdx, dataIdx = (dataIdx + 1) % data.size())  \
+		{                                                                                                    \
+			tensorDataPtr[chunkIdx] op dataPtr[dataIdx];                                                     \
+		}                                                                                                    \
 	}
 
 namespace
 {
 /**
- * @brief Computes index of the element that separates the `shape` so that the right side is fully covered by the `indices` and the left one not.
- * The function assumes that the `indices` have been validated.
- * 
+ * @brief Computes index of the element that separates the `shape` so that the right side is fully covered by
+ * the `indices` and the left one not. The function assumes that the `indices` have been validated.
+ *
  * @example
  * 	shape: {4, 5, 6, 7, 8}
- * 	indices: {(2, 3), (3, 4), (0, 6), (0, 7)}
- * 	Result: 2 
- * 
+ * 	indices: {(2, 3), (3, 4), (2, 5), (0, 7), (0, 8)}
+ * 	Result: 3
+ *
  * @param shape Shape to divide.
  * @param indices Indices referring to the spanned part of the shape.
  * @return Index of the leftmost shape's element spanned entirely by the respective indices.
  * If there's no such element, the index == len(size) is returned.
  */
-size_t getPivotShapeElement(const std::vector<size_t>& shape, const std::vector<std::pair<size_t, size_t>>& indices)
+size_t getPivotShapeElement(const std::vector<size_t>& shape,
+							const std::vector<std::pair<size_t, size_t>>& indices)
 {
-	int64_t shapeIndex = shape.size() - 1;
 
-	for(; shapeIndex >= 0; shapeIndex--)
+	for(auto [shapeIt, indicesIt] = std::tuple{shape.crbegin(), indices.crbegin()};
+		(shapeIt < shape.crend()) && (indicesIt < indices.crend());
+		shapeIt++, indicesIt++)
 	{
-		if((indices.at(shapeIndex).first != 0) || (indices.at(shapeIndex).second != shape.at(shapeIndex)))
+		if((indicesIt->first != 0) || (indicesIt->second != *shapeIt))
 		{
-			break;
+			return static_cast<size_t>(std::distance(shapeIt, shape.crend()));
 		}
 	}
 
-	return shapeIndex + 1;
+	return 0;
 }
 } // namespace
 
@@ -79,18 +89,18 @@ template std::ostream& operator<<(std::ostream& os, const BasicTensorSlice<doubl
 
 template <typename ValueType>
 BasicTensorSlice<ValueType>::BasicTensorSlice(const BasicTensorSlice<ValueType>& other)
-	: tensor_(other.tensor_)
-	, indices_(other.indices_)
-	, dataChunks_(std::make_unique<std::vector<ValueType*>>(*other.dataChunks_))
-{ }
+	: _tensor(other._tensor)
+	, _indices(other._indices)
+	, _dataChunks(std::make_unique<std::vector<ValueType*>>(*other._dataChunks))
+{}
 
 template <typename ValueType>
 BasicTensorSlice<ValueType>& BasicTensorSlice<ValueType>::operator=(const BasicTensorSlice<ValueType>& other)
 {
 	if(&other != this)
 	{
-		tensor_ = other.tensor_;
-		indices_ = other.indices_;
+		_tensor = other._tensor;
+		_indices = other._indices;
 	}
 
 	return *this;
@@ -99,19 +109,20 @@ BasicTensorSlice<ValueType>& BasicTensorSlice<ValueType>::operator=(const BasicT
 template <typename ValueType>
 BasicTensorSlice<ValueType>::BasicTensorSlice(BasicTensor<ValueType>& associatedTensor,
 											  const std::vector<std::pair<size_t, size_t>>& indices)
-	: tensor_(associatedTensor)
-	, indices_(indices)
-	, dataChunks_(std::make_unique<std::vector<ValueType*>>(_computeDataPointers()))
-{ }
+	: _tensor(associatedTensor)
+	, _indices(indices)
+	, _dataChunks(std::make_unique<std::vector<ValueType*>>(_computeDataPointers()))
+{}
 
 template <typename ValueType>
 std::vector<size_t> BasicTensorSlice<ValueType>::_computeSliceShape() const
 {
-	std::vector<size_t> collectedShapeDims(indices_.size(), 0);
+	std::vector<size_t> collectedShapeDims(_indices.size(), 0);
 
-	std::transform(indices_.cbegin(), indices_.cend(), collectedShapeDims.begin(), [](const auto& indexPair) {
-		return indexPair.second - indexPair.first;
-	});
+	std::transform(_indices.cbegin(),
+				   _indices.cend(),
+				   collectedShapeDims.begin(),
+				   [](const auto& indexPair) { return indexPair.second - indexPair.first; });
 
 	return collectedShapeDims;
 }
@@ -121,33 +132,36 @@ std::vector<ValueType*> BasicTensorSlice<ValueType>::_computeDataPointers() cons
 {
 	std::vector<ValueType*> dataPointers;
 
-	const auto& tShape = tensor_.get().shape_;
-	const auto pivotElement = getPivotShapeElement(tShape, indices_);
+	const auto& tShape = _tensor.get()._shape;
+	const auto pivotElement = getPivotShapeElement(tShape, _indices);
 
 	std::function<std::vector<ValueType*>(ValueType*, size_t, size_t)> recurseGetPointers;
 
-	recurseGetPointers =
-		[&tShape, &pivotElement, &recurseGetPointers, this](ValueType* data, size_t shapeIdx, size_t currentSpan) {
-			if(shapeIdx == pivotElement)
-			{
-				return std::vector<ValueType*>{data};
-			}
+	recurseGetPointers = [&tShape, &pivotElement, &recurseGetPointers, this](
+							 ValueType* data, size_t shapeIdx, size_t currentSpan)
+	{
+		if(shapeIdx == pivotElement)
+		{
+			return std::vector<ValueType*>{data};
+		}
 
-			const auto nextSpan = currentSpan / tShape.at(shapeIdx);
+		const auto nextSpan = currentSpan / tShape.at(shapeIdx);
 
-			std::vector<ValueType*> pointers;
+		std::vector<ValueType*> pointers;
 
-			for(size_t nextSpanIndex = indices_.at(shapeIdx).first; nextSpanIndex < indices_.at(shapeIdx).second; nextSpanIndex++)
-			{
-				const auto collectedPointers = recurseGetPointers(data + nextSpanIndex * nextSpan, shapeIdx + 1, nextSpan);
+		for(size_t nextSpanIndex = _indices.at(shapeIdx).first; nextSpanIndex < _indices.at(shapeIdx).second;
+			nextSpanIndex++)
+		{
+			const auto collectedPointers =
+				recurseGetPointers(data + nextSpanIndex * nextSpan, shapeIdx + 1, nextSpan);
 
-				std::copy(collectedPointers.cbegin(), collectedPointers.cend(), std::back_inserter(pointers));
-			}
+			std::copy(collectedPointers.cbegin(), collectedPointers.cend(), std::back_inserter(pointers));
+		}
 
-			return pointers;
-		};
+		return pointers;
+	};
 
-	return recurseGetPointers(tensor_.get().data_, 0, tensor_.get().length_);
+	return recurseGetPointers(_tensor.get()._data, 0, _tensor.get()._length);
 }
 
 template <typename ValueType>
@@ -155,21 +169,22 @@ size_t BasicTensorSlice<ValueType>::_computeChunkLength() const
 {
 	size_t chunkLength = 1;
 
-	const auto& tShape = tensor_.get().shape_;
+	const auto& tShape = _tensor.get()._shape;
 
-	for(size_t shapeIdx = getPivotShapeElement(tShape, indices_); shapeIdx < tShape.size(); shapeIdx++)
+	for(size_t shapeIdx = getPivotShapeElement(tShape, _indices); shapeIdx < tShape.size(); shapeIdx++)
 	{
 		chunkLength *= tShape.at(shapeIdx);
 	}
 
 	return chunkLength;
 }
+
 template <typename ValueType>
 size_t BasicTensorSlice<ValueType>::_computeSliceSize() const
 {
 	const auto shape = _computeSliceShape();
 
-	return std::accumulate(shape.begin(), shape.end(), 1, std::multiplies<size_t>());
+	return std::accumulate(shape.begin(), shape.end(), 1, std::multiplies<>());
 }
 
 template <typename ValueType>
@@ -237,28 +252,28 @@ void BasicTensorSlice<ValueType>::_assignDivide(const std::span<ValueType>& data
 	}
 }
 
-#define OPERATION_WITH_SLICE_AS_RHS(op)                                                                                          \
-	const auto zippedDataPointers = _determineBroadcastedDataPointers(other);                                                    \
-                                                                                                                                 \
-	const auto oChunkLength = other._computeChunkLength();                                                                       \
-	const auto tChunkLength = _computeChunkLength();                                                                             \
-                                                                                                                                 \
-	for(const auto& [thisDataPtr, otherDataPtr] : zippedDataPointers)                                                            \
-	{                                                                                                                            \
-		if(oChunkLength == tChunkLength)                                                                                         \
-		{                                                                                                                        \
-			for(size_t dataIdx = 0; dataIdx < tChunkLength; dataIdx++)                                                           \
-			{                                                                                                                    \
-				thisDataPtr[dataIdx] op otherDataPtr[dataIdx];                                                                   \
-			}                                                                                                                    \
-		}                                                                                                                        \
-		else                                                                                                                     \
-		{                                                                                                                        \
-			for(size_t dataIdx = 0; dataIdx < tChunkLength; dataIdx++)                                                           \
-			{                                                                                                                    \
-				thisDataPtr[dataIdx] op* otherDataPtr;                                                                           \
-			}                                                                                                                    \
-		}                                                                                                                        \
+#define OPERATION_WITH_SLICE_AS_RHS(op)                                                                      \
+	const auto zippedDataPointers = _determineBroadcastedDataPointers(other);                                \
+                                                                                                             \
+	const auto oChunkLength = other._computeChunkLength();                                                   \
+	const auto tChunkLength = _computeChunkLength();                                                         \
+                                                                                                             \
+	for(const auto& [thisDataPtr, otherDataPtr] : zippedDataPointers)                                        \
+	{                                                                                                        \
+		if(oChunkLength == tChunkLength)                                                                     \
+		{                                                                                                    \
+			for(size_t dataIdx = 0; dataIdx < tChunkLength; dataIdx++)                                       \
+			{                                                                                                \
+				thisDataPtr[dataIdx] op otherDataPtr[dataIdx];                                               \
+			}                                                                                                \
+		}                                                                                                    \
+		else                                                                                                 \
+		{                                                                                                    \
+			for(size_t dataIdx = 0; dataIdx < tChunkLength; dataIdx++)                                       \
+			{                                                                                                \
+				thisDataPtr[dataIdx] op* otherDataPtr;                                                       \
+			}                                                                                                \
+		}                                                                                                    \
 	}
 
 template <typename ValueType>
@@ -313,7 +328,8 @@ bool isShapeBroadcastable(const std::vector<size_t>& shapeFrom, const std::vecto
 }
 
 /// Modifies the `shape` so that the indices after the `pivotElement` are merged into a single dimension.
-std::vector<size_t> mergeShape(const std::vector<size_t> shape, const size_t pivotElement, const size_t chunkLength)
+std::vector<size_t>
+mergeShape(const std::vector<size_t>& shape, const size_t pivotElement, const size_t chunkLength)
 {
 	if(pivotElement == shape.size())
 	{
@@ -344,65 +360,70 @@ std::vector<size_t> truncateShape(const std::vector<size_t>& shape, const size_t
 	return truncatedShape;
 }
 
+/// Returns position of an element specified by `indices` within data organized by the `shape`.
 size_t getFlattenedIndex(const std::vector<size_t>& shape, const std::vector<size_t>& indices)
 {
-	size_t offset = 1;
-	size_t flattenedIndex = 0;
+	size_t offset = std::accumulate(shape.cbegin(), shape.cend(), size_t{1}, std::multiplies<>{});
 
-	for(int64_t shapeIdx = shape.size() - 1; shapeIdx >= 0; shapeIdx--)
-	{
-		flattenedIndex += indices.at(shapeIdx) * offset;
-		offset *= shape.at(shapeIdx);
-	}
+	auto shapeIt = shape.cbegin();
 
-	return flattenedIndex;
+	return std::accumulate(indices.cbegin(),
+						   indices.cend(),
+						   size_t{0},
+						   [&offset, &shapeIt](const auto& curr, const auto& index)
+						   { return curr + (offset /= *(shapeIt++)) * index; });
 }
 
 size_t computeNElementsInShape(const std::span<const size_t>& shape)
 {
-	return std::accumulate(shape.begin(), shape.end(), 1, std::multiplies<size_t>());
+	return std::accumulate(shape.begin(), shape.end(), size_t{1}, std::multiplies<>());
 }
 } // namespace
 
 template <typename ValueType>
 SlicedTensorIterator<ValueType> BasicTensorSlice<ValueType>::begin() const
 {
-	std::vector<size_t> firstElementPath(indices_.size());
+	std::vector<size_t> firstElementPath(_indices.size());
 
-	std::transform(
-		indices_.cbegin(), indices_.cend(), firstElementPath.begin(), [](const auto& indices) { return indices.first; });
+	std::transform(_indices.cbegin(),
+				   _indices.cend(),
+				   firstElementPath.begin(),
+				   [](const auto& indices) { return indices.first; });
 
-	auto* startDataPtr = tensor_.get().data_ + getFlattenedIndex(tensor_.get().shape_, firstElementPath);
+	auto* startDataPtr = _tensor.get()._data + getFlattenedIndex(_tensor.get()._shape, firstElementPath);
 
-	return SlicedTensorIterator<ValueType>(startDataPtr, *dataChunks_, _computeChunkLength(), 0);
+	return SlicedTensorIterator<ValueType>(startDataPtr, *_dataChunks, _computeChunkLength(), 0);
 }
 
 template <typename ValueType>
 SlicedTensorIterator<ValueType> BasicTensorSlice<ValueType>::end() const
 {
-	std::vector<size_t> lastElementPath(indices_.size());
+	std::vector<size_t> lastElementPath(_indices.size());
 
-	std::transform(
-		indices_.cbegin(), indices_.cend(), lastElementPath.begin(), [](const auto& indices) { return indices.second - 1; });
+	std::transform(_indices.cbegin(),
+				   _indices.cend(),
+				   lastElementPath.begin(),
+				   [](const auto& indices) { return indices.second - 1; });
 
-	auto* endDataPtr = tensor_.get().data_ + getFlattenedIndex(tensor_.get().shape_, lastElementPath) + 1;
+	auto* endDataPtr = _tensor.get()._data + getFlattenedIndex(_tensor.get()._shape, lastElementPath) + 1;
 
 	return SlicedTensorIterator<ValueType>(
-		endDataPtr, *dataChunks_, _computeChunkLength(), (dataChunks_->size() * _computeChunkLength()));
+		endDataPtr, *_dataChunks, _computeChunkLength(), (_dataChunks->size() * _computeChunkLength()));
 }
 
 template <typename ValueType>
 std::vector<std::pair<ValueType*, ValueType*>>
 BasicTensorSlice<ValueType>::_determineBroadcastedDataPointers(const BasicTensorSlice& other) const
 {
-	const auto& tShape = tensor_.get().shape_;
-	const auto& oShape = other.tensor_.get().shape_;
+	const auto& tShape = _tensor.get()._shape;
+	const auto& oShape = other._tensor.get()._shape;
 
-	const auto pivotElement = getPivotShapeElement(tShape, indices_);
-	const auto oPivotElement = getPivotShapeElement(oShape, other.indices_);
+	const auto pivotElement = getPivotShapeElement(tShape, _indices);
+	const auto oPivotElement = getPivotShapeElement(oShape, other._indices);
 
 	const auto mergedShapeThis = mergeShape(_computeSliceShape(), pivotElement, _computeChunkLength());
-	const auto mergedShapeOther = mergeShape(other._computeSliceShape(), oPivotElement, other._computeChunkLength());
+	const auto mergedShapeOther =
+		mergeShape(other._computeSliceShape(), oPivotElement, other._computeChunkLength());
 
 	if(!isShapeBroadcastable(mergedShapeOther, mergedShapeThis))
 	{
@@ -413,8 +434,8 @@ BasicTensorSlice<ValueType>::_determineBroadcastedDataPointers(const BasicTensor
 
 	std::vector<std::pair<ValueType*, ValueType*>> zippedDataPointers;
 
-	const auto& dataPointersThis = *dataChunks_;
-	const auto& dataPointersOther = *(other.dataChunks_);
+	const auto& dataPointersThis = *_dataChunks;
+	const auto& dataPointersOther = *(other._dataChunks);
 
 	std::vector<size_t> indicesPathThis(mergedShapeThis.size(), 0);
 	std::vector<size_t> indicesPathOther(mergedShapeOther.size(), 0);
@@ -426,23 +447,32 @@ BasicTensorSlice<ValueType>::_determineBroadcastedDataPointers(const BasicTensor
 		const auto flattenedIndexThis = getFlattenedIndex(mergedShapeThis, indicesPathThis);
 		const auto flattenedIndexOther = getFlattenedIndex(mergedShapeOther, indicesPathOther);
 
-		zippedDataPointers.push_back({dataPointersThis.at(flattenedIndexThis), dataPointersOther.at(flattenedIndexOther)});
+		zippedDataPointers.push_back(
+			{dataPointersThis.at(flattenedIndexThis), dataPointersOther.at(flattenedIndexOther)});
 
-		for(int64_t shapeIdx = indicesPathThis.size() - 1; shapeIdx >= 0; shapeIdx--)
+		auto [pathThisIt, pathOtherIt, shapeThisIt, shapeOtherIt] = std::tuple{indicesPathThis.rbegin(),
+																			   indicesPathOther.rbegin(),
+																			   mergedShapeThis.crbegin(),
+																			   mergedShapeOther.crbegin()};
+
+		for(; (pathThisIt < indicesPathThis.rend()) && (pathOtherIt < indicesPathOther.rend()) &&
+			  (shapeThisIt < mergedShapeThis.crend()) && (shapeOtherIt < mergedShapeOther.crend());
+			pathThisIt++, pathOtherIt++, shapeThisIt++, shapeOtherIt++)
 		{
-			indicesPathThis.at(shapeIdx)++;
+			(*pathThisIt)++;
 
-			if((mergedShapeOther.at(shapeIdx) != 1) && (static_cast<uint64_t>(shapeIdx) != (indicesPathThis.size() - 1)))
+			if((*shapeOtherIt != 1) && (shapeOtherIt != mergedShapeOther.crbegin()))
 			{
-				indicesPathOther.at(shapeIdx)++;
+				(*pathOtherIt)++;
 			}
 
-			if(indicesPathThis.at(shapeIdx) < mergedShapeThis.at(shapeIdx))
+			if(*pathThisIt < *shapeThisIt)
 			{
 				break;
 			}
-			indicesPathThis.at(shapeIdx) = 0;
-			indicesPathOther.at(shapeIdx) = 0;
+
+			*pathThisIt = 0;
+			*pathOtherIt = 0;
 		}
 	}
 
@@ -452,7 +482,7 @@ BasicTensorSlice<ValueType>::_determineBroadcastedDataPointers(const BasicTensor
 namespace
 {
 template <typename ValueType>
-void serializeContiguousMemory(std::ostream& out,
+void serializeContiguousMemory(std::ostream& ostream,
 							   const std::span<ValueType>& data,
 							   const std::string& preamble,
 							   const std::span<size_t>& shape,
@@ -464,35 +494,40 @@ void serializeContiguousMemory(std::ostream& out,
 					   const std::string&)>
 		recurseSerialize;
 
-	recurseSerialize = [&recurseSerialize, &out, &data, &shape, blockLength](const std::span<size_t>::iterator shapeIter,
-																			 std::span<ValueType>::iterator dataBeg,
-																			 std::span<ValueType>::iterator dataEnd,
-																			 const std::string& preamble) {
+	recurseSerialize =
+		[&recurseSerialize, &ostream, &shape, blockLength](const std::span<size_t>::iterator shapeIter,
+														   typename std::span<ValueType>::iterator dataBeg,
+														   typename std::span<ValueType>::iterator dataEnd,
+														   const std::string& preamble)
+	{
 		if(shapeIter == std::prev(shape.end()))
 		{
-			out << "\n" << preamble << "[";
+			ostream << "\n" << preamble << "[";
 
 			for(auto dataIter = dataBeg; dataIter != dataEnd - 1; dataIter++)
 			{
-				out << std::setw(blockLength) << *dataIter << ", ";
+				ostream << std::setw(blockLength) << *dataIter << ", ";
 			}
 
-			out << std::setw(blockLength) << *(dataEnd - 1);
+			ostream << std::setw(blockLength) << *(dataEnd - 1);
 
-			out << "]";
+			ostream << "]";
 		}
 		else
 		{
-			const auto offset = std::distance(dataBeg, dataEnd) / *shapeIter;
+			const auto offset = static_cast<size_t>(std::distance(dataBeg, dataEnd)) / *shapeIter;
 
-			out << "\n" << preamble << "[";
+			ostream << "\n" << preamble << "[";
 
 			for(size_t dimIdx = 0; dimIdx < *shapeIter; dimIdx++)
 			{
-				recurseSerialize(shapeIter + 1, dataBeg + (dimIdx * offset), dataBeg + ((dimIdx + 1) * offset), preamble + " ");
+				recurseSerialize(std::next(shapeIter),
+								 std::next(dataBeg, static_cast<ptrdiff_t>(dimIdx * offset)),
+								 std::next(dataBeg, static_cast<ptrdiff_t>((dimIdx + 1) * offset)),
+								 preamble + " ");
 			}
 
-			out << "\n" << preamble << "]";
+			ostream << "\n" << preamble << "]";
 		}
 	};
 
@@ -502,32 +537,40 @@ void serializeContiguousMemory(std::ostream& out,
 template <typename ValueType>
 int getBlockSize(const std::vector<ValueType*>& dataPtrs, const size_t& chunkLength)
 {
-	return std::accumulate(
-		dataPtrs.cbegin(), dataPtrs.cend(), int{0}, [chunkLength](const size_t& acc, const ValueType* dataPtr) {
-			const auto maxForChunk =
-				std::max_element(dataPtr, dataPtr + chunkLength, [](const ValueType& lhs, const ValueType& rhs) {
-					return (std::ostringstream{} << lhs).str().size() < (std::ostringstream{} << rhs).str().size();
-				});
+	return std::accumulate(dataPtrs.cbegin(),
+						   dataPtrs.cend(),
+						   0,
+						   [chunkLength](const size_t& acc, const ValueType* dataPtr)
+						   {
+							   const auto* const maxForChunk =
+								   std::max_element(dataPtr,
+													dataPtr + chunkLength,
+													[](const ValueType& lhs, const ValueType& rhs) {
+														return (std::ostringstream{} << lhs).str().size() <
+															   (std::ostringstream{} << rhs).str().size();
+													});
 
-			const auto maxSizeForChunk = (std::ostringstream{} << *maxForChunk).str().size();
+							   const auto maxSizeForChunk =
+								   (std::ostringstream{} << *maxForChunk).str().size();
 
-			return std::max(acc, maxSizeForChunk);
-		});
+							   return std::max(acc, maxSizeForChunk);
+						   });
 }
 } // namespace
 
 template <typename SliceValueType>
-std::ostream& operator<<(std::ostream& out, const BasicTensorSlice<SliceValueType>& slice)
+std::ostream& operator<<(std::ostream& ostream, const BasicTensorSlice<SliceValueType>& slice)
 {
-	out << "<BasicTensorSlice dtype=" << typeid(SliceValueType).name() << " shape=" << stringifyVector(slice._computeSliceShape())
-		<< ">";
+	ostream << "<BasicTensorSlice dtype=" << typeid(SliceValueType).name()
+			<< " shape=" << stringifyVector(slice._computeSliceShape()) << ">";
 
-	const auto& dataPtrs = *(slice.dataChunks_);
+	const auto& dataPtrs = *(slice._dataChunks);
 	auto tShape = slice._computeSliceShape();
 	const auto chunkLength = slice._computeChunkLength();
 	const auto blockLength = getBlockSize(dataPtrs, chunkLength);
 
-	auto mergedShape = mergeShape(tShape, getPivotShapeElement(slice.tensor_.get().shape(), slice.indices_), chunkLength);
+	auto mergedShape =
+		mergeShape(tShape, getPivotShapeElement(slice._tensor.get().shape(), slice._indices), chunkLength);
 
 	std::function<void(std::vector<size_t>::iterator,
 					   typename std::vector<SliceValueType*>::const_iterator,
@@ -535,37 +578,43 @@ std::ostream& operator<<(std::ostream& out, const BasicTensorSlice<SliceValueTyp
 					   const std::string&)>
 		recursePrint;
 
-	recursePrint = [&recursePrint, &out, &dataPtrs, &tShape, &mergedShape, &chunkLength, &blockLength](
+	recursePrint = [&recursePrint, &ostream, &tShape, &mergedShape, &chunkLength, &blockLength](
 					   std::vector<size_t>::iterator shapeIter,
-					   std::vector<SliceValueType*>::const_iterator dataBeg,
-					   std::vector<SliceValueType*>::const_iterator dataEnd,
-					   const std::string& preamble) {
+					   typename std::vector<SliceValueType*>::const_iterator dataBeg,
+					   typename std::vector<SliceValueType*>::const_iterator dataEnd,
+					   const std::string& preamble)
+	{
 		if(shapeIter == std::prev(mergedShape.end()))
 		{
-			serializeContiguousMemory(out,
-									  std::span(*dataBeg, chunkLength),
-									  preamble,
-									  std::span(tShape.begin() + mergedShape.size() - 1, tShape.size() - mergedShape.size() + 1),
-									  blockLength);
+			const std::span<size_t> leftShape(
+				std::next(tShape.begin(), static_cast<ptrdiff_t>(mergedShape.size() - 1)),
+				tShape.size() - mergedShape.size() + 1);
+
+			const std::span<SliceValueType> memory(*dataBeg, chunkLength);
+
+			serializeContiguousMemory(ostream, memory, preamble, leftShape, blockLength);
 		}
 		else
 		{
-			const auto offset = std::distance(dataBeg, dataEnd) / *shapeIter;
+			const auto offset = static_cast<size_t>(std::distance(dataBeg, dataEnd)) / *shapeIter;
 
-			out << "\n" << preamble << "[";
+			ostream << "\n" << preamble << "[";
 
 			for(size_t dimIdx = 0; dimIdx < *shapeIter; dimIdx++)
 			{
-				recursePrint(shapeIter + 1, dataBeg + (dimIdx * offset), dataBeg + ((dimIdx + 1) * offset), preamble + " ");
+				recursePrint(shapeIter + 1,
+							 std::next(dataBeg, static_cast<ptrdiff_t>(dimIdx * offset)),
+							 std::next(dataBeg, static_cast<ptrdiff_t>((dimIdx + 1) * offset)),
+							 preamble + " ");
 			}
 
-			out << "\n" << preamble << "]";
+			ostream << "\n" << preamble << "]";
 		}
 	};
 
 	recursePrint(mergedShape.begin(), dataPtrs.cbegin(), dataPtrs.cend(), "");
 
-	return out;
+	return ostream;
 }
 
 } // namespace mlCore

@@ -12,7 +12,7 @@ MLCore is a module containing the core components for other data processing / ma
 - Added new [TensorInitializers](#tensorinitializers)
     - [RangeTensorInitializer](#rangetensorinitializer)
     - [GaussianTensorInitializer](#gaussiantensorinitializer)
-- Introduced base [GraphNodes](#graphnodes) interface ([Node](#node)) 
+- Introduced base [GraphNodes](#graphnodes) interface ([Node](#node))
 - Added new [GraphNodes](#graphnodes)
     - [Variable](#variable)
     - [Constant](#constant)
@@ -66,7 +66,7 @@ mlCore::BasicTensor<double> shapedTensorWithDefaultValue({3, 4}, 0);
 mlCore::BasicTensor<double> shapedTensorWithInitValues({2, 2}, {1, 2, 3, 4});
 ```
 
-Assigning values for specific parts of the tensor can be performed with use of a couple of methods, one of which uses [TensorInitializers](#tensorinitializers). 
+Assigning values for specific parts of the tensor can be performed with use of a couple of methods, one of which uses [TensorInitializers](#tensorinitializers).
 
 ```cpp
 // 0 0 0
@@ -83,7 +83,7 @@ std::vector<double> data{7, 8, 9};
 // 7 8 9
 tensor.fill(data.begin(), data.end(), true);
 
-mlCore::RangeTensorInitializer<double> initializer(0); 
+mlCore::RangeTensorInitializer<double> initializer(0);
 
 // 0 1 2
 // 3 4 5
@@ -94,7 +94,7 @@ tensor.fill(initializer);
 tensor.assign({{0, 2}, {1, 3}}, {11, 22, 33, 44});
 ```
 
-BasicTensor can serve as a range via iterators ([TensorIterator](#tensoriterator)). 
+BasicTensor can serve as a range via iterators ([TensorIterator](#tensoriterator)).
 
 ```cpp
 mlCore::BasicTensor<double> tensor(std::vector<size_t>{2, 3});
@@ -112,7 +112,7 @@ The class provides basic operators like: adding, subtracting, dividing, multiply
 ```cpp
 mlCore::BasicTensor<double> tensor({2, 2});
 
-// 1 2 
+// 1 2
 // 3 4
 tensor.fill({1, 2, 3, 4});
 
@@ -205,7 +205,7 @@ namespace mlCore::tensorInitializers
 
 ### RangeTensorInitializer
 
-Class implementing [ITensorInitializer](#itensorinitializer) interface. 
+Class implementing [ITensorInitializer](#itensorinitializer) interface.
 
 Implementation:
 ```cpp
@@ -234,7 +234,7 @@ while(initializer.canYield())
 
 ### GaussianTensorInitializer
 
-Class implementing [ITensorInitializer](#itensorinitializer) interface. 
+Class implementing [ITensorInitializer](#itensorinitializer) interface.
 
 Implementation:
 ```cpp
@@ -268,7 +268,7 @@ Group of classes in form of [BasicTensor](#basictensor) wrappers with associated
 
 ### Node
 
-Base class for all GraphNodes. It defines basic methods to manage the wrapped tensor and for identification purposes. 
+Base class for all GraphNodes. It defines basic methods to manage the wrapped tensor and for identification purposes.
 
 Implementation:
 
@@ -330,7 +330,7 @@ using VariablePtr = std::shared_ptr<Variable>;
 
 ### Constant
 
-Class derived from [Node](#node) providing semantics for nodes designed to keep their values unchanged (for example positional encoding in transformer input). 
+Class derived from [Node](#node) providing semantics for nodes designed to keep their values unchanged (for example positional encoding in transformer input).
 
 Implementation:
 
@@ -372,7 +372,7 @@ Group of classes forming a branch inside the [GraphNodes](#graphnodes) hierarchy
 
 ### UnaryOperator
 
-Base class for unary operator nodes, inherits from [Node](#node). Defines methods for computing output value based on a single input node. 
+Base class for unary operator nodes, inherits from [Node](#node). Defines methods for computing output value based on a single input node.
 
 Implementation:
 ```cpp
@@ -489,7 +489,7 @@ A subclass of [BinaryOperator](#binaryoperator). Performs basic subtraction betw
 
 ## GraphOperations
 
-Set of groups of functions performing operations between [GraphNodes](#graphnodes) instances. GraphOperations define methods creating various types of nodes, connecting them to the inputs. 
+Set of groups of functions performing operations between [GraphNodes](#graphnodes) instances. GraphOperations define methods creating various types of nodes, connecting them to the inputs.
 
 ### UnaryOperations
 
@@ -505,14 +505,14 @@ Set of activation functions performing certain operations on input node. They cr
 
 ## ComputationGraph
 
-Class responsible for storing [GraphNodes](#graphnodes) instances and performing operations on whole tree structure. It can collect nodes belonging to different trees creating computation forest. ComputationGraph makes for one of the main parts of automatic differentiation tools. 
+Class responsible for storing [GraphNodes](#graphnodes) instances and performing operations on whole tree structure. It can collect nodes belonging to different trees creating computation forest. ComputationGraph makes for one of the main parts of automatic differentiation tools.
 
 Basic workflow of the graph can be described as:
 1. Graph is activated, allowing to add more nodes.
 2. Nodes are added to the graph by the client.
 3. Graph is deactivated, disallowing to add anymore nodes.
 4. Forward pass is requested:
-    - Graph sorts its nodes so that the furthest ones are updated first. 
+    - Graph sorts its nodes so that the furthest ones are updated first.
     - Values of the nodes are updated either via given feed map or, in case of operators, via their internal updating mechanics.
 5. Backward pass is requested:
     - Gradients computing starts from the given root node's perspective.
@@ -589,7 +589,7 @@ Available functions:
 
 ## Models
 
-Set of interfaces for classes being components of more complex architectures. They take part in the workflow of a given model and can help implement specific design patterns making for architecture of the desired structure. Models carry semantics sued in the functioning of a model. 
+Set of interfaces for classes being components of more complex architectures. They take part in the workflow of a given model and can help implement specific design patterns making for architecture of the desired structure. Models carry semantics sued in the functioning of a model.
 
 ### Callback
 
@@ -662,7 +662,7 @@ using MetricContextPtr = std::shared_ptr<IMetric>;
 
 ### IOptimizer
 
-An interface for classes updating models' weights ([Node](#node)) with given gradient slices ([Tensor](#basictensor)) according to the internal parameters and the updating politics of a concrete implementation of the interface. 
+An interface for classes updating models' weights ([Node](#node)) with given gradient slices ([Tensor](#basictensor)) according to the internal parameters and the updating politics of a concrete implementation of the interface.
 
 ```cpp
 namespace mlCore::models

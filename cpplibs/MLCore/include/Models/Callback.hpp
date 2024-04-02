@@ -1,6 +1,7 @@
 #ifndef MLCORE_INCLUDE_MODELS_ICALLBACK_HPP
 #define MLCORE_INCLUDE_MODELS_ICALLBACK_HPP
 
+#include <memory>
 #include <type_traits>
 
 namespace mlCore::models
@@ -8,7 +9,7 @@ namespace mlCore::models
 
 /**
  * @brief Specifies the moment at which the callback should be called.
- * 
+ *
  */
 enum class CallbackMode : uint8_t
 {
@@ -21,41 +22,48 @@ enum class CallbackMode : uint8_t
 
 /**
  * @brief Interface for classes executing specific actions at specific points in time.
- * 
+ *
  */
 class Callback
 {
 	using CMType = std::underlying_type_t<CallbackMode>;
 
 public:
+	Callback() = default;
+
+	Callback(const Callback&) = default;
+	Callback(Callback&&) = default;
+	Callback& operator=(const Callback&) = default;
+	Callback& operator=(Callback&&) = default;
+
+	virtual ~Callback() = default;
+
 	/**
-     * @brief Tells the callback to execute its task.
-     * 
-     */
+	 * @brief Tells the callback to execute its task.
+	 *
+	 */
 	virtual void call() = 0;
 
 	/// Adds single CallbackMode to overall callback's mode.
 	void addMode(const CallbackMode mode)
 	{
-		mode_ |= static_cast<CMType>(mode);
+		_mode |= static_cast<CMType>(mode);
 	}
 
 	/// Removes single CallbackMode from the overall callback's mode.
 	void removeMode(const CallbackMode mode)
 	{
-		mode_ &= (~static_cast<CMType>(mode));
+		_mode &= (~static_cast<CMType>(mode));
 	}
 
 	/// Tells if the overall callback's mode has given mode.
 	bool hasMode(const CallbackMode mode) const
 	{
-		return (mode_ & static_cast<CMType>(mode)) != 0;
+		return (_mode & static_cast<CMType>(mode)) != 0;
 	}
 
-	virtual ~Callback() = default;
-
 private:
-	CMType mode_ = 0;
+	CMType _mode = 0;
 };
 
 using CallbackPtr = std::shared_ptr<Callback>;

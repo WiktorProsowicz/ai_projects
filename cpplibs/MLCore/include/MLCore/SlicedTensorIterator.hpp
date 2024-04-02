@@ -3,14 +3,15 @@
 
 #include <iterator>
 #include <memory>
+
 #include "MLCore/Utilities.h"
 
 namespace mlCore
 {
 /**
- * @brief Iterates over data spanned by a tensor slice according to provided 
- * 
- * @tparam ValueType 
+ * @brief Iterates over data spanned by a tensor slice according to provided
+ *
+ * @tparam ValueType
  */
 template <typename ValueType>
 class SlicedTensorIterator
@@ -19,11 +20,13 @@ public:
 	template <typename T>
 	friend class BasicTensorSlice;
 
+	// NOLINTBEGIN
 	using iterator_category = std::random_access_iterator_tag;
 	using value_type = ValueType;
 	using difference_type = std::ptrdiff_t;
 	using pointer = ValueType*;
 	using reference = ValueType&;
+	// NOLINTEND
 
 	SlicedTensorIterator() = delete;
 
@@ -37,13 +40,13 @@ public:
 	/// @brief Accesses underlying value.
 	reference operator*() const
 	{
-		return *currentPtr_;
+		return *_currentPtr;
 	}
 
 	/// @brief Accesses underlying pointer.
 	pointer operator->()
 	{
-		return currentPtr_;
+		return _currentPtr;
 	}
 
 	/// @brief Increments the iterator and returns it.
@@ -79,11 +82,11 @@ public:
 	/// @brief Moves the iterator `n` times forwards and returns it.
 	SlicedTensorIterator& operator-=(difference_type n)
 	{
-		offset_ -= n;
+		_offset -= n;
 
 		if(!_isOffsetValid())
 		{
-			currentPtr_ -= n;
+			_currentPtr -= n;
 			return *this;
 		}
 
@@ -95,11 +98,11 @@ public:
 	/// @brief Moves the iterator `n` times backwards and returns it.
 	SlicedTensorIterator& operator+=(difference_type n)
 	{
-		offset_ += n;
+		_offset += n;
 
 		if(!_isOffsetValid())
 		{
-			currentPtr_ += n;
+			_currentPtr += n;
 			return *this;
 		}
 
@@ -111,59 +114,59 @@ public:
 	/// Tells whether the slice points to the same point in data as the other one.
 	bool operator==(const SlicedTensorIterator& other) const
 	{
-		return currentPtr_ == other.currentPtr_;
+		return _currentPtr == other._currentPtr;
 	}
 
 	/// Tells whether the slice points to the same point in data as the other one.
 	bool operator!=(const SlicedTensorIterator& other) const
 	{
-		return currentPtr_ != other.currentPtr_;
+		return _currentPtr != other._currentPtr;
 	}
 
 	/// Tells whether the slice comes first in order than the other one.
 	bool operator<(const SlicedTensorIterator& other) const
 	{
-		return currentPtr_ < other.currentPtr_;
+		return _currentPtr < other._currentPtr;
 	}
 
 private:
 	/**
-     * @brief Creates a new iterator with parameters passed by a tensor slice.
-     * 
-     * @param ptr Pointer to data spanned by the creating slice.
-     * @param dataChunks Chunks of contiguous data from the tensor.
-     * @param chunkLength Size of each chunk of data.
-     * @param offset Offset indicating the shift of the current pointer regarding the beginning
-     *  of the whole data spanned by the slice. The offset assumes the spanned data is contiguous.
-     */
+	 * @brief Creates a new iterator with parameters passed by a tensor slice.
+	 *
+	 * @param ptr Pointer to data spanned by the creating slice.
+	 * @param dataChunks Chunks of contiguous data from the tensor.
+	 * @param chunkLength Size of each chunk of data.
+	 * @param offset Offset indicating the shift of the current pointer regarding the beginning
+	 *  of the whole data spanned by the slice. The offset assumes the spanned data is contiguous.
+	 */
 	SlicedTensorIterator(pointer ptr,
 						 const std::vector<ValueType*>& dataChunks,
 						 const size_t chunkLength,
 						 const difference_type offset)
-		: currentPtr_(ptr)
-		, dataChunks_(dataChunks)
-		, chunkLength_(chunkLength)
-		, offset_(offset)
-	{ }
+		: _currentPtr(ptr)
+		, _dataChunks(dataChunks)
+		, _chunkLength(chunkLength)
+		, _offset(offset)
+	{}
 
 	/// Updates the pointer value according to current offset. It is assumed the offset is valid.
 	void _updatePointer()
 	{
-		const auto chunkIndex = (static_cast<uint32_t>(offset_) / chunkLength_);
+		const auto chunkIndex = (static_cast<uint32_t>(_offset) / _chunkLength);
 
-		currentPtr_ = dataChunks_[chunkIndex] + (static_cast<uint32_t>(offset_) % chunkLength_);
+		_currentPtr = _dataChunks[chunkIndex] + (static_cast<uint32_t>(_offset) % _chunkLength);
 	}
 
 	/// Tells whether the current offset is within the spanned data.
 	bool _isOffsetValid() const
 	{
-		return (offset_ >= 0) && (static_cast<uint32_t>(offset_) < (dataChunks_.size() * chunkLength_));
+		return (_offset >= 0) && (static_cast<uint32_t>(_offset) < (_dataChunks.size() * _chunkLength));
 	}
 
-	pointer currentPtr_;
-	const std::vector<ValueType*>& dataChunks_;
-	size_t chunkLength_;
-	difference_type offset_;
+	pointer _currentPtr;
+	const std::vector<ValueType*>& _dataChunks;
+	size_t _chunkLength;
+	difference_type _offset;
 };
 } // namespace mlCore
 

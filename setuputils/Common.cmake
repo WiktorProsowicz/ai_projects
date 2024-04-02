@@ -13,7 +13,7 @@ macro(install_library)
     # install library
     add_library(${PROJECT_NAME} SHARED)
 
-    target_sources(${PROJECT_NAME} PUBLIC "${${PROJECT_NAME}_PUBLIC_HEADERS}" 
+    target_sources(${PROJECT_NAME} PUBLIC "${${PROJECT_NAME}_PUBLIC_HEADERS}"
                                    PRIVATE "${${PROJECT_NAME}_SRC}" "${${PROJECT_NAME}_PRIVATE_HEADERS}")
 
     set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
@@ -35,13 +35,13 @@ macro(install_library)
 
 endmacro()
 
-    
+
 
 # ****************************************
 #  Creates an executable for the library.
 # ****************************************
 macro(add_executable_for_lib)
-    
+
     file(GLOB_RECURSE ${PROJECT_NAME}_MAIN src/main.cpp)
 
     if(${PROJECT_NAME}_MAIN)
@@ -50,7 +50,7 @@ macro(add_executable_for_lib)
         target_link_libraries(${PROJECT_NAME}Executable PUBLIC ${PROJECT_NAME})
 
         set_target_properties(${PROJECT_NAME}Executable PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/)
-                
+
         target_compile_options(${PROJECT_NAME}Executable PRIVATE ${COMMON_COMPILE_OPTIONS})
     endif()
 endmacro()
@@ -79,8 +79,8 @@ macro(add_tests)
             endif()
 
             set_target_properties("${TEST_NAME}" PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/test/${PROJECT_NAME}/)
-            
-            target_compile_options("${TEST_NAME}" PRIVATE ${COMMON_COMPILE_OPTIONS})
+
+            target_compile_options("${TEST_NAME}" PRIVATE ${COMMON_COMPILE_OPTIONS_PERMISSIVE})
 
             gtest_discover_tests("${TEST_NAME}")
 
@@ -88,3 +88,75 @@ macro(add_tests)
 
     endif()
 endmacro()
+
+# ***********************************************
+# Used for building libraries and executables
+# ***********************************************
+set(COMMON_COMPILE_OPTIONS
+    -Wall
+    -Werror
+    -Wextra
+    -Weffc++
+    -Wunused
+    -Wpedantic
+    -Wnarrowing
+    -Wcast-align
+    -Wreturn-type
+    -Wconversion
+    -Wlogical-op
+    -Wtype-limits
+    -Winvalid-pch
+    -Wsign-compare
+    -Wuseless-cast
+    -Wunused-result
+    -Wold-style-cast
+    -Wredundant-decls
+    -Wduplicated-cond
+    -Wnull-dereference
+    -Wunused-parameter
+    -Wnon-virtual-dtor
+    -Woverloaded-virtual
+    -Wstringop-truncation
+    -Wduplicated-branches
+    -Wimplicit-fallthrough
+    -Wmissing-declarations
+    -Wmissing-include-dirs
+    -Wmisleading-indentation
+    -Wmissing-format-attribute
+)
+
+# ***********************************************
+# Used for building test executables
+# ***********************************************
+set(COMMON_COMPILE_OPTIONS_PERMISSIVE
+    -Wno-all
+    -Wno-error
+    -Wno-extra
+    -Wno-effc++
+    -Wno-unused
+    -Wno-pedantic
+    -Wno-narrowing
+    -Wno-cast-align
+    -Wno-return-type
+    -Wno-conversion
+    -Wno-logical-op
+    -Wno-type-limits
+    -Wno-invalid-pch
+    -Wno-sign-compare
+    -Wno-useless-cast
+    -Wno-unused-result
+    -Wno-old-style-cast
+    -Wno-redundant-decls
+    -Wno-duplicated-cond
+    -Wno-null-dereference
+    -Wno-unused-parameter
+    -Wno-non-virtual-dtor
+    -Wno-overloaded-virtual
+    -Wno-stringop-truncation
+    -Wno-duplicated-branches
+    -Wno-implicit-fallthrough
+    -Wno-missing-declarations
+    -Wno-missing-include-dirs
+    -Wno-misleading-indentation
+    -Wno-missing-format-attribute
+)

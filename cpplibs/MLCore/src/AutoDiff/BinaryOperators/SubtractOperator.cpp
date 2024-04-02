@@ -1,10 +1,12 @@
-#include <AutoDiff/BinaryOperators/SubtractOperator.h>
+#include "AutoDiff/BinaryOperators/SubtractOperator.h"
+
+#include <utility>
 
 namespace mlCore::autoDiff::binaryOperators
 {
 void SubtractOperator::updateValue()
 {
-	value_ = lhsInput_->getValue() - rhsInput_->getValue();
+	_value = _lhsInput->getValue() - _rhsInput->getValue();
 }
 
 std::pair<Tensor, Tensor> SubtractOperator::computeDerivative(const Tensor& outerDerivative) const

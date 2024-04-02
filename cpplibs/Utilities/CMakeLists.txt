@@ -8,4 +8,4 @@ install_library()
 
 target_link_libraries(${PROJECT_NAME})
 
-add_tests( LoggingLib fmt::fmt)
+add_tests(LoggingLib fmt::fmt)
