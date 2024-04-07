@@ -41,6 +41,17 @@ class RawTensorInitList : public std::vector<RawTensorForm<ContainedType>>
 public:
 	using std::vector<RawTensorForm<ContainedType>>::vector;
 };
+
+/**
+ * @brief Computes the shape of the result of a matrix multiplication.
+ *
+ * @param lhsShape Shape of the left-hand side matrix.
+ * @param rhsShape Shape of the right-hand side matrix.
+ *
+ * @throws std::runtime_error If the shapes are incompatible.
+ */
+std::vector<size_t> getOutputShapeForMatmul(const std::vector<size_t>& lhsShape,
+											const std::vector<size_t>& rhsShape);
 } // namespace detail
 
 /**
