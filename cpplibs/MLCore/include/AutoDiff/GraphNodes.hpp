@@ -80,6 +80,15 @@ public:
 	 */
 	virtual NodePtr copy() const = 0;
 
+	/**
+	 * @brief Returns the shape of the value being on the output port of the node.
+	 *
+	 * It may be simply the shape of the internal value or shape of the value computed via a compilcated
+	 * internal operation depending on the concrete type of node.
+	 *
+	 */
+	virtual std::vector<size_t> getOutputShape() const = 0;
+
 private:
 	std::string _name{};
 };
@@ -274,6 +283,13 @@ public:
 
 	virtual const mlCore::Tensor& getValue() const = 0;
 
+	/**
+	 * @brief Creates a copy of the operator.
+	 *
+	 * The type of the copy depends on the concrete operator class. The copy should have the same inputs as
+	 * the base op and also the same internal state.
+	 *
+	 */
 	virtual NodePtr copy() const = 0;
 
 	/**
@@ -314,10 +330,7 @@ public:
 		return _inputs;
 	}
 
-protected:
-	/// Computes the shape of the output regarding shapes of the input nodes.
-	virtual std::vector<size_t> _computeOutputShape() const = 0;
-
+private:
 	std::vector<NodePtr> _inputs;
 };
 
