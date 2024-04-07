@@ -16,6 +16,12 @@ class MatMulOp final : public Operator
 public:
 	MatMulOp() = delete;
 
+	MatMulOp(const std::vector<NodePtr>& inputs)
+		: Operator(inputs)
+		, _outputShape(computeOutputShapeSafe())
+		, _value(_outputShape)
+	{}
+
 	MatMulOp(const MatMulOp&) = delete;
 	MatMulOp(MatMulOp&&) = delete;
 	MatMulOp& operator=(const MatMulOp&) = delete;
@@ -23,12 +29,9 @@ public:
 
 	~MatMulOp() override = default;
 
-	std::vector<size_t> getOutputShape() const override
+	const std::vector<size_t>& getOutputShape() const override
 	{
-		const auto lhs = getInputs().front();
-		const auto rhs = getInputs().back();
-
-		return mlCore::detail::getOutputShapeForMatmul(lhs->getOutputShape(), rhs->getOutputShape());
+		return _outputShape;
 	}
 
 	const mlCore::Tensor& getValue() const override
@@ -83,6 +86,13 @@ public:
 	}
 
 private:
+	std::vector<size_t> computeOutputShapeSafe() const noexcept
+	{
+		return mlCore::detail::getOutputShapeForMatmul(getInputs().front()->getOutputShape(),
+													   getInputs().back()->getOutputShape());
+	}
+
+	std::vector<size_t> _outputShape;
 	mlCore::Tensor _value;
 };
 } // namespace autoDiff::ops::detail

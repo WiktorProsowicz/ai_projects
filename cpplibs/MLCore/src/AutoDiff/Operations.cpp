@@ -35,7 +35,7 @@ OperatorPtr add(const NodePtr& lhsNode, const NodePtr& rhsNode)
 	const auto fFunc = [](const std::vector<NodePtr>& inputs)
 	{ return inputs.front()->getValue() + inputs.back()->getValue(); };
 
-	const auto bFunc = [](const std::vector<NodePtr>& inputs) {
+	const auto bFunc = [](const std::vector<NodePtr>&) {
 		return std::vector{mlCore::Tensor{1.0}, mlCore::Tensor{1.0}};
 	};
 
@@ -49,7 +49,7 @@ OperatorPtr subtract(const NodePtr& lhsNode, const NodePtr& rhsNode)
 	const auto fFunc = [](const std::vector<NodePtr>& inputs)
 	{ return inputs.front()->getValue() - inputs.back()->getValue(); };
 
-	const auto bFunc = [](const std::vector<NodePtr>& inputs) {
+	const auto bFunc = [](const std::vector<NodePtr>&) {
 		return std::vector{mlCore::Tensor{1.0}, mlCore::Tensor{1.0}};
 	};
 

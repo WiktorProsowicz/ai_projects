@@ -51,7 +51,7 @@ public:
 		return _value;
 	}
 
-	std::vector<size_t> getOutputShape() const override
+	const std::vector<size_t>& getOutputShape() const override
 	{
 		return getInputs().front()->getOutputShape();
 	}

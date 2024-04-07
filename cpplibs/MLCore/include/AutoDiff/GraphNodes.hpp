@@ -87,7 +87,7 @@ public:
 	 * internal operation depending on the concrete type of node.
 	 *
 	 */
-	virtual std::vector<size_t> getOutputShape() const = 0;
+	virtual const std::vector<size_t>& getOutputShape() const = 0;
 
 private:
 	std::string _name{};
@@ -101,7 +101,7 @@ private:
  * since this type of node is not divisible.
  *
  */
-class Variable : public Node
+class Variable final : public Node
 {
 public:
 	Variable() = delete;
@@ -135,6 +135,11 @@ public:
 		return std::make_shared<Variable>(_value);
 	}
 
+	const std::vector<size_t>& getOutputShape() const override
+	{
+		return _value.shape();
+	}
+
 	/**
 	 * @brief Sets the value of the variable.
 	 *
@@ -164,23 +169,23 @@ private:
  * @details While computing derivative with regard to a constant, the result is shall be zeroed.
  *
  */
-class Constant : public Node
+class Constant final : public Node
 {
 public:
 	Constant() = delete;
 
 	/**
-	 * @brief Creates the variable, giving it an initial value.
+	 * @brief Creates the constant, giving it an initial value.
 	 *
-	 * @param initValue Initial value of the variable.
+	 * @param initValue Initial value of the constant.
 	 */
 	explicit Constant(mlCore::Tensor initValue)
 		: _value(std::move(initValue)){};
 
-	Constant(const Variable&) = delete;
-	Constant(Variable&&) = delete;
-	Constant& operator=(const Variable&) = delete;
-	Constant& operator=(Variable&&) = delete;
+	Constant(const Constant&) = delete;
+	Constant(Constant&&) = delete;
+	Constant& operator=(const Constant&) = delete;
+	Constant& operator=(Constant&&) = delete;
 
 	~Constant() override = default;
 
@@ -198,6 +203,11 @@ public:
 		return std::make_shared<Constant>(_value);
 	}
 
+	const std::vector<size_t>& getOutputShape() const override
+	{
+		return _value.shape();
+	}
+
 private:
 	mlCore::Tensor _value;
 };
@@ -206,15 +216,24 @@ private:
  * @brief Provides semantics for graph element holding external data.
  *
  */
-class Placeholder : public Node
+class Placeholder final : public Node
 {
 public:
-	Placeholder() = default;
+	Placeholder() = delete;
 
-	Placeholder(const Variable&) = delete;
-	Placeholder(Variable&&) = delete;
-	Placeholder& operator=(const Variable&) = delete;
-	Placeholder& operator=(Variable&&) = delete;
+	/**
+	 * @brief Creates the placeholder, giving it an initial value.
+	 *
+	 * @param initValue Initial value of the placeholder.
+	 */
+	explicit Placeholder(const mlCore::Tensor& value)
+		: _value(value)
+	{}
+
+	Placeholder(const Placeholder&) = delete;
+	Placeholder(Placeholder&&) = delete;
+	Placeholder& operator=(const Placeholder&) = delete;
+	Placeholder& operator=(Placeholder&&) = delete;
 
 	~Placeholder() override = default;
 
@@ -229,8 +248,7 @@ public:
 	 */
 	NodePtr copy() const override
 	{
-		auto copiedPlaceholder = std::make_shared<Placeholder>(_value);
-		copiedPlaceholder->putValue(_value.get());
+		auto copiedPlaceholder = std::make_shared<Placeholder>(_value.get());
 
 		return copiedPlaceholder;
 	}
@@ -243,6 +261,11 @@ public:
 	void putValue(const mlCore::Tensor& value)
 	{
 		_value = value;
+	}
+
+	const std::vector<size_t>& getOutputShape() const override
+	{
+		return _value.get().shape();
 	}
 
 private:

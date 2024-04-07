@@ -53,12 +53,12 @@ public:
 		setName(oper->getName());
 	}
 
-	virtual const mlCore::Tensor& getValue() const
+	const mlCore::Tensor& getValue() const override
 	{
 		return _oper->getValue();
 	}
 
-	virtual autoDiff::NodePtr copy() const override
+	autoDiff::NodePtr copy() const override
 	{
 		return _oper->copy();
 	}
@@ -73,7 +73,7 @@ public:
 		}
 	}
 
-	virtual std::vector<mlCore::Tensor> computeDerivative(const mlCore::Tensor& outerDerivative) const
+	std::vector<mlCore::Tensor> computeDerivative(const mlCore::Tensor& outerDerivative) const override
 	{
 		for(const auto& input : getInputs())
 		{
@@ -83,9 +83,14 @@ public:
 		return _oper->computeDerivative(outerDerivative);
 	}
 
-	virtual std::vector<mlCore::Tensor> computeDirectDerivative() const
+	std::vector<mlCore::Tensor> computeDirectDerivative() const override
 	{
 		return _oper->computeDirectDerivative();
+	}
+
+	const std::vector<size_t>& getOutputShape() const override
+	{
+		return _oper->getOutputShape();
 	}
 
 private:
@@ -205,7 +210,7 @@ constructTree(const std::vector<std::pair<std::string, std::string>>& config)
 		const auto oper = recipe.substr(0, recipe.find('_'));
 		recipe = recipe.substr(oper.size() + 1);
 
-		if(oper == "NODE")
+		if(oper == "VARIABLE")
 		{
 			recipe = recipe.substr(1, recipe.size() - 2);
 
@@ -219,7 +224,7 @@ constructTree(const std::vector<std::pair<std::string, std::string>>& config)
 			}
 
 			const mlCore::Tensor value(shape);
-			auto node = std::make_shared<Node>(value);
+			auto node = std::make_shared<Variable>(value);
 
 			node->setName(name);
 
@@ -500,19 +505,19 @@ TEST_F(TestComputationGraph, testGraphStructureBuilding)
 {
 	using namespace autoDiff;
 
-	const std::vector<std::pair<std::string, std::string>> config{{"0", "NODE_(5,5)"},
-																  {"1", "NODE_(5,5)"},
+	const std::vector<std::pair<std::string, std::string>> config{{"0", "VARIABLE_(5,5)"},
+																  {"1", "VARIABLE_(5,5)"},
 																  {"2", "MULTIPLY_0_0"},
 																  {"3", "ADD_2_1"},
 																  {"4", "LN_3"},
-																  {"5", "NODE_(5,5)"},
+																  {"5", "VARIABLE_(5,5)"},
 																  {"6", "RELU_5"},
 																  {"7", "SIGMOID_6"},
-																  {"8", "NODE_(5,5)"},
+																  {"8", "VARIABLE_(5,5)"},
 																  {"9", "MULTIPLY_7_8"},
 																  {"10", "SUBTRACT_4_9"},
-																  {"11", "NODE_(5,5)"},
-																  {"12", "NODE_(5,5)"},
+																  {"11", "VARIABLE_(5,5)"},
+																  {"12", "VARIABLE_(5,5)"},
 																  {"13", "MATMUL_11_12"},
 																  {"14", "DIVIDE_10_13"}};
 
@@ -527,18 +532,18 @@ TEST_F(TestComputationGraph, testBackPropagation)
 
 	const std::vector<std::pair<std::string, std::string>> treeConstructionConfig{
 		{"Input", "PLACEHOLDER_(256,1)"},
-		{"L1W", "NODE_(200,256)"},
-		{"L1B", "NODE_(200,1)"},
+		{"L1W", "VARIABLE_(200,256)"},
+		{"L1B", "VARIABLE_(200,1)"},
 		{"Layer1", "MATMUL_L1W_Input"},
 		{"Layer1biased", "ADD_Layer1_L1B"},
 		{"Layer1Act", "RELU_Layer1biased"},
-		{"L2W", "NODE_(200,200)"},
-		{"L2B", "NODE_(200,1)"},
+		{"L2W", "VARIABLE_(200,200)"},
+		{"L2B", "VARIABLE_(200,1)"},
 		{"Layer2", "MATMUL_L2W_Layer1Act"},
 		{"Layer2biased", "ADD_Layer2_L2B"},
 		{"Layer2Act", "SIGMOID_Layer2biased"},
-		{"L3W", "NODE_(1,200)"},
-		{"L3B", "NODE_(1,1)"},
+		{"L3W", "VARIABLE_(1,200)"},
+		{"L3B", "VARIABLE_(1,1)"},
 		{"Layer3", "MATMUL_L3W_Layer2Act"},
 		{"Layer3biased", "ADD_Layer3_L3B"},
 		{"Layer3Act", "SIGMOID_Layer3biased"},
@@ -595,18 +600,18 @@ TEST_F(TestComputationGraph, testGradientDescentSimulation)
 	using namespace autoDiff;
 
 	const std::vector<std::pair<std::string, std::string>> treeConfig{{"Input", "PLACEHOLDER_(256,1)"},
-																	  {"L1W", "NODE_(200,256)"},
-																	  {"L1B", "NODE_(200,1)"},
+																	  {"L1W", "VARIABLE_(200,256)"},
+																	  {"L1B", "VARIABLE_(200,1)"},
 																	  {"Layer1", "MATMUL_L1W_Input"},
 																	  {"Layer1biased", "ADD_Layer1_L1B"},
 																	  {"Layer1Act", "RELU_Layer1biased"},
-																	  {"L2W", "NODE_(200,200)"},
-																	  {"L2B", "NODE_(200,1)"},
+																	  {"L2W", "VARIABLE_(200,200)"},
+																	  {"L2B", "VARIABLE_(200,1)"},
 																	  {"Layer2", "MATMUL_L2W_Layer1Act"},
 																	  {"Layer2biased", "ADD_Layer2_L2B"},
 																	  {"Layer2Act", "SIGMOID_Layer2biased"},
-																	  {"L3W", "NODE_(1,200)"},
-																	  {"L3B", "NODE_(1,1)"},
+																	  {"L3W", "VARIABLE_(1,200)"},
+																	  {"L3B", "VARIABLE_(1,1)"},
 																	  {"Layer3", "MATMUL_L3W_Layer2Act"},
 																	  {"Layer3biased", "ADD_Layer3_L3B"},
 																	  {"Layer3Act", "SIGMOID_Layer3biased"}};

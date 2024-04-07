@@ -29,7 +29,7 @@ public:
 
 	~TestLayer() override = default;
 
-	mlCore::autoDiff::NodePtr build() override
+	autoDiff::NodePtr build() override
 	{
 		return {};
 	}
@@ -39,12 +39,12 @@ public:
 		return 0.0;
 	}
 
-	std::vector<mlCore::autoDiff::NodePtr> getAllWeights() const override
+	std::vector<autoDiff::NodePtr> getAllWeights() const override
 	{
 		return {};
 	}
 
-	std::vector<mlCore::autoDiff::NodePtr> getTrainableWeights() const override
+	std::vector<autoDiff::NodePtr> getTrainableWeights() const override
 	{
 		return {};
 	}
@@ -68,9 +68,12 @@ public:
 
 	~TestOptimizer() override = default;
 
-	void applyGradient(mlCore::autoDiff::NodePtr weight, mlCore::Tensor derivative) override
+	void applyGradient(autoDiff::NodePtr weight, mlCore::Tensor derivative) override
 	{
-		weight->getValue() = std::move(derivative);
+		if(const auto variable = std::dynamic_pointer_cast<autoDiff::Variable>(weight))
+		{
+			variable->setValue(std::move(derivative));
+		}
 	}
 };
 
@@ -176,7 +179,7 @@ TEST(TestModels, testTestOptimizer)
 {
 	const mlCore::models::IOptimizerPtr optimizer = std::make_shared<TestOptimizer>();
 
-	auto node = std::make_shared<mlCore::autoDiff::Node>(mlCore::Tensor(std::vector<size_t>{}));
+	auto node = std::make_shared<autoDiff::Variable>(mlCore::Tensor(std::vector<size_t>{}));
 	const mlCore::Tensor tensor({}, 0);
 
 	optimizer->applyGradient(node, tensor);
