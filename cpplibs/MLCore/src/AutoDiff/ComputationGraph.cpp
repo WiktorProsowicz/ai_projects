@@ -19,21 +19,14 @@
 namespace autoDiff
 {
 
-bool ComputationGraph::hasGradient(const std::string& nodeName) const
+bool ComputationGraph::hasGradient(const NodePtr& node) const
 {
-	return std::find_if(_gradients.begin(),
-						_gradients.end(),
-						[&nodeName](const std::pair<NodePtr, mlCore::Tensor>& nodeGrad)
-						{ return nodeGrad.first->getName() == nodeName; }) == _gradients.end();
+	return _gradients.find(node) == _gradients.end();
 }
 
-const mlCore::Tensor& ComputationGraph::getGradientByNodeName(const std::string& nodeName) const
+const mlCore::Tensor& ComputationGraph::getGradient(const NodePtr& node) const
 {
-	return std::find_if(_gradients.begin(),
-						_gradients.end(),
-						[&nodeName](const std::pair<NodePtr, mlCore::Tensor>& nodeGrad)
-						{ return nodeGrad.first->getName() == nodeName; })
-		->second;
+	return _gradients.at(node);
 }
 
 void ComputationGraph::addNode(const NodePtr& node)

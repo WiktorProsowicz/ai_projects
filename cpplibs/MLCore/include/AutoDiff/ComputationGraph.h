@@ -77,18 +77,16 @@ public:
 	}
 
 	/**
-	 * @brief Tells if there is computed gradient with certain name
+	 * @brief Tells if a gradient computed with respect to the given node is available.
 	 *
-	 * @param nodeName
 	 */
-	bool hasGradient(const std::string& nodeName) const;
+	bool hasGradient(const NodePtr& nodeName) const;
 
 	/**
-	 * @brief Gets gradient connected with the node with given name
+	 * @brief Returns gradient computed with respect to the given node.
 	 *
-	 * @param nodeName
 	 */
-	const mlCore::Tensor& getGradientByNodeName(const std::string& nodeName) const;
+	const mlCore::Tensor& getGradient(const NodePtr& node) const;
 
 	/**
 	 * @brief Goes through the graph starting from the primary leaves
@@ -96,7 +94,7 @@ public:
 	 * @param feedDict Stores values that should fill chosen placeholders. If not given, placeholders keep
 	 * their old values.
 	 */
-	void forwardPass(const std::map<PlaceholderPtr, mlCore::Tensor>& feedDict = {});
+	void forwardPass(const std::map<PlaceholderPtr, mlCore::Tensor>& feenodedDict = {});
 
 	/**
 	 * @brief Goes through the graph starting from the root and perform backward propagation
