@@ -7,7 +7,7 @@
 
 #include "AutoDiff/GraphNodes.hpp"
 
-namespace mlCore::autoDiff
+namespace autoDiff
 {
 
 /**
@@ -88,21 +88,7 @@ public:
 	 *
 	 * @param nodeName
 	 */
-	const Tensor& getGradientByNodeName(const std::string& nodeName) const;
-
-	/**
-	 * @brief Tells if there is computed gradient with certain id
-	 *
-	 * @param nodeId
-	 */
-	bool hasGradient(const size_t& nodeId) const;
-
-	/**
-	 * @brief Gets gradient connected with the node with given id
-	 *
-	 * @param nodeId
-	 */
-	const Tensor& getGradientByNodeId(const size_t& nodeId) const;
+	const mlCore::Tensor& getGradientByNodeName(const std::string& nodeName) const;
 
 	/**
 	 * @brief Goes through the graph starting from the primary leaves
@@ -110,7 +96,7 @@ public:
 	 * @param feedDict Stores values that should fill chosen placeholders. If not given, placeholders keep
 	 * their old values.
 	 */
-	void forwardPass(const std::map<PlaceholderPtr, Tensor>& feedDict = {});
+	void forwardPass(const std::map<PlaceholderPtr, mlCore::Tensor>& feedDict = {});
 
 	/**
 	 * @brief Goes through the graph starting from the root and perform backward propagation
@@ -132,9 +118,9 @@ private:
 private:
 	bool _isActive = false;
 	std::vector<NodePtr> _nodes;
-	std::map<NodePtr, Tensor> _gradients;
+	std::map<NodePtr, mlCore::Tensor> _gradients;
 	bool _areNodesSorted = true;
 };
-} // namespace mlCore::autoDiff
+} // namespace autoDiff
 
 #endif

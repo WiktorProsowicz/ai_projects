@@ -13,44 +13,25 @@
 
 #include <LoggingLib/LoggingLib.hpp>
 
-#include "AutoDiff/BinaryOperators/BinaryOperator.h"
 #include "AutoDiff/GraphNodes.hpp"
-#include "AutoDiff/UnaryOperators/UnaryOperator.h"
 #include "MLCore/BasicTensor.h"
 
-namespace mlCore::autoDiff
+namespace autoDiff
 {
-
-bool ComputationGraph::hasGradient(const size_t& nodeId) const
-{
-	return std::find_if(_gradients.begin(),
-						_gradients.end(),
-						[&nodeId](const std::pair<NodePtr, Tensor>& nodeGrad)
-						{ return nodeGrad.first->getIndex() == nodeId; }) == _gradients.end();
-}
 
 bool ComputationGraph::hasGradient(const std::string& nodeName) const
 {
 	return std::find_if(_gradients.begin(),
 						_gradients.end(),
-						[&nodeName](const std::pair<NodePtr, Tensor>& nodeGrad)
+						[&nodeName](const std::pair<NodePtr, mlCore::Tensor>& nodeGrad)
 						{ return nodeGrad.first->getName() == nodeName; }) == _gradients.end();
 }
 
-const Tensor& ComputationGraph::getGradientByNodeId(const size_t& nodeId) const
+const mlCore::Tensor& ComputationGraph::getGradientByNodeName(const std::string& nodeName) const
 {
 	return std::find_if(_gradients.begin(),
 						_gradients.end(),
-						[&nodeId](const std::pair<NodePtr, Tensor>& nodeGrad)
-						{ return nodeGrad.first->getIndex() == nodeId; })
-		->second;
-}
-
-const Tensor& ComputationGraph::getGradientByNodeName(const std::string& nodeName) const
-{
-	return std::find_if(_gradients.begin(),
-						_gradients.end(),
-						[&nodeName](const std::pair<NodePtr, Tensor>& nodeGrad)
+						[&nodeName](const std::pair<NodePtr, mlCore::Tensor>& nodeGrad)
 						{ return nodeGrad.first->getName() == nodeName; })
 		->second;
 }
@@ -74,16 +55,9 @@ void ComputationGraph::_sortNodes()
 
 	for(const auto& node : _nodes)
 	{
-		if(const auto castedBinaryOp = std::dynamic_pointer_cast<binaryOperators::BinaryOperator>(node))
+		if(const auto castedOperator = std::dynamic_pointer_cast<Operator>(node))
 		{
-			const auto& [lhs, rhs] = castedBinaryOp->getInputs();
-
-			nodesWithParent.insert(lhs);
-			nodesWithParent.insert(rhs);
-		}
-		else if(const auto castedUnaryOp = std::dynamic_pointer_cast<unaryOperators::UnaryOperator>(node))
-		{
-			nodesWithParent.insert(castedUnaryOp->getInput());
+			nodesWithParent.insert(castedOperator->getInputs().begin(), castedOperator->getInputs().end());
 		}
 	}
 
@@ -102,15 +76,9 @@ void ComputationGraph::_sortNodes()
 	std::function<void(const NodePtr&)> traverseTree;
 	traverseTree = [&traverseTree, &newNodes](const NodePtr& node)
 	{
-		if(const auto castedBinaryOp = std::dynamic_pointer_cast<binaryOperators::BinaryOperator>(node))
+		if(const auto castedOp = std::dynamic_pointer_cast<Operator>(node))
 		{
-			const auto& [lhs, rhs] = castedBinaryOp->getInputs();
-			traverseTree(lhs);
-			traverseTree(rhs);
-		}
-		else if(const auto castedUnaryOp = std::dynamic_pointer_cast<unaryOperators::UnaryOperator>(node))
-		{
-			traverseTree(castedUnaryOp->getInput());
+			std::for_each(castedOp->getInputs().begin(), castedOp->getInputs().end(), traverseTree);
 		}
 
 		if(std::find(newNodes.begin(), newNodes.end(), node) == newNodes.end())
@@ -129,7 +97,7 @@ void ComputationGraph::_sortNodes()
 	_areNodesSorted = true;
 }
 
-void ComputationGraph::forwardPass(const std::map<PlaceholderPtr, Tensor>& feedDict)
+void ComputationGraph::forwardPass(const std::map<PlaceholderPtr, mlCore::Tensor>& feedDict)
 {
 	if(!_areNodesSorted)
 	{
@@ -141,15 +109,11 @@ void ComputationGraph::forwardPass(const std::map<PlaceholderPtr, Tensor>& feedD
 		if(const auto placeholder = std::dynamic_pointer_cast<Placeholder>(node);
 		   placeholder && (feedDict.find(placeholder) != feedDict.end()))
 		{
-			placeholder->getValue() = feedDict.at(placeholder);
+			placeholder->putValue(feedDict.at(placeholder));
 		}
-		else if(const auto binaryOper = std::dynamic_pointer_cast<binaryOperators::BinaryOperator>(node))
+		else if(const auto castedOp = std::dynamic_pointer_cast<Operator>(node))
 		{
-			binaryOper->updateValue();
-		}
-		else if(const auto unaryOper = std::dynamic_pointer_cast<unaryOperators::UnaryOperator>(node))
-		{
-			unaryOper->updateValue();
+			castedOp->updateValue();
 		}
 	}
 }
@@ -161,10 +125,10 @@ void ComputationGraph::computeGradients(const NodePtr& root)
 		_sortNodes();
 	}
 
-	std::function<void(const NodePtr&, const Tensor&)> backPropagate;
+	std::function<void(const NodePtr&, const mlCore::Tensor&)> backPropagate;
 
 	// traverses the nodes tree and computes gradient in regard of every node
-	backPropagate = [&backPropagate, this](const NodePtr& node, const Tensor& cumulatedGradient)
+	backPropagate = [&backPropagate, this](const NodePtr& node, const mlCore::Tensor& cumulatedGradient)
 	{
 		if(this->_gradients.find(node) == this->_gradients.end())
 		{
@@ -176,22 +140,25 @@ void ComputationGraph::computeGradients(const NodePtr& root)
 			grad = grad + cumulatedGradient;
 		}
 
-		if(const auto castedUnary = std::dynamic_pointer_cast<unaryOperators::UnaryOperator>(node))
+		if(const auto castedOp = std::dynamic_pointer_cast<Operator>(node))
 		{
-			const auto input = castedUnary->getInput();
-			const auto derivative = castedUnary->computeDerivative(cumulatedGradient);
-			backPropagate(input, cumulatedGradient);
-		}
-		else if(const auto castedBinary = std::dynamic_pointer_cast<binaryOperators::BinaryOperator>(node))
-		{
-			const auto [lInput, rInput] = castedBinary->getInputs();
-			const auto [lDerivative, rDerivative] = castedBinary->computeDerivative(cumulatedGradient);
+			const auto inputs = castedOp->getInputs();
+			const auto derivatives = castedOp->computeDerivative(cumulatedGradient);
 
-			backPropagate(lInput, lDerivative);
-			backPropagate(rInput, rDerivative);
+			if(inputs.size() != derivatives.size())
+			{
+				LOG_ERROR("ComputationGraph",
+						  "Critical! Got different number of derivatives than inputs of an operator!");
+				return;
+			}
+
+			for(std::size_t i = 0; i < inputs.size(); ++i)
+			{
+				backPropagate(inputs[i], derivatives[i]);
+			}
 		}
 	};
 
-	backPropagate(root, Tensor(root->getValue().shape(), 1.0));
+	backPropagate(root, mlCore::Tensor(root->getValue().shape(), 1.0));
 }
-} // namespace mlCore::autoDiff
+} // namespace autoDiff
