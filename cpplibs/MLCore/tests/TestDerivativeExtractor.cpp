@@ -8,41 +8,35 @@
 
 #include <iostream>
 
-#include <AutoDiff/BinaryOperators/BinaryOperator.h>
-#include <AutoDiff/GraphOperations.h>
-#include <AutoDiff/UnaryOperators/UnaryOperator.h>
+#include <AutoDiff/GraphNodes.hpp>
+#include <AutoDiff/Operations.h>
 #include <MLCore/TensorInitializers/RangeTensorInitializer.hpp>
 #include <gtest/gtest.h>
 
 namespace
 {
 
-template <typename OperType>
-concept UnaryNodeOperation = requires(OperType oper, mlCore::autoDiff::NodePtr node) {
-	{
-		oper(node)
-	} -> std::same_as<mlCore::autoDiff::NodePtr>;
+/// Concept for functions taking any number of shared pointers of types inheriting from Node and returning
+/// analogous type
+template <typename Operation, typename... NodePtrs>
+concept NodeOperation = requires(NodePtrs... inputNodes, Operation oper) {
+	// input types are shared pointers
+	(... && std::is_same_v<std::shared_ptr<decltype(*inputNodes)>, decltype(inputNodes)>);
+
+	// pointed types are derived from Node
+	(... && std::is_base_of_v<autoDiff::Node, decltype(*inputNodes)>);
+
+	// result type is shared ptr
+	std::is_same_v<std::shared_ptr<decltype(*oper(inputNodes...))>, decltype(oper(inputNodes...))>;
+
+	// result pointer points to something derived from Node
+	std::is_base_of_v<autoDiff::Node, decltype(*(oper(inputNodes...)))>;
 };
 
-template <typename OperType>
-concept BinaryNodeOperation = requires(OperType oper, const mlCore::autoDiff::NodePtr node) {
-	{
-		oper(node, node)
-	} -> std::same_as<mlCore::autoDiff::NodePtr>;
-};
-
-struct UnaryParams
+struct Params
 {
-	std::vector<uint64_t> tensorShape;
-	std::unique_ptr<mlCore::tensorInitializers::ITensorInitializer<double>> initializer;
-};
-
-struct BinaryParams
-{
-	std::vector<uint64_t> leftTensorShape;
-	std::unique_ptr<mlCore::tensorInitializers::ITensorInitializer<double>> leftInitializer;
-	std::vector<uint64_t> rightTensorShape;
-	std::unique_ptr<mlCore::tensorInitializers::ITensorInitializer<double>> rightInitializer;
+	std::vector<std::vector<size_t>> tensorShapes;
+	std::vector<std::shared_ptr<mlCore::tensorInitializers::ITensorInitializer<double>>> initializers;
 };
 
 std::string stringifyTensor(const mlCore::Tensor& tensor)
@@ -60,13 +54,16 @@ std::string stringifyTensor(const mlCore::Tensor& tensor)
 class TestDerivativeExtractor : public testing::Test
 {
 protected:
-	template <UnaryNodeOperation Operation>
-	static mlCore::Tensor _computeDefinitionDerivative(Operation oper, const mlCore::Tensor& inputTensor)
+	/// Computes derivative of given operation taking one input tensor (it may be a wrapper for a function
+	/// with one node movable and other fixed).
+	static mlCore::Tensor
+	_computeDefinitionDerivative(std::function<autoDiff::NodePtr(const autoDiff::NodePtr&)> oper,
+								 const mlCore::Tensor& inputTensor)
 	{
 		constexpr double kEpsilon = 1e-6;
 
-		const auto backShiftedNode = std::make_shared<mlCore::autoDiff::Constant>(inputTensor - kEpsilon);
-		const auto frontShiftedNode = std::make_shared<mlCore::autoDiff::Constant>(inputTensor + kEpsilon);
+		const auto backShiftedNode = std::make_shared<autoDiff::Constant>(inputTensor - kEpsilon);
+		const auto frontShiftedNode = std::make_shared<autoDiff::Constant>(inputTensor + kEpsilon);
 
 		const auto backShiftedResult = oper(backShiftedNode);
 		const auto frontShiftedResult = oper(frontShiftedNode);
@@ -89,88 +86,65 @@ protected:
 		}
 	}
 
-	template <BinaryNodeOperation Operation>
-	static void _testBinaryOperationDerivative(Operation oper, const BinaryParams& params)
+	static void
+	_testOperationDerivative(std::function<autoDiff::NodePtr(const std::vector<autoDiff::NodePtr>&)> oper,
+							 const Params& params)
 	{
-		using mlCore::autoDiff::binaryOperators::BinaryOperator;
+		std::vector<mlCore::Tensor> inputValues;
+		inputValues.reserve(params.tensorShapes.size());
 
-		// input tensors
-		mlCore::Tensor leftNodeValue(params.leftTensorShape);
-		leftNodeValue.fill(*params.leftInitializer);
+		for(const auto& shape : params.tensorShapes)
+		{
+			mlCore::Tensor tensor(shape);
+			tensor.fill(*params.initializers.front());
+			inputValues.push_back(tensor);
+		}
 
-		mlCore::Tensor rightNodeValue(params.rightTensorShape);
-		rightNodeValue.fill(*params.rightInitializer);
+		std::vector<autoDiff::NodePtr> inputNodes;
+		inputNodes.reserve(inputValues.size());
 
-		// input graph nodes
-		const auto leftInputNode = std::make_shared<mlCore::autoDiff::Constant>(leftNodeValue);
-		const auto rightInputNode = std::make_shared<mlCore::autoDiff::Constant>(rightNodeValue);
+		for(const auto& tensor : inputValues)
+		{
+			inputNodes.push_back(std::make_shared<autoDiff::Constant>(tensor));
+		}
 
-		// operation result
-		auto operationResult = std::dynamic_pointer_cast<BinaryOperator>(oper(leftInputNode, rightInputNode));
+		auto operationResult = std::dynamic_pointer_cast<autoDiff::Operator>(oper(inputNodes));
 
 		if(!operationResult)
 		{
-			FAIL() << "Given operation yields something different than IBinaryOperationPtr!";
+			FAIL() << "Given operation yields something different than OperationPtr!";
 		}
 
-		const auto [leftDerivative, rightDerivative] = operationResult->computeDirectDerivative();
+		const auto derivatives = operationResult->computeDirectDerivative();
 
-		// operation with locked right input
-		const auto leftLockedOperation = [&oper, &rightInputNode](mlCore::autoDiff::NodePtr node)
-		{ return oper(node, rightInputNode); };
-		// operation with locked left input
-		const auto rightLockedOperation = [&oper, &leftInputNode](mlCore::autoDiff::NodePtr node)
-		{ return oper(leftInputNode, node); };
-
-		// computing derivative according to definition
-		const auto leftDefDerivative = _computeDefinitionDerivative(leftLockedOperation, leftNodeValue);
-
-		const auto rightDefDerivative = _computeDefinitionDerivative(rightLockedOperation, rightNodeValue);
-
-		_compareTwoDerivatives(leftDerivative,
-							   leftDefDerivative,
-							   "Found inequality while comparing DerivativeExtractor result and "
-							   "definition derivative with regard to left input!\n\nInputs:\n\n" +
-								   stringifyTensor(leftNodeValue) + "\n\n" + stringifyTensor(rightNodeValue));
-
-		_compareTwoDerivatives(rightDerivative,
-							   rightDefDerivative,
-							   "Found inequality while comparing DerivativeExtractor result and "
-							   "definition derivative with regard to right input!\n\nInputs:\n\n" +
-								   stringifyTensor(leftNodeValue) + "\n\n" + stringifyTensor(rightNodeValue));
-	}
-
-	template <UnaryNodeOperation Operation>
-	static void _testUnaryOperationDerivative(Operation oper, const UnaryParams& params)
-	{
-		using mlCore::autoDiff::unaryOperators::UnaryOperator;
-
-		// input tensor
-		mlCore::Tensor nodeValue(params.tensorShape);
-		nodeValue.fill(*params.initializer);
-
-		// input graph nodes
-		const auto inputNode = std::make_shared<mlCore::autoDiff::Constant>(nodeValue);
-
-		// operation result
-		const auto operationResult = std::dynamic_pointer_cast<UnaryOperator>(oper(inputNode));
-
-		if(!operationResult)
+		for(size_t inputIdx = 0; inputIdx < inputNodes.size(); inputIdx)
 		{
-			FAIL() << "Given operation yields something different than IUnaryOperationPtr!";
+			// Operation wrapper reduced to a single variable input.
+			const auto lockedOperation = [&oper, &inputNodes, inputIdx](const autoDiff::NodePtr& node)
+			{
+				std::vector<autoDiff::NodePtr> newInputs = inputNodes;
+				newInputs[inputIdx] = node;
+
+				return oper(newInputs);
+			};
+
+			// computing derivative according to definition
+			const auto defDerivative =
+				_computeDefinitionDerivative(lockedOperation, inputNodes[inputIdx]->getValue());
+
+			std::vector<std::string> stringifiedInputs;
+
+			for(const auto& input : inputNodes)
+			{
+				stringifiedInputs.push_back(stringifyTensor(input->getValue()));
+			}
+
+			_compareTwoDerivatives(derivatives[inputIdx],
+								   defDerivative,
+								   "Found inequality while comparing DerivativeExtractor result and "
+								   "definition derivative with regard to left input!\n\nInputs:\n\n" +
+									   fmt::format("{}", fmt::join(stringifiedInputs, "\n\n")));
 		}
-
-		const auto derivative = operationResult->computeDirectDerivative();
-
-		// computing derivative according to definition
-		const auto definitionDerivative = _computeDefinitionDerivative(oper, nodeValue);
-
-		_compareTwoDerivatives(
-			derivative,
-			definitionDerivative,
-			"Found inequality while comparing derivative, computed with "
-			"DerivativeExtractor, and that computed according to definition!\n\nInput node:\n\n" +
-				stringifyTensor(nodeValue));
 	}
 
 	static void _testMatmulDerivativeExtracting(const mlCore::Tensor& leftTensor,
@@ -178,21 +152,20 @@ protected:
 												const mlCore::Tensor& outer,
 												const std::pair<mlCore::Tensor, mlCore::Tensor>& expected)
 	{
-		using mlCore::autoDiff::binaryOperators::BinaryOperator;
-
-		const auto leftNode = std::make_shared<mlCore::autoDiff::Constant>(leftTensor);
-		const auto rightNode = std::make_shared<mlCore::autoDiff::Constant>(rightTensor);
+		const auto leftNode = std::make_shared<autoDiff::Constant>(leftTensor);
+		const auto rightNode = std::make_shared<autoDiff::Constant>(rightTensor);
 
 		const auto operationResult =
-			std::dynamic_pointer_cast<mlCore::autoDiff::binaryOperators::BinaryOperator>(
-				mlCore::autoDiff::binaryOperations::matmul(leftNode, rightNode));
+			std::dynamic_pointer_cast<autoDiff::Operator>(autoDiff::ops::matmul(leftNode, rightNode));
 
 		if(!operationResult)
 		{
 			FAIL() << "Matmul operation yielded something other than BinaryOperator!";
 		}
 
-		const auto [leftDerivative, rightDerivative] = operationResult->computeDerivative(outer);
+		const auto derivatives = operationResult->computeDerivative(outer);
+
+		ASSERT_EQ(derivatives.size(), 2);
 
 		const auto& [leftExpected, rightExpected] = expected;
 
@@ -202,9 +175,9 @@ protected:
 						 << rightTensor << "\n\nOuter derivative:\n\n"
 						 << outer;
 
-		_compareTwoDerivatives(leftDerivative, leftExpected, messageGenerator.str());
+		_compareTwoDerivatives(derivatives.front(), leftExpected, messageGenerator.str());
 
-		_compareTwoDerivatives(rightDerivative, rightExpected, messageGenerator.str());
+		_compareTwoDerivatives(derivatives.back(), rightExpected, messageGenerator.str());
 	}
 };
 
@@ -217,111 +190,89 @@ protected:
 TEST_F(TestDerivativeExtractor, testReluDerivative)
 {
 	using mlCore::tensorInitializers::RangeTensorInitializer;
-	using namespace mlCore::autoDiff;
+	using namespace autoDiff;
 
-	const UnaryParams params{.tensorShape = {3, 3},
-							 .initializer = std::make_unique<RangeTensorInitializer<double>>(-3.0, .7)};
+	const Params params{.tensorShapes = {{3, 3}},
+						.initializers = {std::make_shared<RangeTensorInitializer<double>>(-3.0, .7)}};
 
-	_testUnaryOperationDerivative([](const NodePtr& node) { return nodesActivations::relu(node); }, params);
+	_testOperationDerivative([](const std::vector<NodePtr>& node) { return ops::relu(node.front()); },
+							 params);
 }
 
 TEST_F(TestDerivativeExtractor, testLnDerivative)
 {
 	using mlCore::tensorInitializers::RangeTensorInitializer;
-	using namespace mlCore::autoDiff;
+	using namespace autoDiff;
 
-	const UnaryParams params{.tensorShape = {3, 3},
-							 .initializer = std::make_unique<RangeTensorInitializer<double>>(0.1, .7)};
+	const Params params{.tensorShapes = {{3, 3}},
+						.initializers = {std::make_shared<RangeTensorInitializer<double>>(0.1, .7)}};
 
-	_testUnaryOperationDerivative([](const NodePtr& node) { return unaryOperations::ln(node); }, params);
+	_testOperationDerivative([](const std::vector<NodePtr>& node) { return ops::naturalLog(node.front()); },
+							 params);
 }
 
 TEST_F(TestDerivativeExtractor, testSigmoidDerivative)
 {
 	using mlCore::tensorInitializers::RangeTensorInitializer;
-	using namespace mlCore::autoDiff;
+	using namespace autoDiff;
 
-	const UnaryParams params{.tensorShape = {5, 5},
-							 .initializer = std::make_unique<RangeTensorInitializer<double>>(-9.0, .7)};
+	const Params params{.tensorShapes = {{5, 5}},
+						.initializers = {std::make_shared<RangeTensorInitializer<double>>(-9.0, .7)}};
 
-	_testUnaryOperationDerivative([](const NodePtr& node) { return nodesActivations::sigmoid(node); },
-								  params);
+	_testOperationDerivative([](const std::vector<NodePtr>& node) { return ops::sigmoid(node.front()); },
+							 params);
 }
 
 TEST_F(TestDerivativeExtractor, testMultiplyDerivative)
 {
 	using mlCore::tensorInitializers::RangeTensorInitializer;
-	using namespace mlCore::autoDiff;
+	using namespace autoDiff;
 
-	const BinaryParams params{.leftTensorShape = {3, 5},
-							  .leftInitializer = std::make_unique<RangeTensorInitializer<double>>(-4, .8),
-							  .rightTensorShape = {3, 5},
-							  .rightInitializer = std::make_unique<RangeTensorInitializer<double>>(5, .3)};
+	const Params params{.tensorShapes = {{3, 5}, {3, 5}},
+						.initializers = {std::make_shared<RangeTensorInitializer<double>>(-4, .8),
+										 std::make_shared<RangeTensorInitializer<double>>(5, .3)}};
 
-	_testBinaryOperationDerivative([](const NodePtr& left, const NodePtr& right)
-								   { return binaryOperations::multiply(left, right); },
-								   params);
+	_testOperationDerivative(
+		[](const std::vector<NodePtr>& node) { return ops::multiply(node.front(), node.back()); }, params);
 }
 
 TEST_F(TestDerivativeExtractor, testDivideDerivative)
 {
 	using mlCore::tensorInitializers::RangeTensorInitializer;
-	using namespace mlCore::autoDiff;
+	using namespace autoDiff;
 
-	const BinaryParams params{.leftTensorShape = {3, 5},
-							  .leftInitializer = std::make_unique<RangeTensorInitializer<double>>(-4, .7),
-							  .rightTensorShape = {3, 5},
-							  .rightInitializer = std::make_unique<RangeTensorInitializer<double>>(5, .3)};
+	const Params params{.tensorShapes = {{3, 5}, {3, 5}},
+						.initializers = {std::make_shared<RangeTensorInitializer<double>>(-4, .7),
+										 std::make_shared<RangeTensorInitializer<double>>(5, .3)}};
 
-	_testBinaryOperationDerivative([](const NodePtr& left, const NodePtr& right)
-								   { return binaryOperations::divide(left, right); },
-								   params);
+	_testOperationDerivative(
+		[](const std::vector<NodePtr>& node) { return ops::divide(node.front(), node.back()); }, params);
 }
 
 TEST_F(TestDerivativeExtractor, testAddDerivative)
 {
 	using mlCore::tensorInitializers::RangeTensorInitializer;
-	using namespace mlCore::autoDiff;
+	using namespace autoDiff;
 
-	const BinaryParams params{.leftTensorShape = {3, 5},
-							  .leftInitializer = std::make_unique<RangeTensorInitializer<double>>(-4, .7),
-							  .rightTensorShape = {3, 5},
-							  .rightInitializer = std::make_unique<RangeTensorInitializer<double>>(5, .3)};
+	const Params params{.tensorShapes = {{3, 5}, {3, 5}},
+						.initializers = {std::make_shared<RangeTensorInitializer<double>>(-4, .7),
+										 std::make_shared<RangeTensorInitializer<double>>(5, .3)}};
 
-	_testBinaryOperationDerivative(
-		[](const NodePtr& left, const NodePtr& right) { return binaryOperations::add(left, right); }, params);
+	_testOperationDerivative(
+		[](const std::vector<NodePtr>& node) { return ops::add(node.front(), node.back()); }, params);
 }
 
 TEST_F(TestDerivativeExtractor, testSubtractDerivative)
 {
 	using mlCore::tensorInitializers::RangeTensorInitializer;
-	using namespace mlCore::autoDiff;
+	using namespace autoDiff;
 
-	const BinaryParams params{.leftTensorShape = {3, 5},
-							  .leftInitializer = std::make_unique<RangeTensorInitializer<double>>(-4, .7),
-							  .rightTensorShape = {3, 5},
-							  .rightInitializer = std::make_unique<RangeTensorInitializer<double>>(5, .3)};
+	const Params params{.tensorShapes = {{3, 5}, {3, 5}},
+						.initializers = {std::make_shared<RangeTensorInitializer<double>>(-4, .7),
+										 std::make_shared<RangeTensorInitializer<double>>(5, .3)}};
 
-	_testBinaryOperationDerivative([](const NodePtr& left, const NodePtr& right)
-								   { return binaryOperations::subtract(left, right); },
-								   params);
-}
-
-TEST_F(TestDerivativeExtractor, testPowerDerivative)
-{
-	using mlCore::tensorInitializers::RangeTensorInitializer;
-	using namespace mlCore::autoDiff;
-
-	const auto powerLambda = [](const NodePtr& left, const NodePtr& right)
-	{ return binaryOperations::power(left, right); };
-
-	const BinaryParams paramsWithLeftScalar{
-		.leftTensorShape = {3, 5},
-		.leftInitializer = std::make_unique<RangeTensorInitializer<double>>(1.3, .1),
-		.rightTensorShape = {3, 5},
-		.rightInitializer = std::make_unique<RangeTensorInitializer<double>>(5, .1)};
-
-	_testBinaryOperationDerivative(powerLambda, paramsWithLeftScalar);
+	_testOperationDerivative(
+		[](const std::vector<NodePtr>& node) { return ops::subtract(node.front(), node.back()); }, params);
 }
 
 TEST_F(TestDerivativeExtractor, testMatmulDerivative)
