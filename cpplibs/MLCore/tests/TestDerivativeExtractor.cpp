@@ -57,7 +57,7 @@ protected:
 	/// Computes derivative of given operation taking one input tensor (it may be a wrapper for a function
 	/// with one node movable and other fixed).
 	static mlCore::Tensor
-	_computeDefinitionDerivative(std::function<autoDiff::NodePtr(const autoDiff::NodePtr&)> oper,
+	_computeDefinitionDerivative(const std::function<autoDiff::NodePtr(const autoDiff::NodePtr&)>& oper,
 								 const mlCore::Tensor& inputTensor)
 	{
 		constexpr double kEpsilon = 1e-6;
@@ -133,11 +133,12 @@ protected:
 				_computeDefinitionDerivative(lockedOperation, inputNodes[inputIdx]->getValue());
 
 			std::vector<std::string> stringifiedInputs;
+			stringifiedInputs.reserve(inputNodes.size());
 
-			for(const auto& input : inputNodes)
-			{
-				stringifiedInputs.push_back(stringifyTensor(input->getValue()));
-			}
+			std::transform(inputNodes.begin(),
+						   inputNodes.end(),
+						   std::back_inserter(stringifiedInputs),
+						   [](const auto& node) { return stringifyTensor(node->getValue()); });
 
 			_compareTwoDerivatives(derivatives[inputIdx],
 								   defDerivative,

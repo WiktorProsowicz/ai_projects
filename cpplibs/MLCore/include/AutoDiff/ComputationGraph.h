@@ -94,7 +94,7 @@ public:
 	 * @param feedDict Stores values that should fill chosen placeholders. If not given, placeholders keep
 	 * their old values.
 	 */
-	void forwardPass(const std::map<PlaceholderPtr, std::shared_ptr<mlCore::Tensor>>& feenodedDict = {});
+	void forwardPass(const std::map<PlaceholderPtr, std::shared_ptr<mlCore::Tensor>>& feedDict = {});
 
 	/**
 	 * @brief Goes through the graph starting from the root and perform backward propagation

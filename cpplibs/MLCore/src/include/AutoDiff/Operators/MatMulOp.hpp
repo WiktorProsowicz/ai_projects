@@ -16,9 +16,9 @@ class MatMulOp final : public Operator
 public:
 	MatMulOp() = delete;
 
-	MatMulOp(const std::vector<NodePtr>& inputs)
+	explicit MatMulOp(const std::vector<NodePtr>& inputs)
 		: Operator(inputs)
-		, _outputShape(computeOutputShapeSafe())
+		, _outputShape(_computeOutputShapeSafe())
 		, _value(_outputShape)
 	{}
 
@@ -39,7 +39,7 @@ public:
 		return _value;
 	}
 
-	NodePtr copy() const
+	NodePtr copy() const override
 	{
 		auto copiedOp = std::make_shared<MatMulOp>(getInputs());
 		copiedOp->_value = _value;
@@ -86,7 +86,7 @@ public:
 	}
 
 private:
-	std::vector<size_t> computeOutputShapeSafe() const noexcept
+	std::vector<size_t> _computeOutputShapeSafe() const noexcept
 	{
 		return mlCore::detail::getOutputShapeForMatmul(getInputs().front()->getOutputShape(),
 													   getInputs().back()->getOutputShape());

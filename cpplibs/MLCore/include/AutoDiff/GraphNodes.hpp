@@ -311,17 +311,6 @@ public:
 
 	~Operator() override = default;
 
-	virtual const mlCore::Tensor& getValue() const = 0;
-
-	/**
-	 * @brief Creates a copy of the operator.
-	 *
-	 * The type of the copy depends on the concrete operator class. The copy should have the same inputs as
-	 * the base op and also the same internal state.
-	 *
-	 */
-	virtual NodePtr copy() const = 0;
-
 	/**
 	 * @brief Updates the internal value of the operator.
 	 *

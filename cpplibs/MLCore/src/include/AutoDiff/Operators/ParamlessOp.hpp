@@ -34,9 +34,9 @@ public:
 	 */
 	ParamlessOp(std::vector<NodePtr> inputs, ForwardFunction forwardFunc, BackwardFunction backwardFunc)
 		: Operator(std::move(inputs))
-		, _forwardFunc(forwardFunc)
-		, _backwardFunc(backwardFunc)
-		, _value(getOutputShape())
+		, _forwardFunc(std::move(forwardFunc))
+		, _backwardFunc(std::move(backwardFunc))
+		, _value(getInputs().front()->getOutputShape())
 	{}
 
 	ParamlessOp(const ParamlessOp&) = delete;
