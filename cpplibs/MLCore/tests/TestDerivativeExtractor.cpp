@@ -117,7 +117,7 @@ protected:
 
 		const auto derivatives = operationResult->computeDirectDerivative();
 
-		for(size_t inputIdx = 0; inputIdx < inputNodes.size(); inputIdx)
+		for(size_t inputIdx = 0; inputIdx < inputNodes.size(); inputIdx++)
 		{
 			// Operation wrapper reduced to a single variable input.
 			const auto lockedOperation = [&oper, &inputNodes, inputIdx](const autoDiff::NodePtr& node)
@@ -195,7 +195,7 @@ TEST_F(TestDerivativeExtractor, testReluDerivative)
 	const Params params{.tensorShapes = {{3, 3}},
 						.initializers = {std::make_shared<RangeTensorInitializer<double>>(-3.0, .7)}};
 
-	_testOperationDerivative([](const std::vector<NodePtr>& node) { return ops::relu(node.front()); },
+	_testOperationDerivative([](const std::vector<NodePtr>& nodes) { return ops::relu(nodes.front()); },
 							 params);
 }
 
@@ -207,7 +207,7 @@ TEST_F(TestDerivativeExtractor, testLnDerivative)
 	const Params params{.tensorShapes = {{3, 3}},
 						.initializers = {std::make_shared<RangeTensorInitializer<double>>(0.1, .7)}};
 
-	_testOperationDerivative([](const std::vector<NodePtr>& node) { return ops::naturalLog(node.front()); },
+	_testOperationDerivative([](const std::vector<NodePtr>& nodes) { return ops::naturalLog(nodes.front()); },
 							 params);
 }
 
@@ -219,7 +219,7 @@ TEST_F(TestDerivativeExtractor, testSigmoidDerivative)
 	const Params params{.tensorShapes = {{5, 5}},
 						.initializers = {std::make_shared<RangeTensorInitializer<double>>(-9.0, .7)}};
 
-	_testOperationDerivative([](const std::vector<NodePtr>& node) { return ops::sigmoid(node.front()); },
+	_testOperationDerivative([](const std::vector<NodePtr>& nodes) { return ops::sigmoid(nodes.front()); },
 							 params);
 }
 
@@ -233,7 +233,7 @@ TEST_F(TestDerivativeExtractor, testMultiplyDerivative)
 										 std::make_shared<RangeTensorInitializer<double>>(5, .3)}};
 
 	_testOperationDerivative(
-		[](const std::vector<NodePtr>& node) { return ops::multiply(node.front(), node.back()); }, params);
+		[](const std::vector<NodePtr>& nodes) { return ops::multiply(nodes.front(), nodes.back()); }, params);
 }
 
 TEST_F(TestDerivativeExtractor, testDivideDerivative)
@@ -246,7 +246,7 @@ TEST_F(TestDerivativeExtractor, testDivideDerivative)
 										 std::make_shared<RangeTensorInitializer<double>>(5, .3)}};
 
 	_testOperationDerivative(
-		[](const std::vector<NodePtr>& node) { return ops::divide(node.front(), node.back()); }, params);
+		[](const std::vector<NodePtr>& nodes) { return ops::divide(nodes.front(), nodes.back()); }, params);
 }
 
 TEST_F(TestDerivativeExtractor, testAddDerivative)
@@ -259,7 +259,7 @@ TEST_F(TestDerivativeExtractor, testAddDerivative)
 										 std::make_shared<RangeTensorInitializer<double>>(5, .3)}};
 
 	_testOperationDerivative(
-		[](const std::vector<NodePtr>& node) { return ops::add(node.front(), node.back()); }, params);
+		[](const std::vector<NodePtr>& nodes) { return ops::add(nodes.front(), nodes.back()); }, params);
 }
 
 TEST_F(TestDerivativeExtractor, testSubtractDerivative)
@@ -272,7 +272,7 @@ TEST_F(TestDerivativeExtractor, testSubtractDerivative)
 										 std::make_shared<RangeTensorInitializer<double>>(5, .3)}};
 
 	_testOperationDerivative(
-		[](const std::vector<NodePtr>& node) { return ops::subtract(node.front(), node.back()); }, params);
+		[](const std::vector<NodePtr>& nodes) { return ops::subtract(nodes.front(), nodes.back()); }, params);
 }
 
 TEST_F(TestDerivativeExtractor, testMatmulDerivative)

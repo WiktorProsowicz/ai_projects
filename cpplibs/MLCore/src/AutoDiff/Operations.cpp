@@ -21,10 +21,16 @@ void throwIfShapesUnequal(const std::vector<NodePtr>& inputs)
 	if(std::adjacent_find(inputs.cbegin(),
 						  inputs.cend(),
 						  [](const NodePtr& lhs, const NodePtr& rhs)
-						  { return (lhs->getOutputShape() != rhs->getOutputShape()); }) == inputs.cend())
+						  { return (lhs->getOutputShape() != rhs->getOutputShape()); }) != inputs.cend())
 	{
 		LOG_ERROR("AutoDiff::Ops", "Expected input shapes to be equal!");
 	}
+}
+
+OperatorPtr updateOp(const OperatorPtr& op)
+{
+	op->updateValue();
+	return op;
 }
 } // namespace
 
@@ -39,7 +45,7 @@ OperatorPtr add(const NodePtr& lhsNode, const NodePtr& rhsNode)
 		return std::vector{mlCore::Tensor{1.0}, mlCore::Tensor{1.0}};
 	};
 
-	return std::make_shared<detail::PlainChainRuleOp>(std::vector{lhsNode, rhsNode}, fFunc, bFunc);
+	return updateOp(std::make_shared<detail::PlainChainRuleOp>(std::vector{lhsNode, rhsNode}, fFunc, bFunc));
 }
 
 OperatorPtr subtract(const NodePtr& lhsNode, const NodePtr& rhsNode)
@@ -50,10 +56,10 @@ OperatorPtr subtract(const NodePtr& lhsNode, const NodePtr& rhsNode)
 	{ return inputs.front()->getValue() - inputs.back()->getValue(); };
 
 	const auto bFunc = [](const std::vector<NodePtr>&) {
-		return std::vector{mlCore::Tensor{1.0}, mlCore::Tensor{1.0}};
+		return std::vector{mlCore::Tensor{1.0}, mlCore::Tensor{-1.0}};
 	};
 
-	return std::make_shared<detail::PlainChainRuleOp>(std::vector{lhsNode, rhsNode}, fFunc, bFunc);
+	return updateOp(std::make_shared<detail::PlainChainRuleOp>(std::vector{lhsNode, rhsNode}, fFunc, bFunc));
 }
 
 OperatorPtr multiply(const NodePtr& lhsNode, const NodePtr& rhsNode)
@@ -68,13 +74,13 @@ OperatorPtr multiply(const NodePtr& lhsNode, const NodePtr& rhsNode)
 		std::vector<mlCore::Tensor> derivatives;
 		derivatives.reserve(2);
 
-		derivatives[0] = inputs.back()->getValue();
-		derivatives[1] = inputs.front()->getValue();
+		derivatives.emplace_back(inputs.back()->getValue());
+		derivatives.emplace_back(inputs.front()->getValue());
 
 		return derivatives;
 	};
 
-	return std::make_shared<detail::PlainChainRuleOp>(std::vector{lhsNode, rhsNode}, fFunc, bFunc);
+	return updateOp(std::make_shared<detail::PlainChainRuleOp>(std::vector{lhsNode, rhsNode}, fFunc, bFunc));
 }
 
 OperatorPtr divide(const NodePtr& lhsNode, const NodePtr& rhsNode)
@@ -93,13 +99,13 @@ OperatorPtr divide(const NodePtr& lhsNode, const NodePtr& rhsNode)
 		auto rightDeriv =
 			-inputs.front()->getValue() / (inputs.back()->getValue() * inputs.back()->getValue());
 
-		derivatives[0] = std::move(leftDeriv);
-		derivatives[1] = std::move(rightDeriv);
+		derivatives.emplace_back(std::move(leftDeriv));
+		derivatives.emplace_back(std::move(rightDeriv));
 
 		return derivatives;
 	};
 
-	return std::make_shared<detail::PlainChainRuleOp>(std::vector{lhsNode, rhsNode}, fFunc, bFunc);
+	return updateOp(std::make_shared<detail::PlainChainRuleOp>(std::vector{lhsNode, rhsNode}, fFunc, bFunc));
 }
 
 OperatorPtr matmul(const NodePtr& lhsNode, const NodePtr& rhsNode)
@@ -113,7 +119,7 @@ OperatorPtr matmul(const NodePtr& lhsNode, const NodePtr& rhsNode)
 		LOG_ERROR("AutoDiff::Ops", error.what());
 	}
 
-	return std::make_shared<detail::MatMulOp>(std::vector{lhsNode, rhsNode});
+	return updateOp(std::make_shared<detail::MatMulOp>(std::vector{lhsNode, rhsNode}));
 }
 
 OperatorPtr naturalLog(const NodePtr& node)
@@ -128,12 +134,12 @@ OperatorPtr naturalLog(const NodePtr& node)
 		std::vector<mlCore::Tensor> derivatives;
 		derivatives.reserve(1);
 
-		derivatives[0] = ones / inputs.front()->getValue();
+		derivatives.emplace_back(ones / inputs.front()->getValue());
 
 		return derivatives;
 	};
 
-	return std::make_shared<detail::PlainChainRuleOp>(std::vector{node}, fFunc, bFunc);
+	return updateOp(std::make_shared<detail::PlainChainRuleOp>(std::vector{node}, fFunc, bFunc));
 }
 
 OperatorPtr relu(const NodePtr& node)
@@ -153,12 +159,12 @@ OperatorPtr relu(const NodePtr& node)
 		std::vector<mlCore::Tensor> derivatives;
 		derivatives.reserve(1);
 
-		derivatives[0] = std::move(inputCopy);
+		derivatives.emplace_back(std::move(inputCopy));
 
 		return derivatives;
 	};
 
-	return std::make_shared<detail::PlainChainRuleOp>(std::vector{node}, fFunc, bFunc);
+	return updateOp(std::make_shared<detail::PlainChainRuleOp>(std::vector{node}, fFunc, bFunc));
 }
 
 OperatorPtr sigmoid(const NodePtr& node)
@@ -172,17 +178,18 @@ OperatorPtr sigmoid(const NodePtr& node)
 
 		for(auto& val : inputCopy)
 		{
+			val = 1.0 / (1.0 + std::pow(M_E, -val));
 			val = val * (1.0 - val);
 		}
 
 		std::vector<mlCore::Tensor> derivatives;
 		derivatives.reserve(1);
 
-		derivatives[0] = std::move(inputCopy);
+		derivatives.emplace_back(std::move(inputCopy));
 
 		return derivatives;
 	};
 
-	return std::make_shared<detail::PlainChainRuleOp>(std::vector{node}, fFunc, bFunc);
+	return updateOp(std::make_shared<detail::PlainChainRuleOp>(std::vector{node}, fFunc, bFunc));
 }
 } // namespace autoDiff::ops

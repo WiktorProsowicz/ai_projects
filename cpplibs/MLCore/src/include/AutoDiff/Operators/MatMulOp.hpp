@@ -63,8 +63,8 @@ public:
 		std::vector<mlCore::Tensor> derivatives;
 		derivatives.reserve(2);
 
-		derivatives[0] = lhs->getValue().transposed().matmul(outerDerivative);
-		derivatives[1] = outerDerivative.matmul(rhs->getValue().transposed());
+		derivatives.emplace_back(outerDerivative.matmul(rhs->getValue().transposed()));
+		derivatives.emplace_back(lhs->getValue().transposed().matmul(outerDerivative));
 
 		return derivatives;
 	}
@@ -79,8 +79,8 @@ public:
 
 		const mlCore::Tensor onesWithOutputShape(_value.shape(), 1.0);
 
-		derivatives[0] = onesWithOutputShape.matmul(rhs->getValue().transposed());
-		derivatives[1] = lhs->getValue().transposed().matmul(onesWithOutputShape);
+		derivatives.emplace_back(onesWithOutputShape.matmul(rhs->getValue().transposed()));
+		derivatives.emplace_back(lhs->getValue().transposed().matmul(onesWithOutputShape));
 
 		return derivatives;
 	}
