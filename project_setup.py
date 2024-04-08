@@ -232,7 +232,7 @@ def _get_available_functions():
     """
 
     available_functions_env = [setup_venv, build_project, clean_project,
-                               install_dependencies, run_unit_tests]
+                               install_dependencies, run_unit_tests, run_repository_checks]
 
     available_functions_glob = [
         setup_venv
