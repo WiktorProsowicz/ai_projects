@@ -244,7 +244,7 @@ constructTree(const std::vector<std::pair<std::string, std::string>>& config)
 				shape.push_back(std::stoull(shapeItem));
 			}
 
-			auto node = std::make_shared<Placeholder>(shape);
+			auto node = std::make_shared<Placeholder>(std::make_shared<mlCore::Tensor>(shape));
 
 			node->setName(name);
 
@@ -339,21 +339,21 @@ protected:
 	 * @param inputs Placeholders to assign input tensors to.
 	 * @return Created feed map with random generated inputs.
 	 */
-	static std::map<autoDiff::PlaceholderPtr, mlCore::Tensor>
+	static std::map<autoDiff::PlaceholderPtr, std::shared_ptr<mlCore::Tensor>>
 	_createFeedMap(const std::set<autoDiff::PlaceholderPtr>& inputs)
 	{
 		using namespace autoDiff;
 
-		std::map<PlaceholderPtr, mlCore::Tensor> feedMap;
+		std::map<PlaceholderPtr, std::shared_ptr<mlCore::Tensor>> feedMap;
 
 		for(const auto& input : inputs)
 		{
 			const mlCore::tensorInitializers::GaussianInitializer<double> initializer;
-			mlCore::Tensor inputTensor(input->getValue().shape());
+			const auto inputTensor = std::make_shared<mlCore::Tensor>(input->getValue().shape());
 
-			inputTensor.fill(initializer);
+			inputTensor->fill(initializer);
 
-			feedMap.emplace(input, std::move(inputTensor));
+			feedMap.emplace(input, inputTensor);
 		}
 
 		return feedMap;
@@ -472,7 +472,7 @@ protected:
 			{
 				const auto feedMap = _createFeedMap({input});
 
-				std::cout << feedMap.at(input) << '\n';
+				// std::cout << feedMap.at(input) << '\n';
 
 				_graph->forwardPass(feedMap);
 			}

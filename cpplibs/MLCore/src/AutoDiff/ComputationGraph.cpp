@@ -90,7 +90,7 @@ void ComputationGraph::_sortNodes()
 	_areNodesSorted = true;
 }
 
-void ComputationGraph::forwardPass(const std::map<PlaceholderPtr, mlCore::Tensor>& feedDict)
+void ComputationGraph::forwardPass(const std::map<PlaceholderPtr, std::shared_ptr<mlCore::Tensor>>& feedDict)
 {
 	if(!_areNodesSorted)
 	{

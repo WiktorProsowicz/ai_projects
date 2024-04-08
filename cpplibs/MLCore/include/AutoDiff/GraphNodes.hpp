@@ -226,8 +226,8 @@ public:
 	 *
 	 * @param initValue Initial value of the placeholder.
 	 */
-	explicit Placeholder(const mlCore::Tensor& value)
-		: _value(value)
+	explicit Placeholder(const std::shared_ptr<mlCore::Tensor>& initValue)
+		: _value(initValue)
 	{}
 
 	Placeholder(const Placeholder&) = delete;
@@ -239,7 +239,7 @@ public:
 
 	const mlCore::Tensor& getValue() const override
 	{
-		return _value.get();
+		return *_value;
 	}
 
 	/**
@@ -248,7 +248,7 @@ public:
 	 */
 	NodePtr copy() const override
 	{
-		auto copiedPlaceholder = std::make_shared<Placeholder>(_value.get());
+		auto copiedPlaceholder = std::make_shared<Placeholder>(_value);
 
 		return copiedPlaceholder;
 	}
@@ -257,19 +257,26 @@ public:
 	 * @brief Links a given mlCore::Tensor to the internal reference of the placeholder.
 	 *
 	 * @param value mlCore::Tensor to be put in the placeholder.
+	 *
+	 * @throws std::invalid_argument If the given value is nullptr.
 	 */
-	void putValue(const mlCore::Tensor& value)
+	void putValue(const std::shared_ptr<mlCore::Tensor>& value)
 	{
+		if(!value)
+		{
+			throw std::invalid_argument("Cannot put nullptr to the placeholder!");
+		}
+
 		_value = value;
 	}
 
 	const std::vector<size_t>& getOutputShape() const override
 	{
-		return _value.get().shape();
+		return _value->shape();
 	}
 
 private:
-	std::reference_wrapper<const mlCore::Tensor> _value;
+	std::shared_ptr<mlCore::Tensor> _value;
 };
 
 /**
