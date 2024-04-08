@@ -10,8 +10,8 @@ import os
 import pathlib
 import re
 import subprocess
-import venv
 import sys
+import venv
 from os import path
 
 HOME_PATH = pathlib.Path(__file__).absolute().parent.as_posix()
