@@ -1,7 +1,8 @@
-#ifndef MLCORE_COMPUTATIONGRAPH_H
-#define MLCORE_COMPUTATIONGRAPH_H
+#ifndef MLCORE_INCLUDE_AUTODIFF_COMPUTATIONGRAPH_H
+#define MLCORE_INCLUDE_AUTODIFF_COMPUTATIONGRAPH_H
 
 #include <map>
+#include <mutex>
 #include <string>
 #include <vector>
 
@@ -9,17 +10,44 @@
 
 namespace autoDiff
 {
+/**
+ * @brief Contains computation graph parameters.
+ *
+ */
+struct ComputationGraphConfig
+{
+	bool useMultithreading;
+};
 
 /**
- * @brief Class used to build tree of Nodes. Stores information about all of the parts
- * used in complex operation and can therefore accurately compute gradients.
+ * @brief Represents a directed graph containing nodes consisting on a structure of operations.
+ *
+ * @details The main role of the graph is to keep track of computation of the values according to linked
+ * nodes. The information about the graph structure allows to compute gradients of an operator with respect to
+ * its both direct and indirect inputs. Gradients computed in course of back-propagation are stored in the
+ * graph and can be retrieved in order to perform optimization.
+ *
+ * ComputationGraph is intended to be used according to the following pattern:
+ * 1. Perform a complex set of computations on GraphNodes structures.
+ * 2. Set the obtained results as the root nodes of the graph. The results can be perceived as the output of a
+ * complex operation, one may pick an arbitrary node from the structure of computations.
+ * 3. Perform forward pass on the graph. The graph will compute the values of all nodes in the graph, starting
+ * from root nodes.
+ * 4. Perform backward pass on the graph. The graph will compute the gradients with respect to nodes specified
+ * by the caller. These nodes could be trainable weights of the model.
+ * 5. Retrieve the gradients from the graph and use them to perform optimization.
  *
  */
 class ComputationGraph
 {
-
 public:
-	ComputationGraph() = default;
+	/**
+	 * @brief Constructs a computation graph with given configuration.
+	 *
+	 */
+	ComputationGraph(const ComputationGraphConfig& config);
+
+	ComputationGraph() = delete;
 
 	ComputationGraph& operator=(const ComputationGraph&) = delete; // Copy assign
 	ComputationGraph& operator=(ComputationGraph&&) = delete;	   // Move assign
@@ -29,51 +57,16 @@ public:
 	~ComputationGraph() = default;
 
 	/**
-	 * @brief Gets status of the graph
+	 * @brief Cleans the graph from cumulated gradients.
 	 *
-	 * @return true Graph is declared to be able to extend
-	 * @return false Graph should not be extended
-	 */
-	bool isActive() const noexcept
-	{
-		return _isActive;
-	}
-
-	/**
-	 * @brief Erases all graph structure nodes
-	 *
-	 */
-	void reset() noexcept
-	{
-		_nodes.clear();
-		_gradients.clear();
-	}
-
-	/**
-	 * @brief Cleans the graph from cumulated gradient.
+	 * This operation should be performed after each optimization step. Since the gradients computed with
+	 * respect to a particular node are cumulated, consecutive calls to the graph's backward-pass algorithm
+	 * update the gradients instead of replacing them.
 	 *
 	 */
 	void clearGradients()
 	{
 		_gradients.clear();
-	}
-
-	/**
-	 * @brief Enables adding nodes to the graph by friend Operations classes
-	 *
-	 */
-	void activate() noexcept
-	{
-		_isActive = true;
-	}
-
-	/**
-	 * @brief Blocks the graph and disallow it to extend
-	 *
-	 */
-	void deactivate() noexcept
-	{
-		_isActive = false;
 	}
 
 	/**
@@ -83,41 +76,60 @@ public:
 	bool hasGradient(const NodePtr& nodeName) const;
 
 	/**
-	 * @brief Returns gradient computed with respect to the given node.
+	 * @brief Returns stored gradient computed with respect to a given node.
 	 *
 	 */
 	const mlCore::Tensor& getGradient(const NodePtr& node) const;
 
 	/**
-	 * @brief Goes through the graph starting from the primary leaves
+	 * @brief Performs operations between nodes spanned by the graph.
 	 *
-	 * @param feedDict Stores values that should fill chosen placeholders. If not given, placeholders keep
-	 * their old values.
+	 * The computation is performed starting with depth-first search of the leaf nodes to ensure the correct
+	 * order of graph traversal.
+	 *
 	 */
-	void forwardPass(const std::map<PlaceholderPtr, std::shared_ptr<mlCore::Tensor>>& feedDict = {});
+	void forwardPass();
 
 	/**
-	 * @brief Goes through the graph starting from the root and perform backward propagation
+	 * @brief Traverses the graph starting from the root and performs backward propagation.
+	 *
+	 * The gradients are cumulated each time the derivative is computed with respect to a given node. The
+	 * `root` node is allowed to be different then the root of the graph. Is could be for example the result
+	 * of a loss function.
 	 *
 	 * @param root Starting node - the back-propagation will occur relatively to it
 	 */
 	void computeGradients(const NodePtr& root);
 
 	/**
-	 * @brief Adds new node to the graph.
+	 * @brief Sets a given node as the root of the graph.
 	 *
-	 * @param node Node to be added.
+	 * The root determines what part of an existing graph is spanned by the class.
+	 *
 	 */
-	void addNode(const NodePtr& node);
+	void setRoot(const NodePtr& root);
+
+	/**
+	 * @brief Sets the nodes for which the graph shall store gradients.
+	 *
+	 * The nodes could be for example trainable weights of a model.
+	 */
+	void setDifferentiableNodes(const std::vector<NodePtr>& nodes);
+
+	/**
+	 * @brief Creates the visualization of the graph in the DOT format.
+	 *
+	 * The visualization contains nodes representing the operations or values and edges representing the data
+	 * flow. Each node is labelled with the basic information about it, such as the output shape or name.
+	 *
+	 */
+	std::string serializeToDot() const;
 
 private:
-	void _sortNodes();
-
-private:
-	bool _isActive = false;
-	std::vector<NodePtr> _nodes;
-	std::map<NodePtr, mlCore::Tensor> _gradients;
-	bool _areNodesSorted = true;
+	ComputationGraphConfig _config;
+	NodePtr _root{};
+	std::vector<NodePtr> _differentiableNodes{};
+	std::map<NodePtr, mlCore::Tensor> _gradients{};
 };
 } // namespace autoDiff
 
