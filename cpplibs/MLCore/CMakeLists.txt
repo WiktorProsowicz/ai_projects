@@ -6,6 +6,6 @@ include("${CMAKE_SOURCE_DIR}/setuputils/Common.cmake")
 
 install_library()
 
-target_link_libraries(${PROJECT_NAME} LoggingLib fmt::fmt)
+target_link_libraries(${PROJECT_NAME} LoggingLib Utilities fmt::fmt)
 
 add_tests()
