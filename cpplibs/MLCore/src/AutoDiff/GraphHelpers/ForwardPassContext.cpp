@@ -5,72 +5,46 @@
 
 namespace autoDiff::detail
 {
+ForwardPassContext::ForwardPassContext(bool useMultithreading, NodePtr root)
+	: _useMultithreading(useMultithreading)
+	, _root(std::move(root))
+	, _graphInfoExtractor(_root)
+{
+	_nodesToProcess = _graphInfoExtractor.getNodesAboveEntropyThreshold(_entropyThreshold);
+
+	std::sort(_nodesToProcess.begin(),
+			  _nodesToProcess.end(),
+			  [this](const auto& lhs, const auto& rhs)
+			  { return _graphInfoExtractor.getTreeSize(lhs) < _graphInfoExtractor.getTreeSize(rhs); });
+}
+
 void ForwardPassContext::run()
 {
+	_visitedNodes.clear();
+
 	if(!_useMultithreading)
 	{
 		_updateSubtree(_root);
 		return;
 	}
 
-	const auto subtreeClasses = _composeSubtreeClasses();
+	_initThreadPool();
 
-	const auto computeEntropy = [&subtreeClasses](const NodePtr& node)
-	{
-		const auto classesSum =
-			std::accumulate(subtreeClasses.at(node).cbegin(), subtreeClasses.at(node).cend(), 0.0);
-
-		return std::accumulate(subtreeClasses.at(node).cbegin(),
-							   subtreeClasses.at(node).cend(),
-							   0.0,
-							   [&classesSum](const auto curr, const auto subtreeSize)
-							   {
-								   const auto classProbability =
-									   static_cast<double>(subtreeSize) / classesSum;
-
-								   return curr - classProbability * std::log2(classProbability);
-							   });
-	};
-
-	_initThreadPool(subtreeClasses);
-
-	std::vector<NodePtr> nodesToProcess;
-
-	for(const auto& node :
-		subtreeClasses |
-			std::views::filter([&computeEntropy](const auto& item)
-							   { return computeEntropy(item.first) > _entropyThreshold; }) |
-			std::views::keys)
-	{
-		nodesToProcess.emplace_back(node);
-	}
-
-	std::sort(nodesToProcess.begin(),
-			  nodesToProcess.end(),
-			  [&subtreeClasses](const auto& lhs, const auto& rhs)
-			  {
-				  return std::accumulate(subtreeClasses.at(lhs).cbegin(), subtreeClasses.at(lhs).cend(), 0) >
-						 std::accumulate(subtreeClasses.at(rhs).cbegin(), subtreeClasses.at(rhs).cend(), 0);
-			  });
-
-	std::for_each(nodesToProcess.cbegin(),
-				  nodesToProcess.cend(),
+	std::for_each(_nodesToProcess.cbegin(),
+				  _nodesToProcess.cend(),
 				  [this](const auto& node) { _runInParallelFromNode(node); });
 
 	_updateSubtree(_root);
+
+	_threadPool.reset();
 }
 
-void ForwardPassContext::_initThreadPool(const std::map<NodePtr, std::vector<uint16_t>>& subtreeClasses)
+void ForwardPassContext::_initThreadPool()
 {
-	const auto elementWithMaxSubtrees = std::max_element(subtreeClasses.cbegin(),
-														 subtreeClasses.cend(),
-														 [](const auto& lhs, const auto& rhs)
-														 { return lhs.second.size() < rhs.second.size(); });
-
+	const auto maxSubtrees = _graphInfoExtractor.getMaximalNumberOfSubtrees();
 	const size_t maxThreads = std::thread::hardware_concurrency() / 2;
 
-	_threadPool =
-		std::make_unique<utilities::ThreadPool>(std::min(elementWithMaxSubtrees->second.size(), maxThreads));
+	_threadPool = std::make_unique<utilities::ThreadPool>(std::min(maxSubtrees, maxThreads));
 }
 
 void ForwardPassContext::_runInParallelFromNode(const NodePtr& node)

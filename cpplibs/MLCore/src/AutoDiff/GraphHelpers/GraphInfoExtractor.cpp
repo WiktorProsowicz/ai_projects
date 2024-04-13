@@ -52,6 +52,16 @@ std::map<NodePtr, std::vector<uint16_t>> GraphInfoExtractor::_composeSubtreeClas
 	return collectedClasses;
 }
 
+size_t GraphInfoExtractor::getMaximalNumberOfSubtrees() const
+{
+	const auto elementWithMaxSubtrees = std::max_element(_subtreeClasses.cbegin(),
+														 _subtreeClasses.cend(),
+														 [](const auto& lhs, const auto& rhs)
+														 { return lhs.second.size() < rhs.second.size(); });
+
+	return elementWithMaxSubtrees->second.size();
+}
+
 uint16_t GraphInfoExtractor::getTreeSize(const NodePtr& node) const
 {
 	return std::accumulate(_subtreeClasses.at(node).cbegin(), _subtreeClasses.at(node).cend(), 1);

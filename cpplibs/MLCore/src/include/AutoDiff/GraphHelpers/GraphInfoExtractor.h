@@ -56,6 +56,12 @@ public:
 	 */
 	std::vector<NodePtr> getNodesAboveEntropyThreshold(double threshold) const;
 
+	/**
+	 * @brief Returns the maximal number of subtrees encountered among the graph nodes.
+	 *
+	 */
+	size_t getMaximalNumberOfSubtrees() const;
+
 private:
 	/// Creates a map containing nodes and sizes of their subtrees. The size is a number
 	/// operators present in the subtree.

@@ -6,12 +6,13 @@
 
 #include <Utilities/ThreadPool.h>
 
+#include "AutoDiff/GraphHelpers/GraphInfoExtractor.h"
 #include "AutoDiff/GraphNodes.hpp"
 
 namespace autoDiff::detail
 {
 /**
- * @brief Performs forward pass on the graph
+ * @brief Performs forward pass on the graph.
  *
  */
 class ForwardPassContext
@@ -19,10 +20,14 @@ class ForwardPassContext
 public:
 	ForwardPassContext() = delete;
 
-	ForwardPassContext(bool useMultithreading, NodePtr root)
-		: _useMultithreading(useMultithreading)
-		, _root(std::move(root))
-	{}
+	/**
+	 * @brief Constructs the forward pass context.
+	 *
+	 * @param useMultithreading Tells if the algorithm should analyze the graph and run the forward pass in
+	 * parallel.
+	 * @param root The root of the graph for which the forward pass should be performed.
+	 */
+	ForwardPassContext(bool useMultithreading, NodePtr root);
 
 	ForwardPassContext(const ForwardPassContext&) = delete;
 	ForwardPassContext(ForwardPassContext&&) = delete;
@@ -61,8 +66,7 @@ private:
 	void _updateSubtree(const NodePtr& node);
 
 	/// Assigns the internal thread pool according to provided configuration.
-	/// @param subtreeClasses A map containing nodes and sizes of their subtrees.
-	void _initThreadPool(const std::map<NodePtr, std::vector<uint16_t>>& subtreeClasses);
+	void _initThreadPool();
 
 	/// Creates a map containing nodes and sizes of their subtrees. The size is a number
 	/// operators present in the subtree. Only the nodes having at least two subtrees are taken into account.
@@ -76,6 +80,10 @@ private:
 	/// Contains nodes that have been visited during the forward pass.
 	std::set<NodePtr> _visitedNodes{};
 	std::shared_mutex _visitedNodesMutex{};
+	/// Yields necessary info about the spanned graph.
+	GraphInfoExtractor _graphInfoExtractor;
+	/// Contains nodes fot that the forward pass should be run in parallel.
+	std::vector<NodePtr> _nodesToProcess{};
 };
 } // namespace autoDiff::detail
 
