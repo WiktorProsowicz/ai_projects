@@ -2,6 +2,7 @@
 #define MLCORE_SRC_INCLUDE_AUTODIFF_GRAPHHELPERS_BACKWARDPASSCONTEXT_H
 
 #include <condition_variable>
+#include <queue>
 #include <set>
 
 #include <Utilities/ThreadPool.h>
@@ -12,6 +13,16 @@
 
 namespace autoDiff::detail
 {
+/// @brief Compares two objects by their addresses.
+template <typename T>
+struct AddressComparator
+{
+	bool operator()(const T& lhs, const T& rhs) const
+	{
+		return std::addressof(lhs) < std::addressof(rhs);
+	}
+};
+
 /**
  * @brief Contains parameters used by the backward pass context.
  */
@@ -64,6 +75,12 @@ public:
 	void run();
 
 private:
+	/// Tells how big should be the entropy score computed from a given node's perspective to run forward pass
+	/// in parallel starting at it.
+	static constexpr double _entropyThreshold = 0.7;
+
+	using TensorsStorage = std::set<mlCore::Tensor, AddressComparator<mlCore::Tensor>>;
+
 	/// Contains information about a point from which back-propagation should be started.
 	struct PropagationEntryPoint
 	{
@@ -71,11 +88,43 @@ private:
 		NodePtr rootNode;
 	};
 
+	/// Assigns the internal thread pool according to provided configuration.
+	void _initThreadPool();
+
+	/// Adds a tensor to the outer derivatives storage so that it can be referenced by the propagation entry
+	/// points.
+	TensorsStorage::iterator _registerOuterDerivative(mlCore::Tensor outerDerivative);
+
+	/// Tells whether the entry points queue is empty. The check is thread-safe.
+	bool _isEntryPointsQueueEmpty();
+
+	/// Stores derivative for a given node, if it present in the differential nodes set.
+	void _tryStoreDerivative(const NodePtr& node, const mlCore::Tensor& derivative);
+
+	/// Adds an entry point to the queue. The function is thread-safe.
+	void _addEntryPoint(const NodePtr& node, mlCore::Tensor outerDerivative);
+
+	/// Runs back-propagation from the provided entry point.
+	void _processFromEntryPoint(const PropagationEntryPoint& entryPoint);
+
+	/// Runs back-propagation starting from a given node using single thread.
+	void _runBackwardPass(const NodePtr& node, const mlCore::Tensor& outerDerivative);
+
 	BackwardPassParams _params;
 	GraphInfoExtractor _graphInfoExtractor;
-	std::condition_variable _finishedTaskCv{};
-	utilities::ThreadSafeQueue<PropagationEntryPoint> _entryPointsQueue{};
+	std::condition_variable_any _finishedTaskCv{};
+	/// Contains the nodes for which the gradients should be computed. The entry points shall be taken from it
+	/// by the internal thread pool and processed.
+	std::queue<PropagationEntryPoint> _entryPointsQueue{};
+	std::shared_mutex _entryPointsQueueMutex{};
 	std::unique_ptr<utilities::ThreadPool> _threadPool{};
+	/// Contains the nodes for which the forward pass should be run in parallel.
+	const std::vector<NodePtr> _nodesForMultithreadedProcessing{};
+	/// Contains the nodes for which references are stored in the _entryPointsQueue.
+	/// This set is cleared after a full backward pass is performed.
+	TensorsStorage _outerDerivatives{};
+	std::shared_mutex _outerDerivativesMutex{};
+	std::shared_mutex _gradientsMutex{};
 };
 } // namespace autoDiff::detail
 
