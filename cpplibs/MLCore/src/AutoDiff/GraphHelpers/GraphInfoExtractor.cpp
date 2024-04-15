@@ -64,7 +64,7 @@ size_t GraphInfoExtractor::getMaximalNumberOfSubtrees() const
 
 uint16_t GraphInfoExtractor::getTreeSize(const NodePtr& node) const
 {
-	return std::accumulate(_subtreeClasses.at(node).cbegin(), _subtreeClasses.at(node).cend(), 1);
+	return std::accumulate(_subtreeClasses.at(node).cbegin(), _subtreeClasses.at(node).cend(), uint16_t{1});
 }
 
 std::vector<NodePtr> GraphInfoExtractor::getNodesAboveEntropyThreshold(double threshold) const
