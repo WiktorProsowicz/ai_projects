@@ -3,6 +3,7 @@
 
 #include <map>
 #include <mutex>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -10,6 +11,13 @@
 
 namespace autoDiff
 {
+namespace detail
+{
+class ForwardPassContext;
+class BackwardPassContext;
+class BackwardPassContextsMap;
+} // namespace detail
+
 /**
  * @brief Contains computation graph parameters.
  *
@@ -54,14 +62,14 @@ public:
 	ComputationGraph(const ComputationGraph&) = delete;			   // Copy ctor
 	ComputationGraph(ComputationGraph&&) = delete;				   // Move ctor
 
-	~ComputationGraph() = default;
+	~ComputationGraph();
 
 	/**
 	 * @brief Cleans the graph from cumulated gradients.
 	 *
 	 * This operation should be performed after each optimization step. Since the gradients computed with
-	 * respect to a particular node are cumulated, consecutive calls to the graph's backward-pass algorithm
-	 * update the gradients instead of replacing them.
+	 * respect to a particular node are cumulated, consecutive calls to the graph's backward-pass
+	 * algorithm update the gradients instead of replacing them.
 	 *
 	 */
 	void clearGradients()
@@ -97,15 +105,14 @@ public:
 	 * `root` node is allowed to be different then the root of the graph. Is could be for example the result
 	 * of a loss function.
 	 *
-	 * @param root Starting node - the back-propagation will occur relatively to it
+	 * @param backPropRoot Starting node - the back-propagation will occur relatively to it
 	 */
-	void computeGradients(const NodePtr& root);
+	void computeGradients(const NodePtr& backPropRoot);
 
 	/**
 	 * @brief Sets a given node as the root of the graph.
 	 *
 	 * The root determines what part of an existing graph is spanned by the class.
-	 *
 	 */
 	void setRoot(const NodePtr& root);
 
@@ -114,7 +121,7 @@ public:
 	 *
 	 * The nodes could be for example trainable weights of a model.
 	 */
-	void setDifferentiableNodes(const std::vector<NodePtr>& nodes);
+	void setDifferentiableNodes(const std::set<NodePtr>& nodes);
 
 	/**
 	 * @brief Creates the visualization of the graph in the DOT format.
@@ -128,8 +135,13 @@ public:
 private:
 	ComputationGraphConfig _config;
 	NodePtr _root{};
-	std::vector<NodePtr> _differentiableNodes{};
+	std::set<NodePtr> _differentiableNodes{};
 	std::map<NodePtr, mlCore::Tensor> _gradients{};
+	/// Contains settings used to perform the forward pass.
+	std::unique_ptr<detail::ForwardPassContext> _forwardPassContext{};
+	/// Contains settings used to perform the gradient computation. The context is creates whenever the
+	/// backward pass is performed for a new root.
+	std::unique_ptr<detail::BackwardPassContextsMap> _backwardPassContexts{};
 };
 } // namespace autoDiff
 

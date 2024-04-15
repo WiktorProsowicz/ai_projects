@@ -13,15 +13,29 @@
 
 #include <LoggingLib/LoggingLib.hpp>
 
+#include "AutoDiff/GraphHelpers/BackwardPassContext.h"
 #include "AutoDiff/GraphHelpers/ForwardPassContext.h"
 #include "AutoDiff/GraphNodes.hpp"
 #include "MLCore/BasicTensor.h"
 
 namespace autoDiff
 {
+namespace detail
+{
+/// @brief Contains backward contexts associated with nodes being set as their roots.
+class BackwardPassContextsMap : public std::map<NodePtr, BackwardPassContext>
+{
+public:
+	using std::map<NodePtr, BackwardPassContext>::map;
+};
+} // namespace detail
+
 ComputationGraph::ComputationGraph(const ComputationGraphConfig& config)
 	: _config(config)
+	, _backwardPassContexts(std::make_unique<detail::BackwardPassContextsMap>())
 {}
+
+ComputationGraph::~ComputationGraph() {}
 
 bool ComputationGraph::hasGradient(const NodePtr& node) const
 {
@@ -37,51 +51,47 @@ void ComputationGraph::forwardPass()
 {
 	if(!_root)
 	{
-		LOG_ERROR("ComputationGraph", "Root node is not set!");
+		LOG_ERROR("AutoDiff::ComputationGraph", "Root node is not set!");
 		return;
 	}
 
-	detail::ForwardPassContext context(_config.useMultithreading, _root);
-
-	context.run();
+	_forwardPassContext->run();
 }
 
-void ComputationGraph::computeGradients(const NodePtr& root)
+void ComputationGraph::computeGradients(const NodePtr& backPropRoot)
 {
-	std::function<void(const NodePtr&, const mlCore::Tensor&)> backPropagate;
-
-	// traverses the nodes tree and computes gradient in regard of every node
-	backPropagate = [&backPropagate, this](const NodePtr& node, const mlCore::Tensor& cumulatedGradient)
+	if(!_root)
 	{
-		if(this->_gradients.find(node) == this->_gradients.end())
-		{
-			this->_gradients.emplace(node, cumulatedGradient);
-		}
-		else
-		{
-			auto& grad = this->_gradients.at(node);
-			grad = grad + cumulatedGradient;
-		}
+		LOG_ERROR("AutoDiff::ComputationGraph", "Root node is not set!");
+		return;
+	}
 
-		if(const auto castedOp = std::dynamic_pointer_cast<Operator>(node))
-		{
-			const auto inputs = castedOp->getInputs();
-			const auto derivatives = castedOp->computeDerivative(cumulatedGradient);
+	if(!_backwardPassContexts->contains(backPropRoot))
+	{
+		const auto backwardPassParams =
+			detail::BackwardPassParams{.useMultithreading = _config.useMultithreading,
+									   .root = backPropRoot,
+									   .differentiableNodes = _differentiableNodes,
+									   .gradients = _gradients};
 
-			if(inputs.size() != derivatives.size())
-			{
-				LOG_ERROR("ComputationGraph",
-						  "Critical! Got different number of derivatives than inputs of an operator!");
-				return;
-			}
+		_backwardPassContexts->emplace(backPropRoot, backwardPassParams);
+	}
 
-			for(std::size_t i = 0; i < inputs.size(); ++i)
-			{
-				backPropagate(inputs[i], derivatives[i]);
-			}
-		}
-	};
+	_backwardPassContexts->at(backPropRoot).run();
+}
 
-	backPropagate(root, mlCore::Tensor(root->getValue().shape(), 1.0));
+void ComputationGraph::setRoot(const NodePtr& root)
+{
+	if(root != _root)
+	{
+		_forwardPassContext = std::make_unique<detail::ForwardPassContext>(_config.useMultithreading, root);
+
+		_root = root;
+	}
+}
+
+void ComputationGraph::setDifferentiableNodes(const std::set<NodePtr>& nodes)
+{
+	_differentiableNodes = nodes;
 }
 } // namespace autoDiff
