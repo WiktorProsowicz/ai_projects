@@ -29,10 +29,18 @@ void BackwardPassContext::run()
 			auto entryPoint = _entryPointsQueue.front();
 			_entryPointsQueue.pop();
 
-			_threadPool->addJob([this, entryPoint]() { _processFromEntryPoint(entryPoint); });
+			_threadPool->addJob(
+				[this, entryPoint]()
+				{
+					++_activeTasksCounter;
+					_processFromEntryPoint(entryPoint);
+					--_activeTasksCounter;
+
+					_finishedTaskCv.notify_one();
+				});
 		}
 
-		_finishedTaskCv.wait(lock, [this]() { return _entryPointsQueue.empty(); });
+		_finishedTaskCv.wait(lock, [this] { return _entryPointsQueue.empty(); });
 	}
 
 	_outerDerivatives.clear();
@@ -118,9 +126,6 @@ void BackwardPassContext::_processFromEntryPoint(const PropagationEntryPoint& en
 			{
 				_addEntryPoint(castedOp->getInputs()[inputIdx], std::move(derivatives[inputIdx]));
 			}
-
-			_finishedTaskCv.notify_one();
-			return;
 		}
 		else
 		{

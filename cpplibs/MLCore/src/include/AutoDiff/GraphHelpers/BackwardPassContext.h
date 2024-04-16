@@ -125,6 +125,7 @@ private:
 	TensorsStorage _outerDerivatives{};
 	std::shared_mutex _outerDerivativesMutex{};
 	std::shared_mutex _gradientsMutex{};
+	std::atomic_uint16_t _activeTasksCounter = 0;
 };
 } // namespace autoDiff::detail
 
