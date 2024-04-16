@@ -53,7 +53,7 @@ public:
 	 *
 	 * @param params Parameters of the backward pass.
 	 */
-	BackwardPassContext(const BackwardPassParams& params);
+	explicit BackwardPassContext(const BackwardPassParams& params);
 
 	BackwardPassContext(const BackwardPassContext&) = delete;
 	BackwardPassContext(BackwardPassContext&&) = delete;

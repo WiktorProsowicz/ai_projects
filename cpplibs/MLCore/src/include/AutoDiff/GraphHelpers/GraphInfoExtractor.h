@@ -20,7 +20,7 @@ public:
 	 *
 	 * @param root The root of the graph spanned by the extractor.
 	 */
-	GraphInfoExtractor(NodePtr root)
+	explicit GraphInfoExtractor(NodePtr root)
 		: _root(std::move(root))
 		, _subtreeClasses(_composeSubtreeClasses())
 	{}

@@ -89,7 +89,7 @@ bool ForwardPassContext::_isVisited(const NodePtr& node) const
 void ForwardPassContext::_updateSubtree(const NodePtr& node)
 {
 	{
-		std::unique_lock<std::shared_mutex> lock{_visitedNodesMutex};
+		const std::unique_lock<std::shared_mutex> lock{_visitedNodesMutex};
 
 		if(_isVisited(node))
 		{

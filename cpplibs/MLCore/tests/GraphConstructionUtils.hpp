@@ -6,9 +6,9 @@
 namespace mlCoreTests
 {
 /// Decorates input `node` or returns it if it is not of operator type.
-autoDiff::NodePtr wrapNode(const std::vector<autoDiff::NodePtr>& inputs,
-						   const autoDiff::NodePtr& node,
-						   const std::shared_ptr<OperatorStats>& stats)
+inline autoDiff::NodePtr wrapNode(const std::vector<autoDiff::NodePtr>& inputs,
+								  const autoDiff::NodePtr& node,
+								  const std::shared_ptr<OperatorStats>& stats)
 {
 	using namespace autoDiff;
 
@@ -20,8 +20,8 @@ autoDiff::NodePtr wrapNode(const std::vector<autoDiff::NodePtr>& inputs,
 	return node;
 }
 
-autoDiff::NodePtr getOperationByDesc(const std::string& description,
-									 const std::vector<autoDiff::NodePtr>& inputs)
+inline autoDiff::NodePtr getOperationByDesc(const std::string& description,
+											const std::vector<autoDiff::NodePtr>& inputs)
 {
 	using namespace autoDiff;
 
@@ -75,7 +75,7 @@ autoDiff::NodePtr getOperationByDesc(const std::string& description,
  * @param config Vector of pairs: <name of new node, operation and names of its inputs>.
  * @return Pair: <constructed nodes map, pairs of [parent, child] relations between the nodes>.
  */
-std::pair<std::map<std::string, autoDiff::NodePtr>, std::shared_ptr<OperatorStats>>
+inline std::pair<std::map<std::string, autoDiff::NodePtr>, std::shared_ptr<OperatorStats>>
 constructTree(const std::vector<std::pair<std::string, std::string>>& config)
 {
 	using namespace autoDiff;
@@ -146,7 +146,7 @@ constructTree(const std::vector<std::pair<std::string, std::string>>& config)
 					   std::back_inserter(inputs),
 					   [&nodes](const auto& inputName) { return nodes.at(inputName); });
 
-		NodePtr binaryOper = getOperationByDesc(oper, inputs);
+		const NodePtr binaryOper = getOperationByDesc(oper, inputs);
 
 		binaryOper->setName(name);
 

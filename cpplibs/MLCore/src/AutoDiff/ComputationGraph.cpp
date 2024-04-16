@@ -35,7 +35,11 @@ ComputationGraph::ComputationGraph(const ComputationGraphConfig& config)
 	, _backwardPassContexts(std::make_unique<detail::BackwardPassContextsMap>())
 {}
 
+// NOLINTBEGIN(modernize-use-equals-default)
+
 ComputationGraph::~ComputationGraph() {}
+
+// NOLINTEND(modernize-use-equals-default)
 
 bool ComputationGraph::hasGradient(const NodePtr& node) const
 {

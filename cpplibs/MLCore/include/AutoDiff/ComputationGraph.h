@@ -53,7 +53,7 @@ public:
 	 * @brief Constructs a computation graph with given configuration.
 	 *
 	 */
-	ComputationGraph(const ComputationGraphConfig& config);
+	explicit ComputationGraph(const ComputationGraphConfig& config);
 
 	ComputationGraph() = delete;
 

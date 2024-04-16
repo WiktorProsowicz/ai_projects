@@ -73,14 +73,14 @@ void BackwardPassContext::_addEntryPoint(const NodePtr& node, mlCore::Tensor out
 	const auto addedDerivativeIt = _registerOuterDerivative(std::move(outerDerivative));
 
 	{
-		std::unique_lock lock(_entryPointsQueueMutex);
+		const std::unique_lock lock(_entryPointsQueueMutex);
 		_entryPointsQueue.push({std::ref(*addedDerivativeIt), node});
 	}
 }
 
 bool BackwardPassContext::_isEntryPointsQueueEmpty()
 {
-	std::shared_lock lock(_entryPointsQueueMutex);
+	const std::shared_lock lock(_entryPointsQueueMutex);
 	return _entryPointsQueue.empty();
 }
 
@@ -88,7 +88,7 @@ void BackwardPassContext::_tryStoreDerivative(const NodePtr& node, const mlCore:
 {
 	if(_params.differentiableNodes.contains(node))
 	{
-		std::unique_lock lock(_gradientsMutex);
+		const std::unique_lock lock(_gradientsMutex);
 
 		if(_params.gradients.find(node) == _params.gradients.end())
 		{
@@ -140,7 +140,7 @@ void BackwardPassContext::_processFromEntryPoint(const PropagationEntryPoint& en
 BackwardPassContext::TensorsStorage::iterator
 BackwardPassContext::_registerOuterDerivative(mlCore::Tensor outerDerivative)
 {
-	std::unique_lock lock(_outerDerivativesMutex);
+	const std::unique_lock lock(_outerDerivativesMutex);
 	return _outerDerivatives.emplace(std::move(outerDerivative)).first;
 }
 

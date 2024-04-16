@@ -118,9 +118,9 @@ public:
 	 * @brief Checks whether all of the value-updating and derivative-computing operations have been run.
 	 *
 	 */
-	void AssertLogsAreAsExpected(const BackPropagationConfig& config,
-								 const std::map<mlCoreTests::OperatorStats::WrapperLogChannel,
-												std::vector<std::string>>& expectedLogs) const
+	static void assertLogsAreAsExpected(
+		const BackPropagationConfig& config,
+		const std::map<mlCoreTests::OperatorStats::WrapperLogChannel, std::vector<std::string>>& expectedLogs)
 	{
 		for(const auto& [logChannel, logs] : expectedLogs)
 		{
@@ -130,7 +130,7 @@ public:
 		}
 	}
 
-	void AssertGradientsAreAvailable(const BackPropagationConfig& config) const
+	void assertGradientsAreAvailable(const BackPropagationConfig& config) const
 	{
 		ASSERT_THAT(config.trainableWeights,
 					::testing::Each(::testing::Truly([this](const auto& weight)
@@ -173,8 +173,8 @@ TEST_F(TestComputationGraph, CollectProperLogsForOneRootTreeMultithreaded)
 
 	_performBackPropagation(config);
 
-	AssertLogsAreAsExpected(config, mlCoreTests::expectedLogsOneRoot);
-	AssertGradientsAreAvailable(config);
+	assertLogsAreAsExpected(config, mlCoreTests::expectedLogsOneRoot);
+	assertGradientsAreAvailable(config);
 }
 
 TEST_F(TestComputationGraph, CollectProperLogsForOneRootTreeSinglethreaded)
@@ -189,8 +189,8 @@ TEST_F(TestComputationGraph, CollectProperLogsForOneRootTreeSinglethreaded)
 
 	_performBackPropagation(config);
 
-	AssertLogsAreAsExpected(config, mlCoreTests::expectedLogsOneRoot);
-	AssertGradientsAreAvailable(config);
+	assertLogsAreAsExpected(config, mlCoreTests::expectedLogsOneRoot);
+	assertGradientsAreAvailable(config);
 }
 
 TEST_F(TestComputationGraph, CollectProperLogsForMultipleRootTreeMultithreaded)
@@ -211,7 +211,7 @@ TEST_F(TestComputationGraph, CollectProperLogsForMultipleRootTreeMultithreaded)
 
 	_performBackPropagation(config);
 
-	AssertLogsAreAsExpected(config, mlCoreTests::expectedLogsXShape);
-	AssertGradientsAreAvailable(config);
+	assertLogsAreAsExpected(config, mlCoreTests::expectedLogsXShape);
+	assertGradientsAreAvailable(config);
 }
 } // namespace

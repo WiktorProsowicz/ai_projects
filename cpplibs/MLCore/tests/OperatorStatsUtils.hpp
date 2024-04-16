@@ -42,10 +42,10 @@ class OperatorDecorator : public autoDiff::Operator
 {
 public:
 	OperatorDecorator(const std::vector<autoDiff::NodePtr>& inputs,
-					  const autoDiff::OperatorPtr& wrappedOper,
+					  autoDiff::OperatorPtr wrappedOper,
 					  const std::shared_ptr<OperatorStats>& opStats)
 		: Operator(inputs)
-		, _wrappedOper(wrappedOper)
+		, _wrappedOper(std::move(wrappedOper))
 		, _opStats(opStats)
 
 	{
