@@ -11,8 +11,10 @@
 #include <AutoDiff/Operations.h>
 #include <MLCore/TensorInitializers/GaussianInitializer.hpp>
 #include <MLCore/TensorInitializers/RangeTensorInitializer.hpp>
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include "ComputationGraphScenarios.hpp"
 #include "GraphConstructionUtils.hpp"
 
 namespace
@@ -28,6 +30,7 @@ struct BackPropagationConfig
 	autoDiff::NodePtr tree;
 	std::set<autoDiff::NodePtr> trainableWeights;
 	std::shared_ptr<mlCoreTests::OperatorStats> operatorStats;
+	bool multiThreaded;
 };
 
 /*****************************
@@ -94,20 +97,71 @@ std::set<autoDiff::NodePtr> flattenTree(const autoDiff::NodePtr& root)
 	return nodes;
 }
 
-std::set<autoDiff::NodePtr> getNodesByNames(const autoDiff::NodePtr& tree,
+std::set<autoDiff::NodePtr> getNodesByNames(const std::map<std::string, autoDiff::NodePtr> nodesMap,
 											const std::set<std::string>& nodeNames)
 {
-	const auto allNodes = flattenTree(tree);
 
 	std::set<autoDiff::NodePtr> nodes;
 
-	std::copy_if(allNodes.cbegin(),
-				 allNodes.cend(),
-				 std::inserter(nodes, nodes.end()),
-				 [&nodeNames](const auto& node)
-				 { return nodeNames.find(node->getName()) != nodeNames.cend(); });
+	std::transform(nodeNames.cbegin(),
+				   nodeNames.cend(),
+				   std::inserter(nodes, nodes.begin()),
+				   [&nodesMap](const auto& name) { return nodesMap.at(name); });
 
 	return nodes;
+}
+
+/// Verifies that vector B consists of all elements from A. Vector B is allowed to contains additional
+/// elements.
+template <typename T>
+::testing::AssertionResult vectorBIsReducibleToA(const std::vector<T>& vectorA, const std::vector<T>& vectorB)
+{
+	std::vector<std::reference_wrapper<const T>> vectorARefs;
+	std::vector<std::reference_wrapper<const T>> vectorBRefs;
+
+	std::for_each(vectorA.cbegin(),
+				  vectorA.cend(),
+				  [&vectorARefs](const auto& element) { vectorARefs.emplace_back(element); });
+
+	std::for_each(vectorB.cbegin(),
+				  vectorB.cend(),
+				  [&vectorBRefs](const auto& element) { vectorBRefs.emplace_back(element); });
+
+	std::vector<std::reference_wrapper<const T>> missingElements;
+
+	while(!vectorARefs.empty())
+	{
+		const auto& soughtElement = vectorARefs.back();
+
+		const auto foundElement = std::find_if(vectorBRefs.begin(),
+											   vectorBRefs.end(),
+											   [&soughtElement](const auto& element)
+											   { return element.get() == soughtElement.get(); });
+
+		if(foundElement == vectorBRefs.end())
+		{
+			missingElements.emplace_back(soughtElement);
+		}
+
+		vectorARefs.pop_back();
+		vectorBRefs.erase(foundElement);
+	}
+
+	if(!missingElements.empty())
+	{
+		std::stringstream ss;
+
+		ss << "Missing elements: ";
+
+		for(const auto& element : missingElements)
+		{
+			ss << element.get() << ", ";
+		}
+
+		return ::testing::AssertionFailure() << ss.str();
+	}
+
+	return ::testing::AssertionSuccess();
 }
 
 /*****************************
@@ -130,16 +184,7 @@ protected:
 		{
 			const auto& collectedLogs = config.operatorStats->getLogs(logChannel);
 
-			ASSERT_EQ(logs.size(), collectedLogs.size());
-
-			auto collectedLogsIter = collectedLogs.cbegin();
-
-			for(const auto& expectedLog : logs)
-			{
-				ASSERT_STREQ(expectedLog.c_str(), collectedLogsIter->c_str());
-
-				std::advance(collectedLogsIter, 1);
-			}
+			ASSERT_TRUE(vectorBIsReducibleToA<std::string>(logs, collectedLogs));
 		}
 	}
 
@@ -154,7 +199,8 @@ protected:
 
 		const auto nodes = flattenTree(config.tree);
 
-		_graph = std::make_unique<ComputationGraph>(ComputationGraphConfig{.useMultithreading = true});
+		_graph = std::make_unique<ComputationGraph>(
+			ComputationGraphConfig{.useMultithreading = config.multiThreaded});
 
 		_graph->setRoot(config.tree);
 		_graph->setDifferentiableNodes(config.trainableWeights);
@@ -167,75 +213,54 @@ protected:
 	std::unique_ptr<autoDiff::ComputationGraph> _graph{nullptr};
 };
 
-TEST_F(TestComputationGraph, testBackPropagation)
+TEST_F(TestComputationGraph, CollectProperLogsForOneRootTreeMultithreaded)
 {
-	using namespace autoDiff;
+	auto [nodes, stats] = mlCoreTests::constructTree(mlCoreTests::treeConfigOneRoot);
 
-	const std::vector<std::pair<std::string, std::string>> treeConstructionConfig{
-		{"Input", "PLACEHOLDER_(256,1)"},
-		{"L1W", "VARIABLE_(200,256)"},
-		{"L1B", "VARIABLE_(200,1)"},
-		{"Layer1", "MATMUL_L1W_Input"},
-		{"Layer1biased", "ADD_Layer1_L1B"},
-		{"Layer1Act", "RELU_Layer1biased"},
-		{"L2W", "VARIABLE_(200,200)"},
-		{"L2B", "VARIABLE_(200,1)"},
-		{"Layer2", "MATMUL_L2W_Layer1Act"},
-		{"Layer2biased", "ADD_Layer2_L2B"},
-		{"Layer2Act", "SIGMOID_Layer2biased"},
-		{"L3W", "VARIABLE_(1,200)"},
-		{"L3B", "VARIABLE_(1,1)"},
-		{"Layer3", "MATMUL_L3W_Layer2Act"},
-		{"Layer3biased", "ADD_Layer3_L3B"},
-		{"Layer3Act", "SIGMOID_Layer3biased"},
-		{"OutputLayer", "LN_Layer3Act"}};
-
-	auto [tree, stats] = mlCoreTests::constructTree(treeConstructionConfig);
-
-	const BackPropagationConfig config{.tree = tree,
+	const BackPropagationConfig config{.tree = nodes.at("OutputLayer"),
 									   .trainableWeights =
-										   getNodesByNames(tree, {"L1W", "L1B", "L2W", "L2B", "L3W", "L3B"}),
-									   .operatorStats = stats};
+										   getNodesByNames(nodes, {"L1W", "L1B", "L2W", "L2B", "L3W", "L3B"}),
+									   .operatorStats = stats,
+									   .multiThreaded = true};
 
 	_performBackPropagation(config);
 
-	const std::map<mlCoreTests::OperatorStats::WrapperLogChannel, std::vector<std::string>> expectedLogs{
-		{mlCoreTests::OperatorStats::WrapperLogChannel::UPDATE_VALUE,
-		 {"L1W -> Layer1",
-		  "Input -> Layer1",
-		  "Layer1 -> Layer1biased",
-		  "L1B -> Layer1biased",
-		  "Layer1biased -> Layer1Act",
-		  "L2W -> Layer2",
-		  "Layer1Act -> Layer2",
-		  "Layer2 -> Layer2biased",
-		  "L2B -> Layer2biased",
-		  "Layer2biased -> Layer2Act",
-		  "L3W -> Layer3",
-		  "Layer2Act -> Layer3",
-		  "Layer3 -> Layer3biased",
-		  "L3B -> Layer3biased",
-		  "Layer3biased -> Layer3Act",
-		  "Layer3Act -> OutputLayer"}},
-		{mlCoreTests::OperatorStats::WrapperLogChannel::COMPUTE_DERIVATIVE,
-		 {"Layer3Act <- OutputLayer",
-		  "Layer3biased <- Layer3Act",
-		  "Layer3 <- Layer3biased",
-		  "L3B <- Layer3biased",
-		  "L3W <- Layer3",
-		  "Layer2Act <- Layer3",
-		  "Layer2biased <- Layer2Act",
-		  "Layer2 <- Layer2biased",
-		  "L2B <- Layer2biased",
-		  "L2W <- Layer2",
-		  "Layer1Act <- Layer2",
-		  "Layer1biased <- Layer1Act",
-		  "Layer1 <- Layer1biased",
-		  "L1B <- Layer1biased",
-		  "L1W <- Layer1",
-		  "Input <- Layer1"}}};
-
-	_checkBackPropagation(config, expectedLogs);
+	_checkBackPropagation(config, mlCoreTests::expectedLogsOneRoot);
 }
 
+TEST_F(TestComputationGraph, CollectProperLogsForOneRootTreeSinglethreaded)
+{
+	auto [nodes, stats] = mlCoreTests::constructTree(mlCoreTests::treeConfigOneRoot);
+
+	const BackPropagationConfig config{.tree = nodes.at("OutputLayer"),
+									   .trainableWeights =
+										   getNodesByNames(nodes, {"L1W", "L1B", "L2W", "L2B", "L3W", "L3B"}),
+									   .operatorStats = stats,
+									   .multiThreaded = false};
+
+	_performBackPropagation(config);
+
+	_checkBackPropagation(config, mlCoreTests::expectedLogsOneRoot);
+}
+
+TEST_F(TestComputationGraph, CollectProperLogsForMultipleRootTreeMultithreaded)
+{
+	auto [nodes, stats] = mlCoreTests::constructTree(mlCoreTests::treeConfigXShape);
+
+	const BackPropagationConfig config{
+		.tree = nodes["OutputLayer"],
+		.trainableWeights = getNodesByNames(
+			nodes, {"LeftInput/L1/W",	"LeftInput/L1/B",	"LeftInput/L2/W",	"LeftInput/L2/B",
+					"LeftInput/L3/W",	"LeftInput/L3/B",	"RightInput/L1/W",	"RightInput/L1/B",
+					"RightInput/L2/W",	"RightInput/L2/B",	"RightInput/L3/W",	"RightInput/L3/B",
+					"LeftOutput/L1/W",	"LeftOutput/L1/B",	"LeftOutput/L2/W",	"LeftOutput/L2/B",
+					"LeftOutput/L3/W",	"LeftOutput/L3/B",	"RightOutput/L1/W", "RightOutput/L1/B",
+					"RightOutput/L2/W", "RightOutput/L2/B", "RightOutput/L3/W", "RightOutput/L3/B"}),
+		.operatorStats = stats,
+		.multiThreaded = true};
+
+	_performBackPropagation(config);
+
+	_checkBackPropagation(config, mlCoreTests::expectedLogsXShape);
+}
 } // namespace

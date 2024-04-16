@@ -73,9 +73,9 @@ autoDiff::NodePtr getOperationByDesc(const std::string& description,
  * @brief Generates a tree of nodes based on given config.
  *
  * @param config Vector of pairs: <name of new node, operation and names of its inputs>.
- * @return Pair: <head of the constructed tree, pairs of [parent, child] relations between the nodes>.
+ * @return Pair: <constructed nodes map, pairs of [parent, child] relations between the nodes>.
  */
-std::pair<autoDiff::NodePtr, std::shared_ptr<OperatorStats>>
+std::pair<std::map<std::string, autoDiff::NodePtr>, std::shared_ptr<OperatorStats>>
 constructTree(const std::vector<std::pair<std::string, std::string>>& config)
 {
 	using namespace autoDiff;
@@ -158,7 +158,7 @@ constructTree(const std::vector<std::pair<std::string, std::string>>& config)
 		nodes[name] = createNode(name, recipe);
 	}
 
-	return {nodes[config.crbegin()->first], stats};
+	return {nodes, stats};
 }
 } // namespace mlCoreTests
 
