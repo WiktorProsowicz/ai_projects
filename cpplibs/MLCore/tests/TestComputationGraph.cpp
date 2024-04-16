@@ -39,64 +39,6 @@ struct BackPropagationConfig
  *
  *****************************/
 
-/**
- * @brief Creates a feed map that can be used in forward-pass of ComputationGraph.
- *
- * @param inputs Placeholders to assign input tensors to.
- * @return Created feed map with random generated inputs.
- */
-std::map<autoDiff::PlaceholderPtr, std::shared_ptr<mlCore::Tensor>>
-createFeedMap(const std::set<autoDiff::PlaceholderPtr>& inputs)
-{
-	using namespace autoDiff;
-
-	std::map<PlaceholderPtr, std::shared_ptr<mlCore::Tensor>> feedMap;
-
-	for(const auto& input : inputs)
-	{
-		const mlCore::tensorInitializers::GaussianInitializer<double> initializer;
-		const auto inputTensor = std::make_shared<mlCore::Tensor>(input->getValue().shape());
-
-		inputTensor->fill(initializer);
-
-		feedMap.emplace(input, inputTensor);
-	}
-
-	return feedMap;
-}
-
-/**
- * @brief Traverses tree and returns all unique nodes.
- *
- * @param root Root node of the traversed tree.
- * @return All of the nodes present in the tree.
- */
-std::set<autoDiff::NodePtr> flattenTree(const autoDiff::NodePtr& root)
-{
-	using namespace autoDiff;
-
-	std::set<NodePtr> nodes;
-
-	std::function<void(const NodePtr)> flattenTree;
-
-	flattenTree = [&nodes, &flattenTree](const NodePtr& node)
-	{
-		nodes.insert(node);
-
-		if(const auto casted = std::dynamic_pointer_cast<Operator>(node))
-		{
-			for(const auto& input : casted->getInputs())
-			{
-				flattenTree(input);
-			}
-		}
-	};
-
-	flattenTree(root);
-
-	return nodes;
-}
-
 std::set<autoDiff::NodePtr> getNodesByNames(const std::map<std::string, autoDiff::NodePtr> nodesMap,
 											const std::set<std::string>& nodeNames)
 {
@@ -171,14 +113,14 @@ template <typename T>
  *****************************/
 class TestComputationGraph : public testing::Test
 {
-protected:
+public:
 	/**
 	 * @brief Checks whether all of the value-updating and derivative-computing operations have been run.
 	 *
 	 */
-	void _checkBackPropagation(
-		const BackPropagationConfig& config,
-		const std::map<mlCoreTests::OperatorStats::WrapperLogChannel, std::vector<std::string>>& expectedLogs)
+	void AssertLogsAreAsExpected(const BackPropagationConfig& config,
+								 const std::map<mlCoreTests::OperatorStats::WrapperLogChannel,
+												std::vector<std::string>>& expectedLogs) const
 	{
 		for(const auto& [logChannel, logs] : expectedLogs)
 		{
@@ -188,6 +130,14 @@ protected:
 		}
 	}
 
+	void AssertGradientsAreAvailable(const BackPropagationConfig& config) const
+	{
+		ASSERT_THAT(config.trainableWeights,
+					::testing::Each(::testing::Truly([this](const auto& weight)
+													 { return _graph->hasGradient(weight); })));
+	};
+
+protected:
 	/**
 	 * @brief Simulates computation graph forward pass and gradients updates.
 	 *
@@ -196,8 +146,6 @@ protected:
 	void _performBackPropagation(const BackPropagationConfig& config)
 	{
 		using namespace autoDiff;
-
-		const auto nodes = flattenTree(config.tree);
 
 		_graph = std::make_unique<ComputationGraph>(
 			ComputationGraphConfig{.useMultithreading = config.multiThreaded});
@@ -225,7 +173,8 @@ TEST_F(TestComputationGraph, CollectProperLogsForOneRootTreeMultithreaded)
 
 	_performBackPropagation(config);
 
-	_checkBackPropagation(config, mlCoreTests::expectedLogsOneRoot);
+	AssertLogsAreAsExpected(config, mlCoreTests::expectedLogsOneRoot);
+	AssertGradientsAreAvailable(config);
 }
 
 TEST_F(TestComputationGraph, CollectProperLogsForOneRootTreeSinglethreaded)
@@ -240,7 +189,8 @@ TEST_F(TestComputationGraph, CollectProperLogsForOneRootTreeSinglethreaded)
 
 	_performBackPropagation(config);
 
-	_checkBackPropagation(config, mlCoreTests::expectedLogsOneRoot);
+	AssertLogsAreAsExpected(config, mlCoreTests::expectedLogsOneRoot);
+	AssertGradientsAreAvailable(config);
 }
 
 TEST_F(TestComputationGraph, CollectProperLogsForMultipleRootTreeMultithreaded)
@@ -261,6 +211,7 @@ TEST_F(TestComputationGraph, CollectProperLogsForMultipleRootTreeMultithreaded)
 
 	_performBackPropagation(config);
 
-	_checkBackPropagation(config, mlCoreTests::expectedLogsXShape);
+	AssertLogsAreAsExpected(config, mlCoreTests::expectedLogsXShape);
+	AssertGradientsAreAvailable(config);
 }
 } // namespace
