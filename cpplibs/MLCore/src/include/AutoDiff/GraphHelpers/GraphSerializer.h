@@ -24,7 +24,7 @@ public:
 	 *
 	 * @param root The root node of the part of the graph to be serialized.
 	 */
-	GraphSerializer(NodePtr root);
+	explicit GraphSerializer(NodePtr root);
 
 	GraphSerializer(const GraphSerializer&) = delete;
 	GraphSerializer& operator=(const GraphSerializer&) = delete;
@@ -51,7 +51,7 @@ private:
 	void _determineNodesConnections();
 
 	/// Creates a string id representing the given node.
-	std::string _getNodeIdentifier(const NodePtr& node) const;
+	static std::string _getNodeIdentifier(const NodePtr& node);
 
 	/// Returns the attributes of the DOT graph structure.
 	std::string _getGlobalGraphAttributes() const;
@@ -63,7 +63,7 @@ private:
 	std::vector<std::string> _serializeNodesConnections() const;
 
 	/// Returns stringified version of the given node, including its attributes.
-	std::string _getNodeDefinition(const NodePtr& node) const;
+	static std::string _getNodeDefinition(const NodePtr& node);
 
 	size_t _getMaxNodeLevel() const;
 

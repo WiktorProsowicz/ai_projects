@@ -7,7 +7,7 @@
 namespace autoDiff::detail
 {
 GraphSerializer::GraphSerializer(NodePtr root)
-	: _root(root)
+	: _root(std::move(root))
 {
 	_determineNodesLevels();
 	_determineNodesConnections();
@@ -84,7 +84,7 @@ void GraphSerializer::_determineNodesConnections()
 	saveConnectionsForNode(_root);
 }
 
-std::string GraphSerializer::_getNodeIdentifier(const NodePtr& node) const
+std::string GraphSerializer::_getNodeIdentifier(const NodePtr& node)
 {
 	return fmt::format("_{}", std::hash<NodePtr>{}(node));
 }
@@ -145,7 +145,7 @@ std::vector<std::string> GraphSerializer::_serializeNodesConnections() const
 	return stringifiedConnections;
 }
 
-std::string GraphSerializer::_getNodeDefinition(const NodePtr& node) const
+std::string GraphSerializer::_getNodeDefinition(const NodePtr& node)
 {
 	constexpr const char* nodeFormat =
 		R"({node_id} [label="{node_name}|{node_output_shape}"; color="{node_color}"; shape="record"; fontcolor="white"; style="bold"];)";
