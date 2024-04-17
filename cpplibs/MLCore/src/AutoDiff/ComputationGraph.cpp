@@ -15,6 +15,7 @@
 
 #include "AutoDiff/GraphHelpers/BackwardPassContext.h"
 #include "AutoDiff/GraphHelpers/ForwardPassContext.h"
+#include "AutoDiff/GraphHelpers/GraphSerializer.h"
 #include "AutoDiff/GraphNodes.hpp"
 #include "MLCore/BasicTensor.h"
 
@@ -97,5 +98,10 @@ void ComputationGraph::setRoot(const NodePtr& root)
 void ComputationGraph::setDifferentiableNodes(const std::set<NodePtr>& nodes)
 {
 	_differentiableNodes = nodes;
+}
+
+std::string ComputationGraph::serializeToDot() const
+{
+	return detail::GraphSerializer{_root}.serialize();
 }
 } // namespace autoDiff
