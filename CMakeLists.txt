@@ -28,6 +28,6 @@ if(${BUILD_TESTS})
 endif()
 
 add_subdirectory(cpplibs/LoggingLib)
-
 add_subdirectory(cpplibs/MLCore)
 add_subdirectory(cpplibs/Utilities)
+add_subdirectory(cpplibs/Interfaces)

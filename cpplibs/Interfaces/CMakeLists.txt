@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION "${CMAKE_MINIMUM_REQUIRED_VERSION}")
+
+project(Interfaces VERSION 1.0.0)
+
+include("${CMAKE_SOURCE_DIR}/setuputils/Common.cmake")
+
+install_library()
