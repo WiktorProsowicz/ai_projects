@@ -68,11 +68,11 @@ std::vector<size_t> getOutputShapeForMatmul(const std::vector<size_t>& lhsShape,
  * stringifyVector(std::vector<uint32_t>{0, 1, 2, 3}, '(', ')') -> (0, 1, 2, 3)
  */
 template <typename T>
-std::string stringifyVector(const std::vector<T>& vect,
+std::string stringifyVector(const std::vector<T>& vector,
 							const char* const openSign = "(",
 							const char* const closeSign = ")")
 {
-	return fmt::format("{}{}{}", openSign, fmt::join(vect, ", "), closeSign);
+	return fmt::format("{}{}{}", openSign, fmt::join(vector, ", "), closeSign);
 }
 
 template <typename BaseType>

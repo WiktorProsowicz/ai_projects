@@ -6,22 +6,22 @@
 namespace autoDiff::ops
 {
 /**
- * @brief Perfoms the addition operation on the two nodes.
+ * @brief Performs the addition operation on the two nodes.
  */
 OperatorPtr add(const NodePtr& lhsNode, const NodePtr& rhsNode);
 
 /**
- * @brief Perfoms the subtraction operation on the two nodes.
+ * @brief Performs the subtraction operation on the two nodes.
  */
 OperatorPtr subtract(const NodePtr& lhsNode, const NodePtr& rhsNode);
 
 /**
- * @brief Perfoms the multiplication operation on the two nodes.
+ * @brief Performs the multiplication operation on the two nodes.
  */
 OperatorPtr multiply(const NodePtr& lhsNode, const NodePtr& rhsNode);
 
 /**
- * @brief Perfoms the division operation on the two nodes.
+ * @brief Performs the division operation on the two nodes.
  */
 OperatorPtr divide(const NodePtr& lhsNode, const NodePtr& rhsNode);
 

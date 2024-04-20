@@ -8,7 +8,7 @@
 namespace autoDiff::ops::detail
 {
 /**
- * @brief Simple operator class, whose backward pass involves simple ultiplication of outer derivative and
+ * @brief Simple operator class, whose backward pass involves simple multiplication of outer derivative and
  * direct derivatives.
  *
  * @details This operator is suited to nodes representing a simple function applying non-linearity

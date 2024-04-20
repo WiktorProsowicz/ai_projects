@@ -83,7 +83,7 @@ public:
 	/**
 	 * @brief Returns the shape of the value being on the output port of the node.
 	 *
-	 * It may be simply the shape of the internal value or shape of the value computed via a compilcated
+	 * It may be simply the shape of the internal value or shape of the value computed via a complicated
 	 * internal operation depending on the concrete type of node.
 	 *
 	 */
