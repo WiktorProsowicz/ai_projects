@@ -35,7 +35,7 @@ class AiProjectsRecipe(conan.ConanFile):
 
         if self.options.setup_mode == 'dev':
             self.requires('gtest/1.14.0')
-            self.requires('tracy/cci.20220130')
+            self.requires('tracy/0.10')
 
     def layout(self):
         """Specifies the project building behavior.

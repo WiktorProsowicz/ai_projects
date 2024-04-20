@@ -15,15 +15,16 @@ set(CMAKE_PREFIX_PATH ${CMAKE_CURRENT_SOURCE_DIR}/build/ConanFiles ${CMAKE_PREFI
 find_package(fmt REQUIRED)
 include_directories(SYSTEM ${fmt_INCLUDE_DIRS})
 
+find_package(Tracy REQUIRED)
+include_directories(SYSTEM ${Tracy_INCLUDE_DIRS})
+
 if(${BUILD_TESTS})
+    enable_testing()
 
-enable_testing()
+    find_package(GTest REQUIRED)
+    include_directories(SYSTEM ${GTest_INCLUDE_DIRS})
 
-find_package(GTest REQUIRED)
-include_directories(SYSTEM ${GTest_INCLUDE_DIRS})
-
-include(GoogleTest)
-
+    include(GoogleTest)
 endif()
 
 add_subdirectory(cpplibs/LoggingLib)
