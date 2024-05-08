@@ -42,7 +42,7 @@ BasicTensor<ValueType>::BasicTensor(ValueType initVal)
 }
 
 template <typename ValueType>
-BasicTensor<ValueType>::BasicTensor(const std::vector<size_t>& shape)
+BasicTensor<ValueType>::BasicTensor(const TensorShape& shape)
 	: _length()
 	, _shape(shape)
 	, _data()
@@ -74,7 +74,7 @@ BasicTensor<ValueType>::BasicTensor(const std::vector<size_t>& shape)
 	catch(const std::runtime_error&)
 	{
 		size_t nElements = 1;
-		std::vector<size_t> newShape;
+		TensorShape newShape;
 
 		for_each(shape.begin(),
 				 shape.end(),
@@ -104,7 +104,7 @@ BasicTensor<ValueType>::BasicTensor(const std::vector<size_t>& shape)
 }
 
 template <typename ValueType>
-BasicTensor<ValueType>::BasicTensor(const std::vector<size_t>& shape, const ValueType initVal)
+BasicTensor<ValueType>::BasicTensor(const TensorShape& shape, const ValueType initVal)
 	: BasicTensor(shape)
 {
 	for(size_t i = 0; i < _length; i++)
@@ -114,7 +114,7 @@ BasicTensor<ValueType>::BasicTensor(const std::vector<size_t>& shape, const Valu
 }
 
 template <typename ValueType>
-BasicTensor<ValueType>::BasicTensor(const std::vector<size_t>& shape,
+BasicTensor<ValueType>::BasicTensor(const TensorShape& shape,
 									const std::initializer_list<ValueType> initValues)
 	: BasicTensor(shape)
 {
@@ -196,7 +196,7 @@ BasicTensor<ValueType>& BasicTensor<ValueType>::operator=(BasicTensor&& other) n
 }
 
 template <typename ValueType>
-void BasicTensor<ValueType>::reshape(const std::vector<size_t>& newShape)
+void BasicTensor<ValueType>::reshape(const TensorShape& newShape)
 {
 	_checkShapeElementsPositive(newShape);
 	_checkShapeFitsInBounds(newShape);
@@ -206,7 +206,7 @@ void BasicTensor<ValueType>::reshape(const std::vector<size_t>& newShape)
 }
 
 template <typename ValueType>
-void BasicTensor<ValueType>::_checkShapeElementsPositive(const std::vector<size_t>& shape)
+void BasicTensor<ValueType>::_checkShapeElementsPositive(const TensorShape& shape)
 {
 	if(std::any_of(shape.begin(), shape.end(), [](const auto axis) { return axis <= 0; }))
 	{
@@ -215,7 +215,7 @@ void BasicTensor<ValueType>::_checkShapeElementsPositive(const std::vector<size_
 }
 
 template <typename ValueType>
-void BasicTensor<ValueType>::_checkShapeFitsInBounds(const std::vector<size_t>& shape)
+void BasicTensor<ValueType>::_checkShapeFitsInBounds(const TensorShape& shape)
 {
 	size_t nElements = 1;
 	for_each(shape.begin(),
@@ -234,7 +234,7 @@ void BasicTensor<ValueType>::_checkShapeFitsInBounds(const std::vector<size_t>& 
 }
 
 template <typename ValueType>
-void BasicTensor<ValueType>::_checkShapeCompatible(const std::vector<size_t>& shape) const
+void BasicTensor<ValueType>::_checkShapeCompatible(const TensorShape& shape) const
 {
 	const auto newLength =
 		std::accumulate(shape.begin(),
@@ -385,8 +385,8 @@ BasicTensor<ValueType> BasicTensor<ValueType>::matmul(const BasicTensor& other) 
 	const size_t biggerSize = std::max(_shape.size(), other._shape.size());
 
 	// padded shapes for easier operating
-	std::vector<size_t> paddedShapeFirst(biggerSize, 1);
-	std::vector<size_t> paddedShapeSecond(biggerSize, 1);
+	TensorShape paddedShapeFirst(biggerSize, 1);
+	TensorShape paddedShapeSecond(biggerSize, 1);
 
 	std::copy(_shape.cbegin(),
 			  _shape.cend(),
@@ -411,7 +411,7 @@ BasicTensor<ValueType> BasicTensor<ValueType>::matmul(const BasicTensor& other) 
 		}
 	}
 
-	std::vector<size_t> retShape(biggerSize);
+	TensorShape retShape(biggerSize);
 	retShape[biggerSize - 2] = paddedShapeFirst[biggerSize - 2];
 	retShape[biggerSize - 1] = paddedShapeSecond[biggerSize - 1];
 
@@ -423,7 +423,7 @@ BasicTensor<ValueType> BasicTensor<ValueType>::matmul(const BasicTensor& other) 
 	BasicTensor<ValueType> resultTensor(retShape, 0);
 
 	// tells the position of a single computed matrix relative to the array of values
-	auto computeFramePos = [](const std::vector<size_t>& treePath, const std::vector<size_t>& shape) -> size_t
+	auto computeFramePos = [](const std::vector<size_t>& treePath, const TensorShape& shape) -> size_t
 	{
 		size_t offset = 0;
 		size_t factor = shape[shape.size() - 1] * shape[shape.size() - 2];
@@ -495,7 +495,7 @@ template <typename ValueType>
 BasicTensor<ValueType> BasicTensor<ValueType>::transposed() const
 {
 
-	std::vector<size_t> retShape;
+	TensorShape retShape;
 	for(size_t i = 0; i < _shape.size() - 2; i++)
 	{
 		retShape.push_back(_shape[i]);
@@ -558,7 +558,7 @@ void BasicTensor<ValueType>::assign(std::initializer_list<std::pair<size_t, size
 	}
 
 	auto computeFramePos =
-		[&wholeDimensionsOffset](const std::vector<size_t>& treePath, const std::vector<size_t>& shape)
+		[&wholeDimensionsOffset](const std::vector<size_t>& treePath, const TensorShape& shape)
 	{
 		size_t offset = 0;
 		size_t factor = wholeDimensionsOffset;

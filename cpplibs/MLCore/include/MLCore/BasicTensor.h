@@ -23,6 +23,11 @@ class TensorOperationsImpl;
 } // namespace detail
 
 /**
+ * @brief Type representing tensor's shape.
+ */
+using TensorShape = std::vector<size_t>;
+
+/**
  * @brief Class implements a concept of tensor, support basic operation, transposition etc.
  *
  * @tparam ValueType Type of the underlying data
@@ -78,7 +83,7 @@ public:
 	 *
 	 * @param shape Tensor's initial shape.
 	 */
-	BasicTensor(const std::vector<size_t>& shape);
+	BasicTensor(const TensorShape& shape);
 
 	/**
 	 * @brief Constructs tensor from shape and fills it with initial value.
@@ -86,7 +91,7 @@ public:
 	 * @param shape Tensor's initial shape.
 	 * @param initVal Initial value for the whole tensor's data.
 	 */
-	BasicTensor(const std::vector<size_t>& shape, ValueType initVal);
+	BasicTensor(const TensorShape& shape, ValueType initVal);
 
 	/**
 	 * @brief Constructs a new tensor from shape and gives it initial values.
@@ -94,7 +99,7 @@ public:
 	 * @param shape Tensor's initial shape.
 	 * @param initValues Values to assign, there is no check of the init list length.
 	 */
-	BasicTensor(const std::vector<size_t>& shape, std::initializer_list<ValueType> initValues);
+	BasicTensor(const TensorShape& shape, std::initializer_list<ValueType> initValues);
 
 	// NOLINTEND(google-explicit-constructor)
 
@@ -121,7 +126,7 @@ public:
 	BasicTensor& operator=(BasicTensor&& other) noexcept;
 
 	/// Gets tensor's shape.
-	const std::vector<size_t>& shape() const noexcept
+	const TensorShape& shape() const noexcept
 	{
 		return _shape;
 	}
@@ -155,7 +160,7 @@ public:
 	 *
 	 * @param newShape The new shape to assign.
 	 */
-	void reshape(const std::vector<size_t>& newShape);
+	void reshape(const TensorShape& newShape);
 
 	/**
 	 * @brief Assigns new values to tensor in places specified by axes ranges.
@@ -288,17 +293,17 @@ private:
 	void _checkIndicesList(IndicesIter beg, IndicesIter end) const;
 
 	/// Checks if all of the `shape`'s elements are positive i.e. eligible to be present in the shape.
-	static void _checkShapeElementsPositive(const std::vector<size_t>& shape);
+	static void _checkShapeElementsPositive(const TensorShape& shape);
 
 	/// Checks if the number of elements produced by `shape` fits in datatype bounds.
-	static void _checkShapeFitsInBounds(const std::vector<size_t>& shape);
+	static void _checkShapeFitsInBounds(const TensorShape& shape);
 
 	/// Checks if the given `shape` is compatible with the number of elements held by the tensor
-	void _checkShapeCompatible(const std::vector<size_t>& shape) const;
+	void _checkShapeCompatible(const TensorShape& shape) const;
 
 private:
 	size_t _length;
-	std::vector<size_t> _shape;
+	TensorShape _shape;
 	ValueType* _data;
 };
 
