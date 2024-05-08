@@ -6,7 +6,7 @@
 #include "AutoDiff/GraphNodes.hpp"
 #include "MLCore/BasicTensor.h"
 
-namespace mlCore::models
+namespace interfaces
 {
 /**
  * @brief Interface for models' components. Defines a scope inside a model rather than a linear layer inside
@@ -26,25 +26,20 @@ public:
 	virtual ~ILayer() = default;
 
 	/**
-	 * @brief Initializes the layer's parameters based on the specifically defined configuration.
+	 * @brief Calls the layer and returns the output value.
 	 *
-	 * @return Expected layer's output.
+	 * @details The output value should be computed based on the input values and the characteristics concrete
+	 * layer's implementation. The internal value of the output operator shall be updated before returning it.
+	 *
+	 * @param inputs Input values.
 	 */
-	virtual autoDiff::NodePtr build() = 0;
+	virtual autoDiff::OperatorPtr call(const std::vector<autoDiff::NodePtr>& inputs) = 0;
 
 	/**
-	 * @brief Computes the layer's output.
+	 * @brief Returns the shape of the layer's output.
 	 *
-	 * @return Computed output.
 	 */
-	virtual Tensor compute() = 0;
-
-	/**
-	 * @brief Gives the layer's weights regardless of whether they are trainable or not.
-	 *
-	 * @return Layer's weights.
-	 */
-	virtual std::vector<autoDiff::NodePtr> getAllWeights() const = 0;
+	virtual mlCore::TensorShape getOutputShape() const = 0;
 
 	/**
 	 * @brief Gives the layer's weights that are supposed to be trained.
@@ -62,6 +57,6 @@ public:
 };
 
 using ILayerPtr = std::shared_ptr<ILayer>;
-} // namespace mlCore::models
+} // namespace interfaces
 
 #endif

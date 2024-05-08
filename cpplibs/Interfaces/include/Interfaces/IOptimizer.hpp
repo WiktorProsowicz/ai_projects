@@ -5,7 +5,7 @@
 
 #include "AutoDiff/GraphNodes.hpp"
 
-namespace mlCore::models
+namespace interfaces
 {
 /**
  * @brief Interface for classes optimizing layers' weights with use of gradients.
@@ -33,6 +33,6 @@ public:
 };
 
 using IOptimizerPtr = std::shared_ptr<IOptimizer>;
-} // namespace mlCore::models
+} // namespace interfaces
 
 #endif
