@@ -21,10 +21,10 @@ public:
 
 	DenseLayer(std::string name, size_t units, IActivationFactoryPtr activationFactory);
 
-	DenseLayer(const DenseLayer&) = default;
-	DenseLayer(DenseLayer&&) = default;
-	DenseLayer& operator=(const DenseLayer&) = default;
-	DenseLayer& operator=(DenseLayer&&) = default;
+	DenseLayer(const DenseLayer&) = delete;
+	DenseLayer(DenseLayer&&) = delete;
+	DenseLayer& operator=(const DenseLayer&) = delete;
+	DenseLayer& operator=(DenseLayer&&) = delete;
 
 	~DenseLayer() override = default;
 
