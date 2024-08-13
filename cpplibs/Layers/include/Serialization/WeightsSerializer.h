@@ -51,13 +51,18 @@ public:
 	}
 
 private:
-	WeightsSerializer(std::unique_ptr<std::fstream> fileStream)
-		: _fileStream(std::move(fileStream))
-	{}
+	WeightsSerializer(std::unique_ptr<std::fstream> fileStream);
 
+	/// Checks if the given file is a valid weights file.
 	static void _validateFile(const std::string& path);
 
-	std::vector<TensorHandle> _tensorHandles{};
+	/// Initializes the handles for the tensors stored in the pointed file.
+	void _initHandles();
+
+	/// Creates a new tensor handle at a given position and sets its basic fields.
+	void _allocateHandle(const std::streampos& position);
+
+	std::vector<TensorHandle> _tensorHandles;
 	std::unique_ptr<std::fstream> _fileStream;
 };
 
@@ -83,6 +88,11 @@ public:
 	TensorHandle& operator=(TensorHandle&&) = delete;
 
 	~TensorHandle() = default;
+
+	bool operator==(const TensorHandle& other) const
+	{
+		return _position == other._position;
+	}
 
 	/**
 	 * @brief Saves the tensor to the file.
