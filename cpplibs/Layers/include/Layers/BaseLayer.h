@@ -67,6 +67,9 @@ protected:
 	/// Sets the layer as built. This method should be used once the `build` method is called.
 	void _setBuilt();
 
+	/// Sets the vlaue of the given weight and checks whether the shapes are compatible.
+	void _setWeight(const autoDiff::VariablePtr& weight, mlCore::Tensor value);
+
 private:
 	std::string _name;
 	/// Tells whether the layer's internal state has been initialized.
