@@ -36,19 +36,25 @@ public:
 	WeightsSerializer() = delete;
 
 	WeightsSerializer(const WeightsSerializer&) = delete;
-	WeightsSerializer(WeightsSerializer&&) = delete;
+	WeightsSerializer(WeightsSerializer&&) = default;
 	WeightsSerializer& operator=(const WeightsSerializer&) = delete;
-	WeightsSerializer& operator=(WeightsSerializer&&) = delete;
+	WeightsSerializer& operator=(WeightsSerializer&&) = default;
 
 	~WeightsSerializer() = default;
 
 	/**
 	 * @brief Returns handles for each tensor stored in the file.
 	 */
-	const std::vector<TensorHandle>& getTensorHandles() const
+	const std::vector<std::shared_ptr<TensorHandle>>& getTensorHandles() const
 	{
 		return _tensorHandles;
 	}
+
+	/**
+	 * @brief Saves a new tensor at the end of the file and automatically adds a new handle for it.
+	 * @param tensor Tensor to be saved to the file.
+	 */
+	void addNewTensor(const mlCore::Tensor& tensor);
 
 private:
 	WeightsSerializer(std::unique_ptr<std::fstream> fileStream);
@@ -59,10 +65,7 @@ private:
 	/// Initializes the handles for the tensors stored in the pointed file.
 	void _initHandles();
 
-	/// Creates a new tensor handle at a given position and sets its basic fields.
-	void _allocateHandle(const std::streampos& position);
-
-	std::vector<TensorHandle> _tensorHandles;
+	std::vector<std::shared_ptr<TensorHandle>> _tensorHandles{};
 	std::unique_ptr<std::fstream> _fileStream;
 };
 
