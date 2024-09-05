@@ -75,6 +75,9 @@ private:
 	/// Tells whether the layer's internal state has been initialized.
 	bool _built = false;
 };
+
+/// @brief Shared pointer to a BaseLayer object.
+using BaseLayerPtr = std::shared_ptr<BaseLayer>;
 } // namespace layers
 
 #endif

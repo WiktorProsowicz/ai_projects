@@ -4,7 +4,12 @@ namespace layers
 {
 BaseLayer::BaseLayer(std::string name)
 	: _name(std::move(name))
-{}
+{
+	if(_name.empty())
+	{
+		LOG_ERROR("Layers::BaseLayer", "Layer name cannot be empty.");
+	}
+}
 
 const std::string& BaseLayer::getName() const
 {
