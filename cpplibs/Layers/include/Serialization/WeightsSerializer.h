@@ -1,3 +1,6 @@
+#ifndef LAYERS_TESTS_WEIGHTSSERIALIZER_H
+#define LAYERS_TESTS_WEIGHTSSERIALIZER_H
+
 #include <fstream>
 
 #include <AutoDiff/GraphNodes.hpp>
@@ -117,3 +120,5 @@ private:
 	std::streampos _position;
 };
 } // namespace layers::serialization
+
+#endif
