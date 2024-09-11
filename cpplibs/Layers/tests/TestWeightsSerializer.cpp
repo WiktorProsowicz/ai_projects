@@ -7,12 +7,13 @@
  **********************/
 
 #include <filesystem>
-#include <random>
 
 #include <MLCore/TensorOperations.h>
 #include <Serialization/WeightsSerializer.h>
 #include <Utilities/BinarySerialization.hpp>
 #include <gtest/gtest.h>
+
+#include "Utilities.hpp"
 
 namespace
 {
@@ -21,28 +22,6 @@ namespace
  * Common Functions
  *
  *****************************/
-
-/// @brief Creates a temporary file and returns its path.
-std::string createTempFile()
-{
-	std::random_device randomDev;
-	std::uniform_int_distribution<uint64_t> randomDist(0, std::numeric_limits<uint64_t>::max());
-	std::mt19937 randomEngine(randomDev());
-
-	for(uint8_t attempt = 0; attempt < 10; ++attempt)
-	{
-
-		const auto tempPath =
-			std::filesystem::temp_directory_path() / std::to_string(randomDist(randomEngine));
-
-		if(!std::filesystem::exists(tempPath))
-		{
-			return tempPath;
-		}
-	}
-
-	LOG_ERROR("TestWeightSerializer", "Critical! Failed to create a temporary file!");
-}
 
 ::testing::AssertionResult areTensorsEqual(const mlCore::Tensor& expected, const mlCore::Tensor& actual)
 {
@@ -116,7 +95,7 @@ protected:
 	::testing::AssertionResult _serializerCatchesInvalidFile(utilities::SerializationPack<Args...>&& fileData,
 															 const std::string& expectedErrorMsg)
 	{
-		const auto tempPath = createTempFile();
+		const auto tempPath = testUtilities::createTempFile();
 
 		{
 			std::ofstream file(tempPath);
@@ -190,7 +169,7 @@ TEST_F(TestWeightsSerializer, EncountersInvalidData)
 
 TEST_F(TestWeightsSerializer, CorrectlyAllocatesTensorsInOneShot)
 {
-	_resetSerializer(createTempFile());
+	_resetSerializer(testUtilities::createTempFile());
 
 	mlCore::Tensor tensor1(mlCore::TensorShape{3, 3}, {1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0});
 	mlCore::Tensor tensor2(mlCore::TensorShape{2, 2}, {1.0, 2.0, 3.0, 4.0});
@@ -213,7 +192,7 @@ TEST_F(TestWeightsSerializer, CorrectlyAllocatesTensorsInOneShot)
 
 TEST_F(TestWeightsSerializer, CorrectlyAllocatesTensorsInMultipleShots)
 {
-	const auto weightsPath = createTempFile();
+	const auto weightsPath = testUtilities::createTempFile();
 
 	_resetSerializer(weightsPath);
 
@@ -241,7 +220,7 @@ TEST_F(TestWeightsSerializer, CorrectlyAllocatesTensorsInMultipleShots)
 
 TEST_F(TestWeightsSerializer, CorrectlyDecodesTensors)
 {
-	const auto weightsPath = createTempFile();
+	const auto weightsPath = testUtilities::createTempFile();
 
 	_resetSerializer(weightsPath);
 
@@ -258,7 +237,7 @@ TEST_F(TestWeightsSerializer, CorrectlyDecodesTensors)
 
 TEST_F(TestWeightsSerializer, CorrectlyUpdatesTensors)
 {
-	const auto weightsPath = createTempFile();
+	const auto weightsPath = testUtilities::createTempFile();
 
 	_resetSerializer(weightsPath);
 
