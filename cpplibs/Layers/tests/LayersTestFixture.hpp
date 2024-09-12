@@ -58,10 +58,14 @@ protected:
 
 	/// @brief Checks if the tested layer properly builds its internal structure based on provided input
 	/// shapes and parameters.
+	/// @details Can be used to test whether trainable weights are properly set and the output shape is as
+	/// expected.
 	virtual void _testBuildingLayer() = 0;
 
 	/// @brief Checks if the tested layer properly saves and loads its weights.
 	virtual void _testSavingAndLoadingWeights() = 0;
+
+	virtual void _testCalling() = 0;
 
 	layers::BaseLayerPtr _layer{};
 };
