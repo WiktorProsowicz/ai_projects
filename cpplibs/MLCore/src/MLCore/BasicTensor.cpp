@@ -18,6 +18,7 @@
 #include "MLCore/TensorInitializers/ITensorInitializer.hpp"
 #include "MLCore/TensorOperationsImpl.h"
 #include "MLCore/Utilities.h"
+#include "MLCore/UtilitiesImpl.h"
 
 namespace mlCore
 {
@@ -90,7 +91,7 @@ BasicTensor<ValueType>::BasicTensor(const std::vector<size_t>& shape)
 		LOG_WARN("BasicTensor",
 				 "Cumulative number of elements can't exceed the limit of ULL_MAX. Will preserve "
 				 "shape: "
-					 << stringifyVector(newShape));
+					 << detail::stringifyVector(newShape));
 
 		_shape = std::move(newShape);
 	}
@@ -273,7 +274,7 @@ void BasicTensor<ValueType>::_checkIndicesList(IndicesIter beg, IndicesIter end)
 		{
 			throw std::out_of_range(
 				fmt::format("Upper index is not greater than lower for shape '{}' at index {}.",
-							stringifyVector(_shape),
+							detail::stringifyVector(_shape),
 							shapeIt));
 		}
 
@@ -281,7 +282,7 @@ void BasicTensor<ValueType>::_checkIndicesList(IndicesIter beg, IndicesIter end)
 		{
 			throw std::out_of_range(fmt::format(
 				"Upper index cannot be greater than particular dimension size for shape '{}' at index {}.",
-				stringifyVector(_shape),
+				detail::stringifyVector(_shape),
 				shapeIt));
 		}
 	}
@@ -647,7 +648,7 @@ std::ostream& operator<<(std::ostream& ostream, const BasicTensor<TensorValueTyp
 {
 
 	ostream << "<BasicTensor dtype=" << typeid(TensorValueType).name()
-			<< " shape=" << stringifyVector(tensor._shape) << ">";
+			<< " shape=" << detail::stringifyVector(tensor._shape) << ">";
 
 	if(tensor.nDimensions() == 0)
 	{

@@ -4,6 +4,8 @@
 
 #include <fmt/core.h>
 
+#include "MLCore/UtilitiesImpl.h"
+
 namespace autoDiff::detail
 {
 GraphSerializer::GraphSerializer(NodePtr root)
@@ -147,6 +149,8 @@ std::vector<std::string> GraphSerializer::_serializeNodesConnections() const
 
 std::string GraphSerializer::_getNodeDefinition(const NodePtr& node)
 {
+	using mlCore::detail::stringifyVector;
+
 	constexpr const char* nodeFormat =
 		R"({node_id} [label="{node_name}|{node_output_shape}"; color="{node_color}"; shape="record"; fontcolor="white"; style="bold"];)";
 
@@ -155,28 +159,26 @@ std::string GraphSerializer::_getNodeDefinition(const NodePtr& node)
 		return fmt::format(nodeFormat,
 						   fmt::arg("node_id", _getNodeIdentifier(node)),
 						   fmt::arg("node_name", castedOp->getName()),
-						   fmt::arg("node_output_shape", mlCore::stringifyVector(castedOp->getOutputShape())),
+						   fmt::arg("node_output_shape", stringifyVector(castedOp->getOutputShape())),
 						   fmt::arg("node_color", "honeydew2"));
 	}
 
 	if(const auto castedVar = std::dynamic_pointer_cast<Variable>(node))
 	{
-		return fmt::format(
-			nodeFormat,
-			fmt::arg("node_id", _getNodeIdentifier(node)),
-			fmt::arg("node_name", castedVar->getName()),
-			fmt::arg("node_output_shape", mlCore::stringifyVector(castedVar->getOutputShape())),
-			fmt::arg("node_color", "darkgoldenrod3"));
+		return fmt::format(nodeFormat,
+						   fmt::arg("node_id", _getNodeIdentifier(node)),
+						   fmt::arg("node_name", castedVar->getName()),
+						   fmt::arg("node_output_shape", stringifyVector(castedVar->getOutputShape())),
+						   fmt::arg("node_color", "darkgoldenrod3"));
 	}
 
 	if(const auto castedConst = std::dynamic_pointer_cast<Constant>(node))
 	{
-		return fmt::format(
-			nodeFormat,
-			fmt::arg("node_id", _getNodeIdentifier(node)),
-			fmt::arg("node_name", castedConst->getName()),
-			fmt::arg("node_output_shape", mlCore::stringifyVector(castedConst->getOutputShape())),
-			fmt::arg("node_color", "green"));
+		return fmt::format(nodeFormat,
+						   fmt::arg("node_id", _getNodeIdentifier(node)),
+						   fmt::arg("node_name", castedConst->getName()),
+						   fmt::arg("node_output_shape", stringifyVector(castedConst->getOutputShape())),
+						   fmt::arg("node_color", "green"));
 	}
 
 	if(const auto castedPlaceholder = std::dynamic_pointer_cast<Placeholder>(node))
@@ -185,7 +187,7 @@ std::string GraphSerializer::_getNodeDefinition(const NodePtr& node)
 			nodeFormat,
 			fmt::arg("node_id", _getNodeIdentifier(node)),
 			fmt::arg("node_name", castedPlaceholder->getName()),
-			fmt::arg("node_output_shape", mlCore::stringifyVector(castedPlaceholder->getOutputShape())),
+			fmt::arg("node_output_shape", stringifyVector(castedPlaceholder->getOutputShape())),
 			fmt::arg("node_color", "dodgerblue2"));
 	}
 
