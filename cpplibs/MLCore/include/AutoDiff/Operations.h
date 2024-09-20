@@ -2,6 +2,7 @@
 #define MLCORE_INCLUDE_OPERATIONS_H
 
 #include "AutoDiff/GraphNodes.hpp"
+#include "MLCore/Utilities.h"
 
 namespace autoDiff::ops
 {
@@ -28,7 +29,11 @@ OperatorPtr divide(const NodePtr& lhsNode, const NodePtr& rhsNode);
 /**
  * @brief Performs matrix multiplication on the input nodes.
  */
-OperatorPtr matmul(const NodePtr& lhsNode, const NodePtr& rhsNode);
+OperatorPtr matmul(const NodePtr& lhsNode,
+				   const NodePtr& rhsNode,
+				   mlCore::MatrixSpec lhsSpec = mlCore::MatrixSpec::Default,
+				   mlCore::MatrixSpec rhsSpec = mlCore::MatrixSpec::Default,
+				   bool avoidMatrixOutput = false);
 
 /**
  * @brief Applies natural logarithm function on the input node.

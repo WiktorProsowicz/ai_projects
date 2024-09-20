@@ -5,6 +5,7 @@
 #include "AutoDiff/Operators/MatMulOp.hpp"
 #include "AutoDiff/Operators/PlainChainRuleOp.hpp"
 #include "MLCore/TensorOperations.h"
+#include "MLCore/UtilitiesImpl.h"
 
 namespace autoDiff::ops
 {
@@ -108,18 +109,28 @@ OperatorPtr divide(const NodePtr& lhsNode, const NodePtr& rhsNode)
 	return updateOp(std::make_shared<detail::PlainChainRuleOp>(std::vector{lhsNode, rhsNode}, fFunc, bFunc));
 }
 
-OperatorPtr matmul(const NodePtr& lhsNode, const NodePtr& rhsNode)
+OperatorPtr matmul(const NodePtr& lhsNode,
+				   const NodePtr& rhsNode,
+				   mlCore::MatrixSpec lhsSpec,
+				   mlCore::MatrixSpec rhsSpec,
+				   bool avoidMatrixOutput)
 {
+	using mlCore::detail::applyMatSpecToShape;
+
 	try
 	{
-		mlCore::detail::getOutputShapeForMatmul(lhsNode->getOutputShape(), rhsNode->getOutputShape());
+		const auto lhsShape = applyMatSpecToShape(lhsNode->getOutputShape(), lhsSpec);
+		const auto rhsShape = applyMatSpecToShape(rhsNode->getOutputShape(), rhsSpec);
+
+		mlCore::detail::getOutputShapeForMatmul(lhsShape, rhsShape);
 	}
 	catch(const std::runtime_error& error)
 	{
 		LOG_ERROR("AutoDiff::Ops", error.what());
 	}
 
-	return updateOp(std::make_shared<detail::MatMulOp>(std::vector{lhsNode, rhsNode}));
+	return updateOp(std::make_shared<detail::MatMulOp>(
+		std::vector{lhsNode, rhsNode}, lhsSpec, rhsSpec, avoidMatrixOutput));
 }
 
 OperatorPtr naturalLog(const NodePtr& node)
