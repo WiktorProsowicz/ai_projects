@@ -6,6 +6,8 @@
 
 #include <fmt/format.h>
 
+#include "MLCore/Utilities.h"
+
 namespace mlCore::detail
 {
 /**
@@ -28,6 +30,16 @@ std::string stringifyVector(const std::vector<T>& vector,
 {
 	return fmt::format("{}{}{}", openSign, fmt::join(vector, ", "), closeSign);
 }
+
+/// @brief Extends a given shape according to provided matrix specification.
+std::vector<size_t> applyMatSpecToShape(const std::vector<size_t>& shape, const MatrixSpec spec);
+
+/// @brief Checks if the input shape is a row or a column vector, i.e. has has the shape in the form (..., 1,
+/// n) or (..., n, 1).
+bool isRowOrColumnVector(const std::vector<size_t>& shape);
+
+/// @brief If the input shape is a row or a column vector, trims the '1' dimension.
+std::vector<size_t> trimRowOrColumnVector(const std::vector<size_t>& shape);
 
 /**
  * @brief Checks if two tensors have correct shapes to be matrix-multiplied.

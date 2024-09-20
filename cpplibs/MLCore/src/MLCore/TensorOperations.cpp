@@ -162,21 +162,18 @@ BasicTensor<ValueType> BasicTensorOperations<ValueType>::makeTensor(const Tensor
 }
 
 template <typename ValueType>
-BasicTensor<ValueType> BasicTensorOperations<ValueType>::transpose(const BasicTensor<ValueType>& arg)
+BasicTensor<ValueType> BasicTensorOperations<ValueType>::transpose(const BasicTensor<ValueType>& arg,
+																   MatrixSpec spec)
 {
-	std::vector<size_t> retShape;
-	for(size_t i = 0; i < arg._shape.size() - 2; i++)
-	{
-		retShape.push_back(arg._shape[i]);
-	}
+	const auto argShape = detail::applyMatSpecToShape(arg.shape(), spec);
 
-	// size of a single 2-dimensional part that takes part in single matrix multiplication
-	const size_t frameShapeFirst = *(++arg._shape.rbegin());
-	const size_t frameShapeSecond = *arg._shape.rbegin();
+	const size_t frameShapeFirst = *(++argShape.rbegin());
+	const size_t frameShapeSecond = *argShape.rbegin();
+	// Size of a single 2-dimensional part that takes part in single matrix multiplication
 	const size_t frameLength = frameShapeFirst * frameShapeSecond;
 
-	retShape.push_back(frameShapeSecond);
-	retShape.push_back(frameShapeFirst);
+	std::vector<size_t> retShape = argShape;
+	std::swap(retShape[retShape.size() - 1], retShape[retShape.size() - 2]);
 
 	BasicTensor<ValueType> ret(retShape);
 
@@ -339,21 +336,11 @@ void performMatmulWithBroadcastedTensors(const ValueType* const lhsData,
 template <typename ValueType>
 BasicTensor<ValueType> BasicTensorOperations<ValueType>::matmul(const BasicTensor<ValueType>& lhs,
 																const BasicTensor<ValueType>& rhs,
-																const bool extendLhs,
-																const bool extendRhs)
+																MatrixSpec lhsSpec,
+																MatrixSpec rhsSpec)
 {
-	auto lhsShape = lhs.shape();
-	auto rhsShape = rhs.shape();
-
-	if(extendLhs)
-	{
-		lhsShape.emplace_back(1);
-	}
-
-	if(extendRhs)
-	{
-		rhsShape.emplace_back(1);
-	}
+	const auto lhsShape = detail::applyMatSpecToShape(lhs.shape(), lhsSpec);
+	const auto rhsShape = detail::applyMatSpecToShape(rhs.shape(), rhsSpec);
 
 	detail::assertCanMatmulTensors(lhsShape, rhsShape);
 

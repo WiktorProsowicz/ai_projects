@@ -5,6 +5,65 @@
 
 namespace mlCore::detail
 {
+std::vector<size_t> applyMatSpecToShape(const std::vector<size_t>& shape, const MatrixSpec spec)
+{
+	if(shape.size() < 1)
+	{
+		LOG_ERROR("MLCore", "Cannot apply matrix specification to a shape with less than 1 dimension.");
+	}
+
+	auto newShape = shape;
+
+	switch(spec)
+	{
+	case MatrixSpec::ColumnVector:
+		newShape.emplace_back(1);
+		break;
+
+	case MatrixSpec::RowVector:
+		newShape.insert(std::prev(newShape.cend()), 1);
+		break;
+
+	case MatrixSpec::Default:
+		break;
+	}
+
+	return newShape;
+}
+
+bool isRowOrColumnVector(const std::vector<size_t>& shape)
+{
+	if(shape.size() < 2)
+	{
+		LOG_ERROR(
+			"MLCore",
+			"Cannot check if a shape is a row or a column vector for a shape with less than 2 dimensions!");
+	}
+
+	return (shape[shape.size() - 1] == 1) || (shape[shape.size() - 2] == 1);
+}
+
+std::vector<size_t> trimRowOrColumnVector(const std::vector<size_t>& shape)
+{
+	if(shape.size() < 2)
+	{
+		LOG_ERROR("MLCore", "Cannot trim row or column vector for a shape with less than 2 dimensions!");
+	}
+
+	auto newShape = shape;
+
+	if(newShape[newShape.size() - 1] == 1)
+	{
+		newShape.pop_back();
+	}
+	else if(newShape[newShape.size() - 2] == 1)
+	{
+		newShape.erase(std::prev(newShape.cend()));
+	}
+
+	return newShape;
+}
+
 void assertCanMatmulTensors(const std::vector<size_t>& lhsShape, const std::vector<size_t>& rhsShape)
 {
 	// For clean error throwing with additional info about shapes

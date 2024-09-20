@@ -28,16 +28,19 @@ public:
 	/// @brief Computes sigmoid function result of `arg`.
 	static BasicTensor<ValueType> sigmoid(const BasicTensor<ValueType>& arg);
 
-	/// @brief Performs matrix transposition on `arg`.
-	static BasicTensor<ValueType> transpose(const BasicTensor<ValueType>& arg);
+	/**
+	 * @brief Performs matrix transposition on `arg`.
+	 */
+	static BasicTensor<ValueType> transpose(const BasicTensor<ValueType>& arg,
+											MatrixSpec spec = MatrixSpec::Default);
 
-	/// @brief Performs matrix multiplication between `lhs` and `rhs`.
-	/// @param extendLhs Tells whether the lhs' shape should be right-extended with 1.
-	/// @param extentRhs Tells whether the rhs' shape should be right-extended with 1.
+	/**
+	 * @brief Performs matrix multiplication between `lhs` and `rhs`.
+	 */
 	static BasicTensor<ValueType> matmul(const BasicTensor<ValueType>& lhs,
 										 const BasicTensor<ValueType>& rhs,
-										 const bool extendLhs,
-										 const bool extendRhs);
+										 MatrixSpec lhsSpec = MatrixSpec::Default,
+										 MatrixSpec rhsSpec = MatrixSpec::Default);
 
 	/**
 	 * @brief Creates tensor from compile-time nested initializer list form.
