@@ -32,12 +32,13 @@ public:
 					  mlCore::MatrixSpec rhsSpec = mlCore::MatrixSpec::Default,
 					  bool avoidMatrixOutput = false)
 		: Operator(inputs)
-		, _finalOutputShape(_computeFinalOutputShape())
-		, _originalOutputShape(_computeOriginalOutputShape())
-		, _value(_finalOutputShape)
 		, _lhsSpec(lhsSpec)
 		, _rhsSpec(rhsSpec)
 		, _avoidMatrixOutput(avoidMatrixOutput)
+		, _finalOutputShape(_computeFinalOutputShape())
+		, _originalOutputShape(_computeOriginalOutputShape())
+		, _value(_finalOutputShape)
+
 	{}
 
 	MatMulOp(const MatMulOp&) = delete;
@@ -169,12 +170,12 @@ private:
 		return {std::move(lhsDerivative), std::move(rhsDerivative)};
 	}
 
-	std::vector<size_t> _finalOutputShape;
-	std::vector<size_t> _originalOutputShape;
-	mlCore::Tensor _value;
 	mlCore::MatrixSpec _lhsSpec;
 	mlCore::MatrixSpec _rhsSpec;
 	bool _avoidMatrixOutput;
+	std::vector<size_t> _finalOutputShape;
+	std::vector<size_t> _originalOutputShape;
+	mlCore::Tensor _value;
 };
 } // namespace autoDiff::ops::detail
 
