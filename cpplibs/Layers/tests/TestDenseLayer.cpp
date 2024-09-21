@@ -56,6 +56,18 @@ protected:
 				testUtilities::areTensorsEqual(originalWeights[1]->getValue(), newWeights[1]->getValue()));
 		}
 	}
+
+	void _testCalling() override
+	{
+
+		const auto input = std::make_shared<autoDiff::Constant>(mlCore::Tensor{mlCore::TensorShape{32, 100}});
+
+		_layer->build({input->getOutputShape()});
+		const auto output = _layer->call({input});
+
+		const mlCore::TensorShape expectedOutputShape{32, 10};
+		ASSERT_EQ(output->getOutputShape(), expectedOutputShape);
+	}
 };
 } // namespace
 
@@ -72,4 +84,9 @@ TEST_F(TestDenseLayer, BuildsLayer)
 TEST_F(TestDenseLayer, SavesAndLoadsWeights)
 {
 	_testSavingAndLoadingWeights();
+}
+
+TEST_F(TestDenseLayer, IsCalledCorrectly)
+{
+	_testCalling();
 }
