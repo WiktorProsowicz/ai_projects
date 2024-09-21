@@ -1,5 +1,7 @@
 #include "Layers/BaseLayer.h"
 
+#include <fmt/format.h>
+
 namespace layers
 {
 BaseLayer::BaseLayer(std::string name)
@@ -26,15 +28,23 @@ void BaseLayer::_setBuilt()
 	_built = true;
 }
 
+namespace
+{
+std::string stringifyShape(const mlCore::TensorShape& shape)
+{
+	return fmt::format("({})", fmt::join(shape, ", "));
+}
+} // namespace
+
 void BaseLayer::_setWeight(const autoDiff::VariablePtr& weight, mlCore::Tensor value)
 {
 	if(weight->getOutputShape() != value.shape())
 	{
 		LOG_ERROR("Layers::BaseLayer",
 				  fmt::format("Cannot assign a value with shape {} to a weight '{}' with shape {}!",
-							  mlCore::stringifyVector(value.shape()),
+							  stringifyShape(value.shape()),
 							  weight->getName(),
-							  mlCore::stringifyVector(weight->getOutputShape())));
+							  stringifyShape(weight->getOutputShape())));
 	}
 
 	weight->setValue(std::move(value));

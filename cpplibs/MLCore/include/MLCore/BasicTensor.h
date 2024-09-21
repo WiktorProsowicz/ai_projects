@@ -203,21 +203,6 @@ public:
 	BasicTensor operator-() const;
 
 	/**
-	 * @brief Performs matrix multiplication operation on `this` and `other` tensor.
-	 *
-	 * @param other Tensor to matrix-multiply `this` by.
-	 * @return BasicTensor Product of matrix multiplication.
-	 */
-	BasicTensor matmul(const BasicTensor& other) const;
-
-	/**
-	 * @brief Creates transposed version of `this`.
-	 *
-	 * @return Transposed tensor.
-	 */
-	BasicTensor transposed() const;
-
-	/**
 	 * @brief Fills the tensor with given data.
 	 *
 	 * @param newData Data to assign to tensor.

@@ -55,29 +55,42 @@ std::vector<size_t> getOutputShapeForMatmul(const std::vector<size_t>& lhsShape,
 } // namespace detail
 
 /**
- * @brief Creates a human-readable serialized form of the vector. Can be used for displaying tensors' shapes
- * etc.
+ * @brief Represents an additional specification telling how a tensor should be treated by an algorithm.
  *
- * @param vect Vector to be serialized.
- * @param openSign Character serving as the beginning for the result sequence.
- * @param closeSign Character serving as the end for the result sequence.
- * @return Serialized representation of the vector.
+ * @details Whenever it is required to treat the last dimension of a tensor as either a row or a column
+ * vector, which is in practice represented by two-dimensional matrix, an additional value may specify whether
+ * its shape should be treated in a different way without the need of explicitly reshaping the tensor.
  *
  * @example
  *
- * stringifyVector(std::vector<uint32_t>{0, 1, 2, 3}, '(', ')') -> (0, 1, 2, 3)
+ * // Implicitly treated as a (10, 1) coumn vector.
+ * const mlCore::Tensor tensor(mlCore::TensorShape{10});
+ *
+ * // Although the tensor is only one-dimensional, a (1, 10) matrix is created.
+ * const auto transposed = mlCore::TensorOperations::transpose(tensor, mlCore::MatrixSpec::ColumnVector);
+ *
+ * // The same applies for tensors having more than one dimension.
+ * // e.g. a (batch_size, 10) tensor may be treated as a batch_size * (1, 10) row vectors.
  */
-template <typename T>
-std::string stringifyVector(const std::vector<T>& vector,
-							const char* const openSign = "(",
-							const char* const closeSign = ")")
+enum class MatrixSpec
 {
-	return fmt::format("{}{}{}", openSign, fmt::join(vector, ", "), closeSign);
-}
+	/// Treat the last dimension as a column vector. (As if there was a '1' at the end of the
+	/// shape.)
+	ColumnVector,
+	/// Treat the last dimension as a row vector. (As if there was a '1' before the last
+	/// dimension.)
+	RowVector,
+	/// Leave the tensor as it is.
+	Default
+};
 
+/// @brief Represents an element or a slice of a tensor that is being created e.g. via a tensor literal.
+/// @see TensorOperations::makeTensor
 template <typename BaseType>
 using TensorForm = detail::RawTensorForm<BaseType>;
 
+/// @brief Represents a slice of tensor that is being created e.g. via a tensor literal.
+/// @see TensorOperations::makeTensor
 template <typename BaseType>
 using TensorArr = detail::RawTensorInitList<BaseType>;
 

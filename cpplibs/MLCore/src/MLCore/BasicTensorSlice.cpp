@@ -14,6 +14,7 @@
 
 #include "MLCore/BasicTensor.h"
 #include "MLCore/SlicedTensorIterator.hpp"
+#include "MLCore/UtilitiesImpl.h"
 
 #define OPERATION_WITH_SCALAR_RHS(op, rhs)                                                                   \
 	const auto chunkLength = _computeChunkLength();                                                          \
@@ -562,7 +563,7 @@ template <typename SliceValueType>
 std::ostream& operator<<(std::ostream& ostream, const BasicTensorSlice<SliceValueType>& slice)
 {
 	ostream << "<BasicTensorSlice dtype=" << typeid(SliceValueType).name()
-			<< " shape=" << stringifyVector(slice._computeSliceShape()) << ">";
+			<< " shape=" << detail::stringifyVector(slice._computeSliceShape()) << ">";
 
 	const auto& dataPtrs = *(slice._dataChunks);
 	auto tShape = slice._computeSliceShape();

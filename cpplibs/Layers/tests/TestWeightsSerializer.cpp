@@ -23,13 +23,17 @@ namespace
  *
  *****************************/
 
+std::string stringifyShape(const mlCore::TensorShape& shape)
+{
+	return fmt::format("({})", fmt::join(shape, ", "));
+}
+
 ::testing::AssertionResult areTensorsEqual(const mlCore::Tensor& expected, const mlCore::Tensor& actual)
 {
 	if(expected.shape() != actual.shape())
 	{
-		return ::testing::AssertionFailure()
-			   << "Shapes are different: " << mlCore::stringifyVector(expected.shape()) << " vs "
-			   << mlCore::stringifyVector(actual.shape());
+		return ::testing::AssertionFailure() << "Shapes are different: " << stringifyShape(expected.shape())
+											 << " vs " << stringifyShape(actual.shape());
 	}
 
 	const auto& expectedData = std::vector<double>{expected.begin(), expected.end()};

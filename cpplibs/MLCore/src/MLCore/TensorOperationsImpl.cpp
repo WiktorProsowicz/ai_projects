@@ -6,6 +6,7 @@
 
 #include "MLCore/BasicTensor.h"
 #include "MLCore/Utilities.h"
+#include "MLCore/UtilitiesImpl.h"
 
 // NOLINTBEGIN
 
