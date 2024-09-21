@@ -143,6 +143,65 @@ TEST_F(TestTensorOperations, testSigmoid)
 	_performUnaryOperationAndCompare(params, mlCore::TensorOperations::sigmoid);
 }
 
+TEST_F(TestTensorOperations, CorrectlyTransposesMatrix)
+{
+	using mlCore::tensorInitializers::RangeTensorInitializer;
+
+	const UnaryTestParams params{
+		// 0  1  2  3  4
+		// 5  6  7  8  9
+		// 10 11 12 13 14
+		// 15 16 17 18 19
+		.tensor = initTensor({4, 5}, std::make_unique<RangeTensorInitializer<double>>(0.0)),
+		// 0  5  10  15
+		// 1  6  11  16
+		// 2  7  12  17
+		// 3  8  13  18
+		// 4  9  14  19
+		.expectedOutput = {{5, 4}, {0, 5, 10, 15, 1, 6, 11, 16, 2, 7, 12, 17, 3, 8, 13, 18, 4, 9, 14, 19}}};
+
+	_performUnaryOperationAndCompare(
+		params, [](const auto& tensor) { return mlCore::TensorOperations::transpose(tensor); });
+}
+
+TEST_F(TestTensorOperations, CorrectlyTransposesColumnVector)
+{
+	using mlCore::tensorInitializers::RangeTensorInitializer;
+
+	const UnaryTestParams params{
+		// 0
+		// 5
+		// 10
+		// 15
+		.tensor = initTensor({4}, std::make_unique<RangeTensorInitializer<double>>(0.0, 5.0)),
+		// 0  5  10  15
+		.expectedOutput = {{1, 4}, {0, 5, 10, 15}}};
+
+	_performUnaryOperationAndCompare(
+		params,
+		[](const auto& tensor)
+		{ return mlCore::TensorOperations::transpose(tensor, mlCore::MatrixSpec::ColumnVector); });
+}
+
+TEST_F(TestTensorOperations, CorrectlyTransposesRowVector)
+{
+	using mlCore::tensorInitializers::RangeTensorInitializer;
+
+	const UnaryTestParams params{
+		// 0 5 10, 15
+		.tensor = initTensor({4}, std::make_unique<RangeTensorInitializer<double>>(0.0, 5.0)),
+		// 0
+		// 5
+		// 10
+		// 15
+		.expectedOutput = {{4, 1}, {0, 5, 10, 15}}};
+
+	_performUnaryOperationAndCompare(
+		params,
+		[](const auto& tensor)
+		{ return mlCore::TensorOperations::transpose(tensor, mlCore::MatrixSpec::RowVector); });
+}
+
 TEST_F(TestTensorOperations, testPower)
 {
 	using mlCore::tensorInitializers::RangeTensorInitializer;
@@ -157,6 +216,71 @@ TEST_F(TestTensorOperations, testPower)
 						48558.704, 201135.719, 861979.333, 3814697.266, 17403307.346, 81721509.398}}};
 
 	_performBinaryOperationAndCompare(params, mlCore::TensorOperations::power);
+}
+
+TEST_F(TestTensorOperations, testMatrixMultiplicationClassicMatrices)
+{
+	using mlCore::tensorInitializers::RangeTensorInitializer;
+
+	const BinaryTestParams params{
+		.lhsTensor = initTensor({3, 2}, std::make_unique<RangeTensorInitializer<double>>(1.0)),
+		.rhsTensor = initTensor({2, 4}, std::make_unique<RangeTensorInitializer<double>>(1.0)),
+		.expectedOutput = {{3, 4}, {11, 14, 17, 20, 23, 30, 37, 44, 35, 46, 57, 68}}};
+
+	_performBinaryOperationAndCompare(
+		params, [](const auto& lhs, const auto& rhs) { return mlCore::TensorOperations::matmul(lhs, rhs); });
+}
+
+TEST_F(TestTensorOperations, testMatrixMultiplicationExtended)
+{
+
+	using mlCore::tensorInitializers::RangeTensorInitializer;
+
+	const BinaryTestParams params{
+		.lhsTensor = initTensor({2, 4, 2}, std::make_unique<RangeTensorInitializer<double>>(1.0)),
+		.rhsTensor = initTensor({2, 5}, std::make_unique<RangeTensorInitializer<double>>(1.0)),
+		.expectedOutput = {{2, 4, 5}, {13,	16,	 19, 22,  25,  27,	34,	 41,  48,  55,	41,	 52, 63,  74,
+									   85,	55,	 70, 85,  100, 115, 69,	 88,  107, 126, 145, 83, 106, 129,
+									   152, 175, 97, 124, 151, 178, 205, 111, 142, 173, 204, 235}}};
+
+	_performBinaryOperationAndCompare(
+		params, [](const auto& lhs, const auto& rhs) { return mlCore::TensorOperations::matmul(lhs, rhs); });
+}
+
+TEST_F(TestTensorOperations, testMatrixMultiplicationWithColumnVector)
+{
+	using mlCore::tensorInitializers::RangeTensorInitializer;
+
+	const BinaryTestParams params{
+		.lhsTensor = initTensor({2, 5}, std::make_unique<RangeTensorInitializer<double>>(0.0)),
+		.rhsTensor = initTensor({5}, std::make_unique<RangeTensorInitializer<double>>(0.0)),
+		.expectedOutput = {{2, 1}, {30, 80}}};
+
+	_performBinaryOperationAndCompare(
+		params,
+		[](const auto& lhs, const auto& rhs)
+		{
+			return mlCore::TensorOperations::matmul(
+				lhs, rhs, mlCore::MatrixSpec::Default, mlCore::MatrixSpec::ColumnVector);
+		});
+}
+
+TEST_F(TestTensorOperations, testMatrixMultiplicationWithRowVector)
+{
+	using mlCore::tensorInitializers::RangeTensorInitializer;
+
+	const BinaryTestParams params{
+		.lhsTensor = initTensor({5}, std::make_unique<RangeTensorInitializer<double>>(0.0)),
+		.rhsTensor = initTensor({5, 2}, std::make_unique<RangeTensorInitializer<double>>(0.0)),
+		.expectedOutput = {{1, 2}, {60, 70}}};
+
+	_performBinaryOperationAndCompare(
+		params,
+		[](const auto& lhs, const auto& rhs)
+		{
+			return mlCore::TensorOperations::matmul(
+				lhs, rhs, mlCore::MatrixSpec::RowVector, mlCore::MatrixSpec::Default);
+		});
 }
 
 TEST_F(TestTensorOperations, testMakeTensor)
