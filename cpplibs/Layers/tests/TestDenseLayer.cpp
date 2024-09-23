@@ -26,7 +26,7 @@ protected:
 
 		ASSERT_EQ(weights.size(), 2);
 
-		ASSERT_EQ(weights[0]->getOutputShape(), mlCore::TensorShape({100, 10}));
+		ASSERT_EQ(weights[0]->getOutputShape(), mlCore::TensorShape({10, 100}));
 		ASSERT_EQ(weights[1]->getOutputShape(), mlCore::TensorShape({10}));
 	}
 
