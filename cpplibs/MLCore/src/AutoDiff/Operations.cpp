@@ -11,23 +11,6 @@ namespace autoDiff::ops
 {
 namespace
 {
-/**
- * @brief Checks if output shapes of the given input nodes are equal.
- *
- * @throws std::runtime_error If the shapes are not equal.
- */
-void throwIfShapesUnequal(const std::vector<NodePtr>& inputs)
-{
-
-	if(std::adjacent_find(inputs.cbegin(),
-						  inputs.cend(),
-						  [](const NodePtr& lhs, const NodePtr& rhs)
-						  { return (lhs->getOutputShape() != rhs->getOutputShape()); }) != inputs.cend())
-	{
-		LOG_ERROR("AutoDiff::Ops", "Expected input shapes to be equal!");
-	}
-}
-
 OperatorPtr updateOp(const OperatorPtr& op)
 {
 	op->updateValue();
@@ -37,8 +20,6 @@ OperatorPtr updateOp(const OperatorPtr& op)
 
 OperatorPtr add(const NodePtr& lhsNode, const NodePtr& rhsNode)
 {
-	throwIfShapesUnequal({lhsNode, rhsNode});
-
 	const auto fFunc = [](const std::vector<NodePtr>& inputs)
 	{ return inputs.front()->getValue() + inputs.back()->getValue(); };
 
@@ -51,8 +32,6 @@ OperatorPtr add(const NodePtr& lhsNode, const NodePtr& rhsNode)
 
 OperatorPtr subtract(const NodePtr& lhsNode, const NodePtr& rhsNode)
 {
-	throwIfShapesUnequal({lhsNode, rhsNode});
-
 	const auto fFunc = [](const std::vector<NodePtr>& inputs)
 	{ return inputs.front()->getValue() - inputs.back()->getValue(); };
 
@@ -65,8 +44,6 @@ OperatorPtr subtract(const NodePtr& lhsNode, const NodePtr& rhsNode)
 
 OperatorPtr multiply(const NodePtr& lhsNode, const NodePtr& rhsNode)
 {
-	throwIfShapesUnequal({lhsNode, rhsNode});
-
 	const auto fFunc = [](const std::vector<NodePtr>& inputs)
 	{ return inputs.front()->getValue() * inputs.back()->getValue(); };
 
@@ -86,8 +63,6 @@ OperatorPtr multiply(const NodePtr& lhsNode, const NodePtr& rhsNode)
 
 OperatorPtr divide(const NodePtr& lhsNode, const NodePtr& rhsNode)
 {
-	throwIfShapesUnequal({lhsNode, rhsNode});
-
 	const auto fFunc = [](const std::vector<NodePtr>& inputs)
 	{ return inputs.front()->getValue() / inputs.back()->getValue(); };
 

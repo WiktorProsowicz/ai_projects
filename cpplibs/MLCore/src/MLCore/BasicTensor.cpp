@@ -240,7 +240,7 @@ void BasicTensor<ValueType>::_checkShapeCompatible(const std::vector<size_t>& sh
 	const auto newLength =
 		std::accumulate(shape.begin(),
 						shape.end(),
-						size_t{0},
+						size_t{1},
 						[](const auto current, const auto axis) { return current * axis; });
 
 	if(newLength != _length)
