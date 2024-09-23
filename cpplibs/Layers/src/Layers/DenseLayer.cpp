@@ -27,13 +27,12 @@ autoDiff::OperatorPtr DenseLayer::call(const std::vector<autoDiff::NodePtr>& inp
 		LOG_ERROR("Layers::DenseLayer", "Dense layer must have exactly one input.");
 	}
 
-	const auto output = autoDiff::ops::matmul(_weights, inputs[0]);
+	const auto output = autoDiff::ops::matmul(
+		_weights, inputs[0], mlCore::MatrixSpec::Default, mlCore::MatrixSpec::ColumnVector, true);
+
 	const auto biased = autoDiff::ops::add(output, _bias);
-	auto activated = _activationFactory->apply(biased);
 
-	activated->updateValue();
-
-	return activated;
+	return _activationFactory->apply(biased);
 }
 
 mlCore::TensorShape DenseLayer::getOutputShape() const
@@ -43,7 +42,10 @@ mlCore::TensorShape DenseLayer::getOutputShape() const
 		LOG_ERROR("Layers::DenseLayer", "Layer must be built before getting output shape.");
 	}
 
-	return {_units, 1};
+	auto outputShape = _inputShape;
+	*outputShape.rbegin() = _units;
+
+	return outputShape;
 }
 
 std::vector<autoDiff::NodePtr> DenseLayer::getTrainableWeights() const
@@ -72,19 +74,21 @@ void DenseLayer::build(const std::vector<mlCore::TensorShape>& inputShapes)
 
 	const auto& inputShape = inputShapes[0];
 
-	if(inputShape.size() != 2 || inputShape[1] != 1)
+	if(inputShape.size() < 1)
 	{
-		LOG_ERROR("Layers::DenseLayer", "Input shape must be a column vector.");
+		LOG_ERROR("Layers::DenseLayer", "The input shape must have at least one dimension.");
 	}
 
-	mlCore::Tensor weightsTensor({_units, inputShape[0]});
-	weightsTensor.fill(mlCore::tensorInitializers::GaussianInitializer(0.0, 0.1));
+	mlCore::Tensor weightsTensor(mlCore::TensorShape{_units, *inputShape.crbegin()});
+	weightsTensor.fill(mlCore::tensorInitializers::GaussianInitializer(0.0, 1.0));
 
-	mlCore::Tensor biasTensor({_units, 1});
-	biasTensor.fill(mlCore::tensorInitializers::GaussianInitializer(0.0, 0.1));
+	mlCore::Tensor biasTensor(mlCore::TensorShape{_units});
+	biasTensor.fill(mlCore::tensorInitializers::GaussianInitializer(0.0, 1.0));
 
 	_weights = std::make_shared<autoDiff::Variable>(std::move(weightsTensor));
 	_bias = std::make_shared<autoDiff::Variable>(std::move(biasTensor));
+
+	_inputShape = inputShape;
 
 	_setBuilt();
 }

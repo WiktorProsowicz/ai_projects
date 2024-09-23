@@ -47,6 +47,7 @@ private:
 	autoDiff::VariablePtr _bias{};
 	size_t _units;
 	IActivationFactoryPtr _activationFactory;
+	mlCore::TensorShape _inputShape{};
 };
 } // namespace layers
 
