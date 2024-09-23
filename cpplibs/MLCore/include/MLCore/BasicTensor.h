@@ -230,12 +230,12 @@ public:
 		{
 			if(size() < nElementsToAssign)
 			{
-				throw std::out_of_range("Too many values to assign to the tensor.");
+				LOG_ERROR("MLCore::BasicTensor", "Too many values to assign to the tensor.");
 			}
 
 			if(size() > nElementsToAssign)
 			{
-				throw std::out_of_range("Too few values to assign to the tensor.");
+				LOG_ERROR("MLCore::BasicTensor", "Too few values to assign to the tensor.");
 			}
 		}
 
@@ -266,7 +266,7 @@ public:
 
 private:
 	/// Traverses list of indices and checks ranges correctness. Correct indices specify tensor slice that can
-	/// be modified via value assignment. Throws std::out_of_range if upper[i] > shape[i] or 0 >
+	/// be modified via value assignment. Throws if upper[i] > shape[i] or 0 >
 	/// indices.size() > shape_.size(). Indices is a list of pairs of min-max indices from axis zero i.e for
 	/// tensor([[1, 2], [3, 4]]) -> list{{0, 1}} -> [1, 2].
 	template <typename IndicesIter>

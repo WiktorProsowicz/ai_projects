@@ -136,7 +136,7 @@ TEST_F(TestBasicTensor, testFillingTensor)
 
 	// tensor filled with too few values
 	mlCore::Tensor tensorUnderfilled(std::vector<size_t>{10});
-	EXPECT_THROW(tensorUnderfilled.fill({1, 2, 3, 4, 5}), std::out_of_range);
+	EXPECT_THROW(tensorUnderfilled.fill({1, 2, 3, 4, 5}), std::runtime_error);
 
 	// tensor filled with wrapped values
 	mlCore::Tensor tensorWithWrappedValues(std::vector<size_t>{2, 3});
