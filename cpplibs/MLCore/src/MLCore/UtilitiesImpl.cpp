@@ -132,4 +132,14 @@ std::vector<size_t> getReturnShapeForMatmul(const std::vector<size_t>& lhsPadded
 
 	return retShape;
 }
+
+bool isShapeExtendableToAnother(const std::vector<size_t>& shape, const std::vector<size_t>& targetShape)
+{
+	if(targetShape.size() < shape.size())
+	{
+		return false;
+	}
+
+	return std::equal(shape.crbegin(), shape.crend(), targetShape.crbegin());
+}
 } // namespace mlCore::detail

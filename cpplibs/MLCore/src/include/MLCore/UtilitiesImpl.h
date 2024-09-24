@@ -56,6 +56,9 @@ std::pair<std::vector<size_t>, std::vector<size_t>> padShapes(const std::vector<
 std::vector<size_t> getReturnShapeForMatmul(const std::vector<size_t>& lhsPaddedShape,
 											const std::vector<size_t>& rhsPaddedShape);
 
+/// @brief Tells if the given `shape` is the right part of the `targetShape`.
+bool isShapeExtendableToAnother(const std::vector<size_t>& shape, const std::vector<size_t>& targetShape);
+
 } // namespace mlCore::detail
 
 #endif

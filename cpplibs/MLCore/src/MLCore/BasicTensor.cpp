@@ -48,53 +48,9 @@ BasicTensor<ValueType>::BasicTensor(const TensorShape& shape)
 	, _shape(shape)
 	, _data()
 {
-	try
-	{
-		_checkShapeElementsPositive(_shape);
-	}
-	catch(const std::runtime_error&)
-	{
-		LOG_WARN("BasicTensor",
-				 "Shape's members have to be greater than zero. Changing all zero dims to 1's.");
+	_checkShapeElementsPositive(_shape);
 
-		std::for_each(_shape.begin(),
-					  _shape.end(),
-					  [](auto& dim)
-					  {
-						  if(dim == 0)
-						  {
-							  dim = 1;
-						  }
-					  });
-	}
-
-	try
-	{
-		_checkShapeFitsInBounds(_shape);
-	}
-	catch(const std::runtime_error&)
-	{
-		size_t nElements = 1;
-		TensorShape newShape;
-
-		for_each(shape.begin(),
-				 shape.end(),
-				 [&nElements, &newShape](const auto dim)
-				 {
-					 if(nElements <= (ULLONG_MAX / dim))
-					 {
-						 nElements *= dim;
-						 newShape.push_back(dim);
-					 }
-				 });
-
-		LOG_WARN("BasicTensor",
-				 "Cumulative number of elements can't exceed the limit of ULL_MAX. Will preserve "
-				 "shape: "
-					 << detail::stringifyVector(newShape));
-
-		_shape = std::move(newShape);
-	}
+	_checkShapeFitsInBounds(_shape);
 
 	_length = std::accumulate(_shape.begin(),
 							  _shape.end(),
@@ -211,7 +167,7 @@ void BasicTensor<ValueType>::_checkShapeElementsPositive(const TensorShape& shap
 {
 	if(std::any_of(shape.begin(), shape.end(), [](const auto axis) { return axis <= 0; }))
 	{
-		throw std::runtime_error("Shape's members have to be greater than zero.");
+		LOG_ERROR("MLCore::BasicTensor", "Shape's members have to be greater than zero!")
 	}
 }
 
@@ -219,19 +175,20 @@ template <typename ValueType>
 void BasicTensor<ValueType>::_checkShapeFitsInBounds(const TensorShape& shape)
 {
 	size_t nElements = 1;
-	for_each(shape.begin(),
-			 shape.end(),
-			 [&nElements](const auto dim)
-			 {
-				 if(nElements <= (ULLONG_MAX / dim))
-				 {
-					 nElements *= dim;
-				 }
-				 else
-				 {
-					 throw std::runtime_error("Cumulative number of elements in shape exceeds ULLONG_MAX");
-				 }
-			 });
+	std::for_each(shape.begin(),
+				  shape.end(),
+				  [&nElements](const auto dim)
+				  {
+					  if(nElements <= (ULLONG_MAX / dim))
+					  {
+						  nElements *= dim;
+					  }
+					  else
+					  {
+						  LOG_ERROR("MLCore::BasicTensor",
+									"Cumulative number of elements in shape exceeds ULLONG_MAX!");
+					  }
+				  });
 }
 
 template <typename ValueType>
@@ -240,13 +197,14 @@ void BasicTensor<ValueType>::_checkShapeCompatible(const TensorShape& shape) con
 	const auto newLength =
 		std::accumulate(shape.begin(),
 						shape.end(),
-						size_t{0},
+						size_t{1},
 						[](const auto current, const auto axis) { return current * axis; });
 
 	if(newLength != _length)
 	{
-		throw std::out_of_range(
-			fmt::format("Cannot reshape if the new shape's total size ({}) does not match current the ({}).",
+		LOG_ERROR(
+			"MLCore::BasicTensor",
+			fmt::format("Cannot reshape if the new shape's total size ({}) does not match current the ({})!",
 						newLength,
 						_length));
 	}
@@ -258,12 +216,12 @@ void BasicTensor<ValueType>::_checkIndicesList(IndicesIter beg, IndicesIter end)
 {
 	if(beg == end)
 	{
-		throw std::out_of_range("Indices list must have minimum length of 1.");
+		LOG_ERROR("MLCore::BasicTensor", "Indices list must have minimum length of 1!");
 	}
 
 	if(static_cast<size_t>(std::distance(beg, end)) > _shape.size())
 	{
-		throw std::out_of_range("Indices list cannot be longer than tensor's shape.");
+		LOG_ERROR("MLCore::BasicTensor", "Indices list cannot be longer than tensor's shape!");
 	}
 
 	for(auto [indicesIt, shapeIt] = std::tuple{beg, size_t{0}}; indicesIt < end; ++indicesIt, ++shapeIt)
@@ -272,18 +230,19 @@ void BasicTensor<ValueType>::_checkIndicesList(IndicesIter beg, IndicesIter end)
 
 		if(upper <= lower)
 		{
-			throw std::out_of_range(
-				fmt::format("Upper index is not greater than lower for shape '{}' at index {}.",
-							detail::stringifyVector(_shape),
-							shapeIt));
+			LOG_ERROR("MLCore::BasicTensor",
+					  fmt::format("Upper index is not greater than lower for shape '{}' at index {}!",
+								  detail::stringifyVector(_shape),
+								  shapeIt));
 		}
 
 		if(upper > _shape[shapeIt])
 		{
-			throw std::out_of_range(fmt::format(
-				"Upper index cannot be greater than particular dimension size for shape '{}' at index {}.",
-				detail::stringifyVector(_shape),
-				shapeIt));
+			LOG_ERROR("MLCore::BasicTensor",
+					  fmt::format("Upper index cannot be greater than particular dimension size for shape "
+								  "'{}' at index {}!",
+								  detail::stringifyVector(_shape),
+								  shapeIt));
 		}
 	}
 }
@@ -376,7 +335,7 @@ void BasicTensor<ValueType>::assign(std::initializer_list<std::pair<size_t, size
 
 	if((itemsToAssign < newData.size()) && (!wrapData))
 	{
-		throw std::out_of_range("Too few values to assign to the tensor.");
+		LOG_ERROR("MLCore::BasicTensor", "Too few values to assign to the tensor!");
 	}
 
 	std::vector<size_t> treePath;
@@ -448,7 +407,7 @@ void BasicTensor<ValueType>::fill(const tensorInitializers::ITensorInitializer<V
 	}
 	if(elementPos < _length)
 	{
-		throw std::out_of_range("Too few values to assign to the tensor");
+		LOG_ERROR("MLCore::BasicTensor", "Too few values to assign to the tensor!");
 	}
 }
 

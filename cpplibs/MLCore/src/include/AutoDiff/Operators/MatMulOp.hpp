@@ -75,7 +75,7 @@ public:
 
 		if(_originalOutputShape != _finalOutputShape)
 		{
-			_value.reshape(mlCore::detail::trimRowOrColumnVector(_value.shape()));
+			_value.reshape(_finalOutputShape);
 		}
 	}
 

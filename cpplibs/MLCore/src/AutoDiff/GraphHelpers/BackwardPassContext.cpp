@@ -1,5 +1,9 @@
 #include "AutoDiff/GraphHelpers/BackwardPassContext.h"
 
+#include "MLCore/BasicTensor.h"
+#include "MLCore/TensorOperations.h"
+#include "MLCore/UtilitiesImpl.h"
+
 namespace autoDiff::detail
 {
 BackwardPassContext::BackwardPassContext(const BackwardPassParams& params)
@@ -86,13 +90,31 @@ bool BackwardPassContext::_isEntryPointsQueueEmpty()
 
 void BackwardPassContext::_tryStoreDerivative(const NodePtr& node, const mlCore::Tensor& derivative)
 {
+	using mlCore::detail::isShapeExtendableToAnother;
+
 	if(_params.differentiableNodes.contains(node))
 	{
+		const auto nodeShape = node->getOutputShape();
+		const auto derivativeShape = derivative.shape();
+
+		if(!isShapeExtendableToAnother(nodeShape, derivativeShape) &&
+		   !isShapeExtendableToAnother(derivativeShape, nodeShape))
+		{
+			LOG_ERROR("AutoDiff::BackwardPassContext",
+					  fmt::format("Derivative shape {} is not compatible with node shape {}.",
+								  mlCore::detail::stringifyVector(derivativeShape),
+								  mlCore::detail::stringifyVector(nodeShape)));
+		}
+
 		const std::unique_lock lock(_gradientsMutex);
+
+		mlCore::Tensor derivativeToStore = isShapeExtendableToAnother(derivativeShape, nodeShape)
+											   ? derivative
+											   : mlCore::TensorOperations::reduceAdd(derivative, nodeShape);
 
 		if(_params.gradients.find(node) == _params.gradients.end())
 		{
-			_params.gradients.emplace(node, derivative);
+			_params.gradients.emplace(node, std::move(derivativeToStore));
 		}
 		else
 		{
