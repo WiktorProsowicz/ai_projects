@@ -356,4 +356,30 @@ BasicTensor<ValueType> BasicTensorOperations<ValueType>::matmul(const BasicTenso
 
 	return resultTensor;
 }
+
+template <typename ValueType>
+BasicTensor<ValueType> BasicTensorOperations<ValueType>::reduceAdd(const BasicTensor<ValueType>& arg,
+																   const std::vector<size_t>& targetShape)
+{
+	if(!detail::isShapeExtendableToAnother(targetShape, arg.shape()))
+	{
+		LOG_ERROR("TensorOperations",
+				  fmt::format("Cannot reduce-add tensor. The shape {} is not reducable to the target "
+							  "tensor's shape {}!",
+							  detail::stringifyVector(arg.shape()),
+							  detail::stringifyVector(targetShape)));
+	}
+
+	BasicTensor<ValueType> ret(targetShape, 0);
+
+	for(size_t framePos = 0; framePos < arg._length; framePos += ret._length)
+	{
+		for(size_t i = 0; i < ret._length; i++)
+		{
+			ret._data[i] += arg._data[framePos + i];
+		}
+	}
+
+	return ret;
+}
 } // namespace mlCore

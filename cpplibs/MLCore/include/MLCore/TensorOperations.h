@@ -49,6 +49,16 @@ public:
 	 * @return Tensor created from the given `tensorForm`.
 	 */
 	static BasicTensor<ValueType> makeTensor(const TensorForm<ValueType>& tensorForm);
+
+	/**
+	 * @brief Reduces a given tensor to a target shape by summing up the elements.
+	 *
+	 * @param arg Tensor to be reduced.
+	 * @param targetShape Shape to which the `arg` should be reduced. The shape should be right-aligned with
+	 * the original shape, i.e. the original shape should be its left-hand extension.
+	 */
+	static BasicTensor<ValueType> reduceAdd(const BasicTensor<ValueType>& arg,
+											const std::vector<size_t>& targetShape);
 };
 
 using TensorOperations = BasicTensorOperations<double>;

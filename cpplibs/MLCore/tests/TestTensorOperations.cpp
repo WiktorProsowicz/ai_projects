@@ -354,4 +354,16 @@ TEST_F(TestTensorOperations, testMakeTensorWithEmptyComponent)
 	// clang-format on
 }
 
+TEST_F(TestTensorOperations, CorrectlyReduceAddsTensor)
+{
+	using mlCore::tensorInitializers::RangeTensorInitializer;
+
+	const UnaryTestParams params{.tensor = {{3, 2, 2}, {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 11}},
+								 .expectedOutput = {{2, 2}, {15, 18, 21, 23}}};
+
+	_performUnaryOperationAndCompare(params,
+									 [](const auto& tensor) {
+										 return mlCore::TensorOperations::reduceAdd(tensor, {2, 2});
+									 });
+}
 } // namespace
