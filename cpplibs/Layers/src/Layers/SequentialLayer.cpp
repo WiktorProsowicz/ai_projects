@@ -16,7 +16,7 @@ SequentialLayer::SequentialLayer(std::string name, std::vector<BaseLayerPtr> lay
 		LOG_ERROR("Layers::SequentialLayer", "Sequential layer must have at least one layer.");
 	}
 
-	if(std::set{_layers.begin(), _layers.end()}.size() != _layers.size())
+	if(std::set<layers::BaseLayerPtr>{_layers.begin(), _layers.end()}.size() != _layers.size())
 	{
 		LOG_ERROR("Layers::SequentialLayer", "Sequential layer must have unique layers.");
 	}
@@ -98,6 +98,8 @@ void SequentialLayer::build(const std::vector<mlCore::TensorShape>& inputShapes)
 		layer->build(outputShapes);
 		outputShapes = {layer->getOutputShape()};
 	}
+
+	_setBuilt();
 }
 
 void SequentialLayer::saveWeights(const std::string& path) const
