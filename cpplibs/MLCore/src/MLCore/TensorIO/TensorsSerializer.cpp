@@ -1,12 +1,12 @@
-#include "Serialization/WeightsSerializer.h"
+#include "MLCore/TensorIO/TensorsSerializer.h"
 
 #include <filesystem>
 
 #include <Utilities/BinarySerialization.hpp>
 
-namespace layers::serialization
+namespace mlCore::io
 {
-std::unique_ptr<WeightsSerializer> WeightsSerializer::open(const std::string& path)
+std::unique_ptr<TensorsSerializer> TensorsSerializer::open(const std::string& path)
 {
 	if(!std::filesystem::exists(path))
 	{
@@ -21,10 +21,10 @@ std::unique_ptr<WeightsSerializer> WeightsSerializer::open(const std::string& pa
 	std::unique_ptr<std::fstream> fileStream =
 		std::make_unique<std::fstream>(path, std::ios_base::in | std::ios_base::out | std::ios_base::binary);
 
-	return std::unique_ptr<WeightsSerializer>{new WeightsSerializer{std::move(fileStream)}};
+	return std::unique_ptr<TensorsSerializer>{new TensorsSerializer{std::move(fileStream)}};
 }
 
-WeightsSerializer::WeightsSerializer(std::unique_ptr<std::fstream> fileStream)
+TensorsSerializer::TensorsSerializer(std::unique_ptr<std::fstream> fileStream)
 	: _fileStream(std::move(fileStream))
 {
 	_initHandles();
@@ -46,7 +46,7 @@ uint64_t getNBlocks(std::istream& file)
 }
 } // namespace
 
-void WeightsSerializer::addNewTensor(const mlCore::Tensor& tensor)
+void TensorsSerializer::addNewTensor(const mlCore::Tensor& tensor)
 {
 	uint64_t nBlocks = getNBlocks(*_fileStream);
 	nBlocks++;
@@ -67,11 +67,11 @@ void WeightsSerializer::addNewTensor(const mlCore::Tensor& tensor)
 	_tensorHandles.emplace_back(std::make_shared<TensorHandle>(*_fileStream, _fileStream->tellp()));
 }
 
-void WeightsSerializer::_validateFile(const std::string& path)
+void TensorsSerializer::_validateFile(const std::string& path)
 {
 	if(std::filesystem::file_size(path) < sizeof(uint64_t))
 	{
-		LOG_ERROR("Layers::WeightsSerializer",
+		LOG_ERROR("Layers::TensorsSerializer",
 				  fmt::format("File '{}' is too small to be a valid weights file.", path));
 	}
 
@@ -86,7 +86,7 @@ void WeightsSerializer::_validateFile(const std::string& path)
 	{
 		if(static_cast<size_t>(fileEnd - filePos) < sizeof(size_t))
 		{
-			LOG_ERROR("Layers::WeightsSerializer",
+			LOG_ERROR("Layers::TensorsSerializer",
 					  fmt::format("For block {} in file '{}' could not read the number of dimensions.",
 								  blockIdx,
 								  path));
@@ -100,7 +100,7 @@ void WeightsSerializer::_validateFile(const std::string& path)
 		if(static_cast<size_t>(fileEnd - filePos) < (sizeof(size_t) * nDimensions))
 		{
 			LOG_ERROR(
-				"Layers::WeightsSerializer",
+				"Layers::TensorsSerializer",
 				fmt::format("For block {} in file '{}' not enough data to read dimensions.", blockIdx, path));
 		}
 
@@ -114,7 +114,7 @@ void WeightsSerializer::_validateFile(const std::string& path)
 
 		if(static_cast<size_t>(fileEnd - filePos) < sizeof(double) * tensorSize)
 		{
-			LOG_ERROR("Layers::WeightsSerializer",
+			LOG_ERROR("Layers::TensorsSerializer",
 					  fmt::format(
 						  "For block {} in file '{}' not enough data to read tensor data.", blockIdx, path));
 		}
@@ -124,7 +124,7 @@ void WeightsSerializer::_validateFile(const std::string& path)
 	}
 }
 
-void WeightsSerializer::_initHandles()
+void TensorsSerializer::_initHandles()
 {
 	std::streampos currentPos = sizeof(uint64_t);
 
@@ -157,7 +157,7 @@ void TensorHandle::save(const mlCore::Tensor& tensor)
 
 	if(tensor.size() != allowedTensorSize)
 	{
-		LOG_ERROR("Layers::WeightsSerializer",
+		LOG_ERROR("Layers::TensorsSerializer",
 				  fmt::format("Tensor size does not match the expected size. Expected: {}, got: {}.",
 							  allowedTensorSize,
 							  tensor.size()));
@@ -204,4 +204,4 @@ mlCore::TensorShape TensorHandle::getShape() const
 
 	return dimensions;
 }
-} // namespace layers::serialization
+} // namespace mlCore::io

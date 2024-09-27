@@ -2,17 +2,19 @@
 #define LAYERS_TESTS_WEIGHTSSERIALIZER_H
 
 #include <fstream>
+#include <memory>
+#include <vector>
 
-#include <AutoDiff/GraphNodes.hpp>
+#include "MLCore/BasicTensor.h"
 
-namespace layers::serialization
+namespace mlCore::io
 {
 class TensorHandle;
 
 /**
- * @brief Opens a connection to a file storing layers' weights.
+ * @brief Opens a connection to a file storing tensors..
  *
- * @details The saver is responsible for saving and retrieving the weights of the layers from the file
+ * @details The saver is responsible for saving and retrieving tensors from the file
  * associated with it. The format of the file is as follows:
  *
  * {
@@ -25,7 +27,7 @@ class TensorHandle;
  * 	 }
  * }
  */
-class WeightsSerializer
+class TensorsSerializer
 {
 public:
 	/**
@@ -34,16 +36,16 @@ public:
 	 * The given path is checked and the file is created if it does not exist. In the case the file already
 	 * exists, it is validated.
 	 */
-	static std::unique_ptr<WeightsSerializer> open(const std::string& path);
+	static std::unique_ptr<TensorsSerializer> open(const std::string& path);
 
-	WeightsSerializer() = delete;
+	TensorsSerializer() = delete;
 
-	WeightsSerializer(const WeightsSerializer&) = delete;
-	WeightsSerializer(WeightsSerializer&&) = default;
-	WeightsSerializer& operator=(const WeightsSerializer&) = delete;
-	WeightsSerializer& operator=(WeightsSerializer&&) = default;
+	TensorsSerializer(const TensorsSerializer&) = delete;
+	TensorsSerializer(TensorsSerializer&&) = default;
+	TensorsSerializer& operator=(const TensorsSerializer&) = delete;
+	TensorsSerializer& operator=(TensorsSerializer&&) = default;
 
-	~WeightsSerializer() = default;
+	~TensorsSerializer() = default;
 
 	/**
 	 * @brief Returns handles for each tensor stored in the file.
@@ -60,7 +62,7 @@ public:
 	void addNewTensor(const mlCore::Tensor& tensor);
 
 private:
-	WeightsSerializer(std::unique_ptr<std::fstream> fileStream);
+	TensorsSerializer(std::unique_ptr<std::fstream> fileStream);
 
 	/// Checks if the given file is a valid weights file.
 	static void _validateFile(const std::string& path);
@@ -119,6 +121,6 @@ private:
 	std::fstream& _file;
 	std::streampos _position;
 };
-} // namespace layers::serialization
+} // namespace mlCore::io
 
 #endif
