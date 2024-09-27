@@ -4,8 +4,8 @@
 #include <AutoDiff/Operations.h>
 #include <Layers/BaseLayer.h>
 #include <LoggingLib/LoggingLib.hpp>
+#include <MLCore/TensorIO/TensorsSerializer.h>
 #include <MLCore/TensorInitializers/GaussianInitializer.hpp>
-#include <Serialization/WeightsSerializer.h>
 
 namespace testUtilities::fixtures
 {
@@ -87,7 +87,7 @@ public:
 	{
 		_assertBuilt();
 
-		const auto serializer = layers::serialization::WeightsSerializer::open(path);
+		const auto serializer = mlCore::io::TensorsSerializer::open(path);
 
 		serializer->addNewTensor(_weights->getValue());
 	}
@@ -96,7 +96,7 @@ public:
 	{
 		_assertBuilt();
 
-		const auto serializer = layers::serialization::WeightsSerializer::open(path);
+		const auto serializer = mlCore::io::TensorsSerializer::open(path);
 		const auto handles = serializer->getTensorHandles();
 
 		if(handles.size() != 1)

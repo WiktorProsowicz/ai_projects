@@ -2,10 +2,10 @@
 
 #include <AutoDiff/Operations.h>
 #include <LoggingLib/LoggingLib.hpp>
+#include <MLCore/TensorIO/TensorsSerializer.h>
 #include <MLCore/TensorInitializers/GaussianInitializer.hpp>
 
 #include "LayersModules/IActivationFactory.hpp"
-#include "Serialization/WeightsSerializer.h"
 
 namespace layers
 {
@@ -100,7 +100,7 @@ void DenseLayer::saveWeights(const std::string& path) const
 		LOG_ERROR("Layers::DenseLayer", "Layer must be built before saving its weights.");
 	}
 
-	auto serializer = serialization::WeightsSerializer::open(path);
+	auto serializer = mlCore::io::TensorsSerializer::open(path);
 
 	const auto& tensorHandles = serializer->getTensorHandles();
 
@@ -131,7 +131,7 @@ void DenseLayer::loadWeights(const std::string& path)
 		LOG_ERROR("Layers::DenseLayer", "Layer must be built before loading its weights.");
 	}
 
-	auto serializer = serialization::WeightsSerializer::open(path);
+	auto serializer = mlCore::io::TensorsSerializer::open(path);
 
 	const auto& tensorHandles = serializer->getTensorHandles();
 

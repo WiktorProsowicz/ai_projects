@@ -6,7 +6,7 @@
 
 #include <LoggingLib/LoggingLib.hpp>
 #include <MLCore/BasicTensor.h>
-#include <Serialization/WeightsSerializer.h>
+#include <MLCore/TensorIO/TensorsSerializer.h>
 #include <fmt/format.h>
 #include <gtest/gtest.h>
 
@@ -63,7 +63,7 @@ std::string createTempFile()
 		return ::testing::AssertionFailure() << fmt::format("File '{}' does not exist!", weightsPath);
 	}
 
-	const auto weightsFileHandle = layers::serialization::WeightsSerializer::open(weightsPath);
+	const auto weightsFileHandle = mlCore::io::TensorsSerializer::open(weightsPath);
 	const auto tensorHandles = weightsFileHandle->getTensorHandles();
 
 	if(tensorHandles.size() != expectedTensors.size())
