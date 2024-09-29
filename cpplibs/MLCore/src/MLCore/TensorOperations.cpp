@@ -382,4 +382,97 @@ BasicTensor<ValueType> BasicTensorOperations<ValueType>::reduceAdd(const BasicTe
 
 	return ret;
 }
+
+namespace
+{
+/// @brief Tells if two given tensors have the same shape except the given axis.
+template <typename ValueType>
+bool canStackTensors(const BasicTensor<ValueType>& lhs, const BasicTensor<ValueType>& rhs, const size_t axis)
+{
+	if(lhs.shape().size() != rhs.shape().size())
+	{
+		return false;
+	}
+
+	for(size_t i = 0; i < lhs.shape().size(); i++)
+	{
+		if(i == axis)
+		{
+			continue;
+		}
+
+		if(lhs.shape()[i] != rhs.shape()[i])
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+} // namespace
+
+template <typename ValueType>
+BasicTensor<ValueType>
+BasicTensorOperations<ValueType>::stack(const std::vector<BasicTensor<ValueType>>& tensors, const size_t axis)
+{
+	if(tensors.empty())
+	{
+		LOG_ERROR("TensorOperations", "Cannot stack empty list of tensors!");
+	}
+
+	if(const auto unstackableIt = std::adjacent_find(tensors.cbegin(),
+													 tensors.cend(),
+													 [axis](const auto& lhs, const auto& rhs)
+													 { return !canStackTensors(lhs, rhs, axis); });
+	   unstackableIt != tensors.cend())
+	{
+		LOG_ERROR("TensorOperations",
+				  fmt::format("Cannot stack tensors at axis {}. Incompatible shapes: {} and {}",
+							  axis,
+							  detail::stringifyVector(unstackableIt->shape()),
+							  detail::stringifyVector(std::next(unstackableIt)->shape())));
+	}
+
+	mlCore::TensorShape retShape = tensors.front().shape();
+	retShape[axis] =
+		std::accumulate(tensors.cbegin(),
+						tensors.cend(),
+						size_t{0},
+						[axis](const auto& acc, const auto& tensor) { return acc + tensor.shape()[axis]; });
+
+	BasicTensor<ValueType> ret(retShape);
+
+	std::vector<size_t> frameSizes;
+	frameSizes.reserve(tensors.size());
+
+	std::transform(tensors.cbegin(),
+				   tensors.cend(),
+				   std::back_inserter(frameSizes),
+				   [axis](const auto& tensor)
+				   {
+					   return std::accumulate(tensor.shape().cbegin() + axis,
+											  tensor.shape().cend(),
+											  size_t{1},
+											  std::multiplies<>());
+				   });
+
+	const size_t stackingIterations =
+		std::accumulate(retShape.cbegin(), retShape.cbegin() + axis, size_t{1}, std::multiplies<>());
+
+	ValueType* retData = ret._data;
+	for(size_t i = 0; i < stackingIterations; i++)
+	{
+		for(size_t j = 0; j < tensors.size(); j++)
+		{
+			const auto& tensor = tensors[j];
+			const auto& frameSize = frameSizes[j];
+
+			std::copy(tensor._data + i * frameSize, tensor._data + (i + 1) * frameSize, retData);
+
+			retData += frameSize;
+		}
+	}
+
+	return ret;
+}
 } // namespace mlCore

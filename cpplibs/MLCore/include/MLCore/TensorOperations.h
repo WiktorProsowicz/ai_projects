@@ -59,6 +59,13 @@ public:
 	 */
 	static BasicTensor<ValueType> reduceAdd(const BasicTensor<ValueType>& arg,
 											const std::vector<size_t>& targetShape);
+
+	/**
+	 * @brief Stacks a list of tensors along a given axis.
+	 *
+	 * @details The input tensors should have the same shape except for the axis along which they are stacked.
+	 */
+	static BasicTensor<ValueType> stack(const std::vector<BasicTensor<ValueType>>& tensors, size_t axis = 0);
 };
 
 using TensorOperations = BasicTensorOperations<double>;

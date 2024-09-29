@@ -52,6 +52,22 @@ mlCore::Tensor initTensor(const std::vector<size_t>& shape,
 	return tensor;
 }
 
+void assertTensorsEqual(const mlCore::Tensor& checked, const mlCore::Tensor& expected)
+{
+	ASSERT_EQ(checked.shape(), expected.shape());
+
+	for(auto checkedIter = checked.begin(), expectedIter = expected.begin();
+		checkedIter < checked.end() && expectedIter < expected.end();
+		checkedIter++, expectedIter++)
+	{
+		ASSERT_NEAR(*checkedIter, *expectedIter, 1e-3)
+			<< "\nInequality at position " << std::distance(checkedIter, checked.end())
+			<< " for checked tensor:\n\n"
+			<< checked << "\n\nAnd expected one:\n\n"
+			<< expected;
+	}
+}
+
 /*****************************
  *
  * Test Fixture
@@ -64,28 +80,12 @@ class TestTensorOperations : public testing::Test
 {
 
 protected:
-	static void _compareTensors(const mlCore::Tensor& checked, const mlCore::Tensor& expected)
-	{
-		ASSERT_EQ(checked.shape(), expected.shape());
-
-		for(auto checkedIter = checked.begin(), expectedIter = expected.begin();
-			checkedIter < checked.end() && expectedIter < expected.end();
-			checkedIter++, expectedIter++)
-		{
-			ASSERT_NEAR(*checkedIter, *expectedIter, 1e-3)
-				<< "\nInequality at position " << std::distance(checkedIter, checked.end())
-				<< " for checked tensor:\n\n"
-				<< checked << "\n\nAnd expected one:\n\n"
-				<< expected;
-		}
-	}
-
 	template <UnaryTensorOperation Operation>
 	void _performUnaryOperationAndCompare(const UnaryTestParams& params, Operation operation) const
 	{
 		const auto output = operation(params.tensor);
 
-		_compareTensors(output, params.expectedOutput);
+		assertTensorsEqual(output, params.expectedOutput);
 	}
 
 	template <BinaryTensorOperation Operation>
@@ -93,7 +93,7 @@ protected:
 	{
 		const auto output = operation(params.lhsTensor, params.rhsTensor);
 
-		_compareTensors(output, params.expectedOutput);
+		assertTensorsEqual(output, params.expectedOutput);
 	}
 };
 
@@ -305,7 +305,7 @@ TEST_F(TestTensorOperations, testMakeTensor)
 	mlCore::Tensor expectedTensor({2, 3, 4});
 	expectedTensor.fill(mlCore::tensorInitializers::RangeTensorInitializer<double>(0.0, 1.0));
 
-	_compareTensors(createdTensor, expectedTensor);
+	assertTensorsEqual(createdTensor, expectedTensor);
 }
 
 TEST_F(TestTensorOperations, testMakeTensorWithInconsistentShape)
@@ -365,5 +365,61 @@ TEST_F(TestTensorOperations, CorrectlyReduceAddsTensor)
 									 [](const auto& tensor) {
 										 return mlCore::TensorOperations::reduceAdd(tensor, {2, 2});
 									 });
+}
+
+TEST_F(TestTensorOperations, CorrectlyStacksTensors)
+{
+	// clang-format off
+	const std::vector<mlCore::Tensor> inputs{
+		[](){
+			using Arr = mlCore::TensorArr<double>;
+
+			return mlCore::TensorOperations::makeTensor(
+			            Arr{Arr{
+                                Arr{1., 2.},
+                                Arr{3., 4.}},
+                            Arr{
+                                Arr{5., 6.},
+                                Arr{7., 8.}}});
+		}(),
+		[](){
+			using Arr = mlCore::TensorArr<double>;
+
+			return mlCore::TensorOperations::makeTensor(
+			            Arr{Arr{
+                                Arr{9., 10.},
+                                Arr{11., 12.},
+								Arr{13., 14.}},
+								
+                            Arr{
+                                Arr{15., 16.},
+                                Arr{17., 18.},
+								Arr{19., 20.}}});
+		}(),
+	};
+
+	const auto expected = [](){
+			using Arr = mlCore::TensorArr<double>;
+
+			return mlCore::TensorOperations::makeTensor(
+			            Arr{Arr{
+								Arr{1., 2.},
+                                Arr{3., 4.},
+                                Arr{9., 10.},
+                                Arr{11., 12.},
+								Arr{13., 14.}},
+								
+                            Arr{
+								Arr{5., 6.},
+                                Arr{7., 8.},
+                                Arr{15., 16.},
+                                Arr{17., 18.},
+								Arr{19., 20.}}});
+		}();
+	// clang-format on
+
+	const auto stacked = mlCore::TensorOperations::stack(inputs, 1);
+
+	assertTensorsEqual(stacked, expected);
 }
 } // namespace
