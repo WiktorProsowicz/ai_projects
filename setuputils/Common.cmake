@@ -26,8 +26,6 @@ macro(install_library)
 
     target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-    install(TARGETS ${PROJECT_NAME} DESTINATION lib)
-
     target_compile_options(${PROJECT_NAME} PRIVATE ${COMMON_COMPILE_OPTIONS})
 
     # adding executable
@@ -81,6 +79,8 @@ macro(add_tests)
             set_target_properties("${TEST_NAME}" PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/test/${PROJECT_NAME}/)
 
             target_compile_options("${TEST_NAME}" PRIVATE ${COMMON_COMPILE_OPTIONS_PERMISSIVE})
+
+            target_compile_definitions("${TEST_NAME}" PRIVATE TEST_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/tests/res")
 
             gtest_discover_tests("${TEST_NAME}")
 
