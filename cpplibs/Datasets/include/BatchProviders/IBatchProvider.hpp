@@ -5,7 +5,7 @@
 
 #include <MLCore/BasicTensor.h>
 
-namespace datasets
+namespace datasets::batchProviders
 {
 /**
  * @brief Interface for classes providing batches of data.
@@ -45,6 +45,6 @@ public:
 
 /// @brief Shared pointer to an IBatchProvider instance.
 using IBatchProviderPtr = std::shared_ptr<IBatchProvider>;
-} // namespace datasets
+} // namespace datasets::batchProviders
 
 #endif
