@@ -7,3 +7,5 @@ include("${CMAKE_SOURCE_DIR}/setuputils/Common.cmake")
 install_library()
 
 target_link_libraries(${PROJECT_NAME} MLCore Interfaces)
+
+add_tests(LoggingLib fmt::fmt)
