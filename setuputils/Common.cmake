@@ -74,7 +74,7 @@ macro(add_tests)
                 target_include_directories("${TEST_NAME}" PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/include)
             endif()
 
-            target_link_libraries("${TEST_NAME}" PUBLIC ${PROJECT_NAME} GTest::gtest GTest::gtest_main)
+            target_link_libraries("${TEST_NAME}" PUBLIC ${PROJECT_NAME} GTest::gtest GTest::gmock GTest::gtest_main)
 
             if(${ARGC} GREATER 0)
                 target_link_libraries("${TEST_NAME}" PUBLIC ${ARGV})
