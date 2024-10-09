@@ -22,10 +22,7 @@ public:
 	 * @param batchSize The number of samples every batch is intended to contain.
 	 * @param shuffle Tells whether the dataset should shuffle the samples on every epoch.
 	 */
-	BaseDataset(batchProviders::IBatchProviderPtr batchProvider,
-				size_t batchSize,
-				bool shuffle,
-				bool trimRemaining);
+	BaseDataset(batchProviders::IBatchProviderPtr batchProvider, size_t batchSize, bool shuffle);
 
 	BaseDataset(const BaseDataset&) = delete;
 	BaseDataset(BaseDataset&&) = delete;
@@ -34,15 +31,39 @@ public:
 
 	~BaseDataset() override = default;
 
-	size_t getBatchSize() const override;
+	size_t getBatchSize() const override
+	{
+		return _batchSize;
+	}
 
-	bool hasNextBatch() const override;
+	bool hasNextBatch() const override
+	{
+		return _currentBatchIndex < getNumberOfBatches();
+	}
 
 	std::vector<mlCore::Tensor> getNextBatch() override;
 
-	size_t getNumberOfBatches() const override;
+	size_t getNumberOfBatches() const override
+	{
+		return _batchProvider->getNumberOfSamples() / _batchSize;
+	}
 
-	void resetState() override;
+	void resetState() override
+	{
+		_resetState();
+	}
+
+protected:
+	batchProviders::IBatchProviderPtr _batchProvider;
+	std::vector<size_t> _samplesIndices;
+
+private:
+	/// @brief Resets the batch index and, if supported, shuffles the samples.
+	void _resetState();
+
+	size_t _batchSize;
+	bool _shuffle;
+	size_t _currentBatchIndex;
 };
 } // namespace datasets
 
