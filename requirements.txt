@@ -4,3 +4,5 @@
 
 cmake==3.28.4
 conan==2.2.1
+numpy==2.1.2
+pandas==2.2.3
