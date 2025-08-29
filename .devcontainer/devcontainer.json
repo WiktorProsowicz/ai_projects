@@ -3,10 +3,9 @@
 {
 	"name": "Ubuntu_22.04",
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	// "build": { "dockerfile": "Dockerfile", "options": [
-	// 	"-t", "ai_projects-devcontainer"
-	// ] },
-	"image": "ai_projects-devcontainer",
+	"build": { "dockerfile": "Dockerfile", "options": [
+		"-t", "ai_projects-devcontainer"
+	] },
 	"customizations": {
 		"vscode": {
 			"extensions": [
@@ -23,7 +22,8 @@
 				"brobeson.ctest-lab",
 				"ms-python.pylint",
 				"eamodio.gitlens",
-				"ms-vscode.cpptools-extension-pack"
+				"ms-vscode.cpptools-extension-pack",
+				"skellock.just"
 			]
 		}
 	},
