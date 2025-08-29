@@ -5,15 +5,15 @@
 # environment without installing anything locally on the system.
 # ------------------------------------------------------------------------
 
-FROM mcr.microsoft.com/devcontainers/base:jammy
+FROM mcr.microsoft.com/devcontainers/base:noble
 ARG DEBIAN_FRONTEND=noninteractive
 
 # Installing the main packages required for a new project's user
 # They're necessary to correctly use the project's content
 RUN apt update && \
-    # Enabling adding apt repository and adding ppas for necessary packages
-    apt install -y software-properties-common && \
-    add-apt-repository -y ppa:deadsnakes/ppa && \
     # Main dependencies
     apt update && apt install -y \
-        python3.12 python3.12-venv gcc-12 g++-12
+        just gcc-14 g++-14 wget
+
+USER vscode
+RUN wget -qO- https://astral.sh/uv/install.sh | sh 
