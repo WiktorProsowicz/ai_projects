@@ -42,15 +42,27 @@
 	size_t positionName = 0;                                                                                 \
 	{                                                                                                        \
 		size_t offset = 1;                                                                                   \
-		for(size_t i = path.size() - 1; i < path.size(); i--)                                                \
+		for(size_t i = path.size(); i >= 1; i--)                                                             \
 		{                                                                                                    \
-			positionName += offset * path[i];                                                                \
-			offset *= shape[i];                                                                              \
+			positionName += offset * path[i - 1];                                                            \
+			offset *= shape[i - 1];                                                                          \
 		}                                                                                                    \
 	}
 
-// Stretches a tensor and applies an operation
+/// Maximum number of dimensions supported for broadcasting operation.
+#define MAX_DIMENSIONS_FOR_BROADCASTING 1000
+
+// Stretches a tensor and applies an operation.
 #define STRETCH_TENSOR_TO_ANOTHER(dst, src, srcPaddedShape, oper)                                            \
+                                                                                                             \
+	if(dst.nDimensions() > MAX_DIMENSIONS_FOR_BROADCASTING)                                                  \
+	{                                                                                                        \
+		LOG_ERROR("TensorOperations",                                                                        \
+				  fmt::format("Broadcasting operation supports up to {} dimensions, but got {}.",            \
+							  MAX_DIMENSIONS_FOR_BROADCASTING,                                               \
+							  dst.nDimensions()));                                                           \
+	}                                                                                                        \
+                                                                                                             \
 	std::vector<size_t> dstTreePath(dst.nDimensions(), 0);                                                   \
 	std::vector<size_t> srcTreePath(dst.nDimensions(), 0);                                                   \
                                                                                                              \

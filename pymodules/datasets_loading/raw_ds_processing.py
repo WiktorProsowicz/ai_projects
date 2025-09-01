@@ -1,13 +1,10 @@
-# -*- coding: utf-8 -*-
 """Contains utilities for transforming raw datasets into unified format."""
-
-import os
 import logging
+import os
 from typing import Tuple
 
-import pandas as pd
 import numpy as np
-
+import pandas as pd
 from datasets_loading import tensors_serializing
 
 

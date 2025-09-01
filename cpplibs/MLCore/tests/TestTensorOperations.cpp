@@ -390,7 +390,7 @@ TEST_F(TestTensorOperations, CorrectlyStacksTensors)
                                 Arr{9., 10.},
                                 Arr{11., 12.},
 								Arr{13., 14.}},
-								
+
                             Arr{
                                 Arr{15., 16.},
                                 Arr{17., 18.},
@@ -408,7 +408,7 @@ TEST_F(TestTensorOperations, CorrectlyStacksTensors)
                                 Arr{9., 10.},
                                 Arr{11., 12.},
 								Arr{13., 14.}},
-								
+
                             Arr{
 								Arr{5., 6.},
                                 Arr{7., 8.},

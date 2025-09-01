@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 """Contains utilities for encoding/decoding tensors."""
-
 import dataclasses
 import logging
 import os
-from typing import List, Dict
+from typing import Dict
+from typing import List
 
 import numpy as np
 
@@ -30,12 +29,12 @@ class TensorsSet:
 def _extract_tensor(raw_data: bytes, start_idx: int) -> np.ndarray:
 
     shape_size = np.frombuffer(raw_data[start_idx:start_idx + 8], dtype=np.uint64)[0]
-    shape = np.frombuffer(raw_data[start_idx + 8:start_idx + 8 + shape_size*8], dtype=np.uint64)
+    shape = np.frombuffer(raw_data[start_idx + 8:start_idx + 8 + shape_size * 8], dtype=np.uint64)
 
     tensor_size = np.prod(shape)
-    data_start_idx = start_idx + 8 + shape_size*8
+    data_start_idx = start_idx + 8 + shape_size * 8
     tensor_raw = np.frombuffer(
-        raw_data[data_start_idx:data_start_idx + tensor_size*8], dtype=np.float64)
+        raw_data[data_start_idx:data_start_idx + tensor_size * 8], dtype=np.float64)
 
     return tensor_raw.reshape(shape)
 

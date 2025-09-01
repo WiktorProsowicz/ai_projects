@@ -1,9 +1,7 @@
-# -*- coding: utf-8 -*-
 """Contains functions for fetching raw datasets from web."""
-
 import logging
-from os import path
 import subprocess
+from os import path
 
 
 TITANIC_DS_URL = (
@@ -37,4 +35,4 @@ def fetch_titanic(destination_path: str):
         subprocess.run(['wget', TITANIC_DS_URL, '-O', csv_path], check=True)
 
     except subprocess.SubprocessError as e:
-        _logger().error("Failed to download Titanic dataset: %s", e)
+        _logger().error('Failed to download Titanic dataset: %s', e)
