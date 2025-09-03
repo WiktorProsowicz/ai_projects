@@ -1,11 +1,7 @@
-cmake_minimum_required(VERSION "${CMAKE_MINIMUM_REQUIRED_VERSION}")
-
 project(Datasets VERSION 1.0.0)
 
-include("${CMAKE_SOURCE_DIR}/setuputils/Common.cmake")
+aiprojects_add_library(LIBRARY_NAME Datasets)
 
-install_library()
+target_link_libraries(Datasets MLCore Interfaces)
 
-target_link_libraries(${PROJECT_NAME} MLCore Interfaces)
-
-add_tests(LoggingLib fmt::fmt)
+add_tests(LINKED_LIBRARIES LoggingLib fmt::fmt)

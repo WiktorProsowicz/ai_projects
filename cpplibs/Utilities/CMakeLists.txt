@@ -1,11 +1,5 @@
-cmake_minimum_required(VERSION "${CMAKE_MINIMUM_REQUIRED_VERSION}")
-
 project(Utilities VERSION 1.0.0)
 
-include("${CMAKE_SOURCE_DIR}/setuputils/Common.cmake")
+aiprojects_add_library(LIBRARY_NAME Utilities)
 
-install_library()
-
-target_link_libraries(${PROJECT_NAME})
-
-add_tests(LoggingLib fmt::fmt)
+add_tests(LINKED_LIBRARIES LoggingLib fmt::fmt)

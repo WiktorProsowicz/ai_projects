@@ -1,11 +1,7 @@
-cmake_minimum_required(VERSION "${CMAKE_MINIMUM_REQUIRED_VERSION}")
-
 project(MLCore VERSION 1.0.0)
 
-include("${CMAKE_SOURCE_DIR}/setuputils/Common.cmake")
+aiprojects_add_library(LIBRARY_NAME MLCore)
 
-install_library()
-
-target_link_libraries(${PROJECT_NAME} LoggingLib Utilities fmt::fmt)
+target_link_libraries(MLCore LoggingLib Utilities fmt::fmt)
 
 add_tests()

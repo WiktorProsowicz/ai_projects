@@ -1,11 +1,7 @@
-cmake_minimum_required(VERSION "${CMAKE_MINIMUM_REQUIRED_VERSION}")
-
 project(Layers VERSION 1.0.0)
 
-include("${CMAKE_SOURCE_DIR}/setuputils/Common.cmake")
+aiprojects_add_library(LIBRARY_NAME Layers)
 
-install_library()
+target_link_libraries(Layers Interfaces MLCore LoggingLib)
 
-target_link_libraries(${PROJECT_NAME} Interfaces MLCore LoggingLib)
-
-add_tests(LoggingLib Utilities fmt::fmt)
+add_tests(LINKED_LIBRARIES LoggingLib Utilities fmt::fmt)

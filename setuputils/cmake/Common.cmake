@@ -1,37 +1,44 @@
 # ***********************************************************************
 #  Collectes files in current directory and creates a library from them.
 # ***********************************************************************
-macro(install_library)
+function(aiprojects_add_library)
 
-    # get all files for library
-    file(GLOB_RECURSE ${PROJECT_NAME}_PUBLIC_HEADERS CONFIGURE_DEPENDS include/**.h*)
-    file(GLOB_RECURSE ${PROJECT_NAME}_PRIVATE_HEADERS CONFIGURE_DEPENDS src/**/include/**.h*)
-    file(GLOB_RECURSE ${PROJECT_NAME}_SRC src/**.cpp)
+    cmake_parse_arguments(PARSED_ARGS "" "LIBRARY_NAME" "" ${ARGN})
 
-    list(FILTER ${PROJECT_NAME}_SRC EXCLUDE REGEX "main.cpp")
+    set(LIBRARY_NAME "${PARSED_ARGS_LIBRARY_NAME}")
 
-    # install library
-    add_library(${PROJECT_NAME} SHARED)
+    # Get all files for library
+    file(GLOB_RECURSE ${LIBRARY_NAME}_PUBLIC_HEADERS CONFIGURE_DEPENDS include/**.h*)
+    file(GLOB_RECURSE ${LIBRARY_NAME}_PRIVATE_HEADERS CONFIGURE_DEPENDS src/**/include/**.h*)
+    file(GLOB_RECURSE ${LIBRARY_NAME}_SRC src/**.cpp)
 
-    target_sources(${PROJECT_NAME} PUBLIC "${${PROJECT_NAME}_PUBLIC_HEADERS}"
-                                   PRIVATE "${${PROJECT_NAME}_SRC}" "${${PROJECT_NAME}_PRIVATE_HEADERS}")
+    # Exclude cpp for executable.
+    list(FILTER ${LIBRARY_NAME}_SRC EXCLUDE REGEX "main.cpp")
 
-    set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
+    add_library(${LIBRARY_NAME})
 
-    set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/)
+    target_sources(${LIBRARY_NAME} PUBLIC "${${LIBRARY_NAME}_PUBLIC_HEADERS}"
+                                   PRIVATE "${${LIBRARY_NAME}_SRC}" "${${LIBRARY_NAME}_PRIVATE_HEADERS}")
+
+    set_target_properties(${LIBRARY_NAME} PROPERTIES LINKER_LANGUAGE CXX)
+
+    set_target_properties(${LIBRARY_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/)
 
     if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/src/include)
-        target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/include)
+        target_include_directories(${LIBRARY_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/include)
     endif()
 
-    target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+    target_include_directories(${LIBRARY_NAME}
+                                PUBLIC
+                                    "$<INSTALL_INTERFACE:include>"
+                                    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>")
 
-    target_compile_options(${PROJECT_NAME} PRIVATE ${COMMON_COMPILE_OPTIONS})
+    target_compile_options(${LIBRARY_NAME} PRIVATE ${COMMON_COMPILE_OPTIONS})
 
     # adding executable
     add_executable_for_lib()
 
-endmacro()
+endfunction()
 
 
 
@@ -58,7 +65,10 @@ endmacro()
 #  Looks for tests files and creates an executable for each of them.
 #  Links given libraries to the tests.
 # ********************************************************************
-macro(add_tests)
+function(add_tests)
+
+    cmake_parse_arguments(PARSED_ARGS "" "" "LINKED_LIBRARIES" ${ARGN})
+
     if(${BUILD_TESTS})
 
         # get tests files
@@ -77,7 +87,7 @@ macro(add_tests)
             target_link_libraries("${TEST_NAME}" PUBLIC ${PROJECT_NAME} GTest::gtest GTest::gmock GTest::gtest_main)
 
             if(${ARGC} GREATER 0)
-                target_link_libraries("${TEST_NAME}" PUBLIC ${ARGV})
+                target_link_libraries("${TEST_NAME}" PUBLIC ${PARSED_ARGS_LINKED_LIBRARIES})
             endif()
 
             set_target_properties("${TEST_NAME}" PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/test/${PROJECT_NAME}/)
@@ -91,7 +101,7 @@ macro(add_tests)
         endforeach()
 
     endif()
-endmacro()
+endfunction()
 
 # ***********************************************
 # Used for building libraries and executables

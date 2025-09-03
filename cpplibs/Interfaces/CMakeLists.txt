@@ -1,9 +1,5 @@
-cmake_minimum_required(VERSION "${CMAKE_MINIMUM_REQUIRED_VERSION}")
-
 project(Interfaces VERSION 1.0.0)
 
-include("${CMAKE_SOURCE_DIR}/setuputils/Common.cmake")
+aiprojects_add_library(LIBRARY_NAME Interfaces)
 
-install_library()
-
-target_link_libraries(${PROJECT_NAME} MLCore)
+target_link_libraries(Interfaces MLCore)
