@@ -5,12 +5,22 @@ requires-python = ">=3.12"
 dependencies = [
     "cmake>=3.28.4",
     "conan>=2.2.1",
-    "ninja>=1.13.0"
+    "ninja>=1.13.0",
 ]
 
 [project.optional-dependencies]
 dev = [
     "clang-tidy>=18.1.1",
     "pre-commit>=3.4.0",
-    "pylint>=3.1.0"
+    "pylint>=3.1.0",
+    "clang-format>=19.0.0",
+    "autopep8>=2.3.2"
 ]
+py_scripts = [
+    "numpy>=2.1.2",
+    "pandas>=2.2.3"
+]
+
+
+[tool.mypy]
+modules = ["dataset_loading", "utilities"]

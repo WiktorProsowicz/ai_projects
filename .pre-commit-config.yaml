@@ -11,7 +11,6 @@ repos:
       - id: check-shebang-scripts-are-executable
       - id: detect-private-key
       - id: double-quote-string-fixer
-      - id: forbid-submodules
       - id: requirements-txt-fixer
 
   # Ensures C++/C files are formatted using clang-format
@@ -35,7 +34,7 @@ repos:
     rev: v1.8.0
     hooks:
       - id: mypy
-        args: [--explicit-package-bases, --python-executable, venv/bin/python]
+        args: [--explicit-package-bases, --python-executable, .venv/bin/python]
 
   # Ensures python files are written using modern syntax
   - repo: https://github.com/asottile/pyupgrade
