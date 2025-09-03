@@ -1,6 +1,5 @@
-.vscode
-build
-venv
-CMakeUserPresets.json
+/.vscode/
+build/
+.venv/
 **/__pycache__/**
 .mypy_cache
