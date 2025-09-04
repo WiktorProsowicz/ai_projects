@@ -23,7 +23,8 @@
 				"ms-python.pylint",
 				"eamodio.gitlens",
 				"ms-vscode.cpptools-extension-pack",
-				"skellock.just"
+				"skellock.just",
+				"matangover.mypy"
 			]
 		}
 	},

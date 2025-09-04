@@ -33,4 +33,9 @@
     "cmake.cmakePath": "${workspaceFolder}/.venv/bin/cmake",
     "clang-format.executable": "${workspaceFolder}/.venv/bin/clang-format",
     "clang-format.style": "file:${workspaceFolder}/setuputils/.clang-format",
+    "mypy.dmypyExecutable": "${workspaceFolder}/.venv/bin/dmypy",
+    "mypy.mypyExecutable": "${workspaceFolder}/.venv/bin/mypy",
+    "mypy.targets": [
+        "pymodules"
+    ]
 }
