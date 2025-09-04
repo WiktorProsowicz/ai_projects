@@ -35,6 +35,10 @@ function(aiprojects_add_library)
 
     target_compile_options(${LIBRARY_NAME} PRIVATE ${COMMON_COMPILE_OPTIONS})
 
+    if(ENABLE_IWYU)
+        aiprojects_setup_iwyu_for_target(${LIBRARY_NAME})
+    endif()
+
     # adding executable
     add_executable_for_lib()
 
@@ -57,6 +61,10 @@ macro(add_executable_for_lib)
         set_target_properties(${PROJECT_NAME}Executable PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/)
 
         target_compile_options(${PROJECT_NAME}Executable PRIVATE ${COMMON_COMPILE_OPTIONS})
+
+        if(ENABLE_IWYU)
+            aiprojects_setup_iwyu_for_target(${PROJECT_NAME}Executable)
+        endif()
     endif()
 endmacro()
 
@@ -96,6 +104,10 @@ function(add_tests)
 
             target_compile_definitions("${TEST_NAME}" PRIVATE TEST_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/tests/res")
 
+            if(ENABLE_IWYU)
+                aiprojects_setup_iwyu_for_target("${TEST_NAME}")
+            endif()
+
             gtest_discover_tests("${TEST_NAME}")
 
         endforeach()
@@ -114,7 +126,19 @@ macro(add_subdirectory_supress_messages DIR)
 endmacro()
 
 
+# ********************************************************************
+#  Sets up include-what-you-use for the given target if iwyu_path is set.
+# ********************************************************************
+function(aiprojects_setup_iwyu_for_target TARGET)
 
+    set(iwyu_options
+        "-Xiwyu" "--quoted_includes_first"
+        "-w"
+    )
+
+    set_property(TARGET ${TARGET} PROPERTY CXX_INCLUDE_WHAT_YOU_USE "${iwyu_path};${iwyu_options}")
+
+endfunction()
 
 # ***********************************************
 # Used for building libraries and executables

@@ -67,7 +67,13 @@ if(CCACHE_PROGRAM)
     set(CMAKE_CUDA_COMPILER_LAUNCHER "${CCACHE_PROGRAM}")
 endif()
 
+# ----------------------------------------------------------------------------
+# Enable include-what-you-use if requested.
+# ----------------------------------------------------------------------------
 
+if (ENABLE_IWYU)
+    find_program(iwyu_path NAMES "include-what-you-use" REQUIRED)
+endif()
 
 # ----------------------------------------------------------------------------
 # Include all subdirectories.

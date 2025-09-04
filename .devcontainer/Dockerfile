@@ -13,7 +13,10 @@ ARG DEBIAN_FRONTEND=noninteractive
 RUN apt update && \
     # Main dependencies
     apt update && apt install -y \
-        just gcc-14 g++-14 wget
+        just gcc-14 g++-14 wget ccache
+
+RUN apt-get update && \
+    apt-get install -y iwyu
 
 USER vscode
-RUN wget -qO- https://astral.sh/uv/install.sh | sh 
+RUN wget -qO- https://astral.sh/uv/install.sh | sh
