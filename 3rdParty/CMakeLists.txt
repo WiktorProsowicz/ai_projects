@@ -1,4 +1,6 @@
 
+include("../setuputils/cmake/Common.cmake")
+
 find_package(Git QUIET)
 
 # Ensure the submodules are synced.
@@ -12,13 +14,17 @@ if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
 endif()
 
 set(FMT_SYSTEM_HEADERS ON CACHE BOOL "Expose fmt headers as system headers")
-add_subdirectory(fmt)
+add_subdirectory_supress_messages(fmt)
 
 if(${ENABLE_TRACY})
-    add_subdirectory(tracy)
+    add_subdirectory_supress_messages(tracy)
+
+    target_compile_options(TracyClient PRIVATE
+        -Wno-unused-result
+    )
 endif()
 
 if(${BUILD_TESTS})
-    add_subdirectory(googletest)
+    add_subdirectory_supress_messages(googletest)
     include(GoogleTest)
 endif()

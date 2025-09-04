@@ -103,6 +103,19 @@ function(add_tests)
     endif()
 endfunction()
 
+# ********************************************************************
+#  Wraps add_subdirectory for supressing messages from external subdirs.
+# ********************************************************************
+macro(add_subdirectory_supress_messages DIR)
+    set(_saved_CMAKE_MESSAGE_LOG_LEVEL ${CMAKE_MESSAGE_LOG_LEVEL})
+    set(CMAKE_MESSAGE_LOG_LEVEL "WARNING")
+    add_subdirectory("${DIR}")
+    set(CMAKE_MESSAGE_LOG_LEVEL ${_saved_CMAKE_MESSAGE_LOG_LEVEL})
+endmacro()
+
+
+
+
 # ***********************************************
 # Used for building libraries and executables
 # ***********************************************
