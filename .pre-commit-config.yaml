@@ -29,13 +29,6 @@ repos:
       - id: autopep8
         args: [--in-place, --aggressive, --max-line-length=100]
 
-  # Used for python type checking
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.8.0
-    hooks:
-      - id: mypy
-        args: [--explicit-package-bases, --python-executable, .venv/bin/python]
-
   # Ensures python files are written using modern syntax
   - repo: https://github.com/asottile/pyupgrade
     rev: v3.15.0
@@ -57,6 +50,16 @@ repos:
         language: system
         types: [python]
         args: [-rn, -sn]
+
+  # Performs Python static type check
+  - repo: local
+    hooks:
+      - id: mypy
+        name: mypy
+        entry: mypy
+        language: system
+        types: [python]
+        args: [--no-namespace-packages, --python-executable, .venv/bin/python]
 
   # Ensures yaml files are formatted
   - repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt
