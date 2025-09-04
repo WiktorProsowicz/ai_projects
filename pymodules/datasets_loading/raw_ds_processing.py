@@ -76,7 +76,5 @@ def decode_titanic_ds(raw_ds_path: str
     # Label data processing
     labels_df['Survived'] = labels_df['Survived'].astype(float)
 
-    inputs_df = inputs_df.to_numpy(np.float64)
-    labels_df = labels_df.to_numpy(np.float64)
-
-    return tensors_serializing.TensorsSet(inputs_df), tensors_serializing.TensorsSet(labels_df)
+    return (tensors_serializing.TensorsSet(list(inputs_df.to_numpy(np.float64))),
+            tensors_serializing.TensorsSet(list(labels_df.to_numpy(np.float64))))
