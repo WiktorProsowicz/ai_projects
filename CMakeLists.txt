@@ -3,15 +3,32 @@ cmake_minimum_required(VERSION "${CMAKE_MINIMUM_REQUIRED_VERSION}")
 
 project(ai_projects VERSION 1.0.0 LANGUAGES CXX)
 
+# ----------------------------------------------------------------------------
+# Declare options.
+# ----------------------------------------------------------------------------
 
 option(BUILD_TESTS "Build test executables." OFF)
 option(ENABLE_TRACY "Enable Tracy profiler." OFF)
+option(ENABLE_IWYU "Enable include-what-you-use compilation checks" OFF)
+
+# ----------------------------------------------------------------------------
+# Set CMake policies.
+# ----------------------------------------------------------------------------
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# ----------------------------------------------------------------------------
+# Set custom variables.
+# ----------------------------------------------------------------------------
+
 set(MAIN_PROJECT_VERSION ${PROJECT_VERSION})
+
+# ----------------------------------------------------------------------------
+# Set default properties.
+# ----------------------------------------------------------------------------
+
 set(DEFAULT_BUILD_TYPE "Release")
 set(DEFAULT_SHARED_LIBS ON)
 
@@ -26,6 +43,35 @@ if(NOT DEFINED BUILD_SHARED_LIBS)
     set(BUILD_SHARED_LIBS ${DEFAULT_SHARED_LIBS} CACHE BOOL "Build using shared libraries." FORCE)
 endif()
 
+# ----------------------------------------------------------------------------
+# Print config.
+# ----------------------------------------------------------------------------
+
+include(CMakePrintHelpers)
+
+cmake_print_variables(
+    CMAKE_BUILD_TYPE
+    BUILD_SHARED_LIBS
+    BUILD_TESTS
+    ENABLE_TRACY
+)
+
+# ----------------------------------------------------------------------------
+# Enable ccache.
+# ----------------------------------------------------------------------------
+
+find_program(CCACHE_PROGRAM ccache)
+
+if(CCACHE_PROGRAM)
+    set(CMAKE_CXX_COMPILER_LAUNCHER "${CCACHE_PROGRAM}")
+    set(CMAKE_CUDA_COMPILER_LAUNCHER "${CCACHE_PROGRAM}")
+endif()
+
+
+
+# ----------------------------------------------------------------------------
+# Include all subdirectories.
+# ----------------------------------------------------------------------------
 
 include("${CMAKE_SOURCE_DIR}/setuputils/cmake/Common.cmake")
 
