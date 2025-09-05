@@ -29,7 +29,7 @@ py-scripts = [
 [package.metadata]
 requires-dist = [
     { name = "autopep8", marker = "extra == 'dev'", specifier = ">=2.3.2" },
-    { name = "clang-format", marker = "extra == 'dev'", specifier = ">=19.0.0" },
+    { name = "clang-format", marker = "extra == 'dev'", specifier = ">=21.1.0" },
     { name = "clang-tidy", marker = "extra == 'dev'", specifier = ">=18.1.1" },
     { name = "cmake", specifier = ">=3.28.4" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.17.1" },

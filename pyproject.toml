@@ -12,7 +12,7 @@ dev = [
     "clang-tidy>=18.1.1",
     "pre-commit>=3.4.0",
     "pylint>=3.1.0",
-    "clang-format>=19.0.0",
+    "clang-format>=21.1.0",
     "autopep8>=2.3.2",
     "mypy>=1.17.1",
 
