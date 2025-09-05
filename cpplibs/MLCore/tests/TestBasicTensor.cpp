@@ -6,13 +6,20 @@
  * by Wiktor Prosowicz
  **********************/
 
-#include <iostream>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <utility>
+#include <vector>
 
-#include <LoggingLib/LoggingLib.hpp>
 #include <MLCore/BasicTensor.h>
 #include <MLCore/TensorInitializers/RangeTensorInitializer.hpp>
 #include <fmt/format.h>
 #include <gtest/gtest.h>
+#include <stdint.h>
+#include <string.h>
+
+#include "MLCore/TensorIterator.hpp"
 
 namespace
 {

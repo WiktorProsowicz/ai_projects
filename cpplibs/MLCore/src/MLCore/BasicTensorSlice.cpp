@@ -1,14 +1,19 @@
 #include "MLCore/BasicTensorSlice.h"
 
+#include <algorithm>
+#include <compare>
 #include <cstddef>
 #include <functional>
 #include <iomanip>
 #include <iterator>
+#include <numeric>
 #include <ostream>
 #include <span>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 #include <tuple>
+#include <typeinfo>
 #include <utility>
 #include <vector>
 
@@ -546,7 +551,8 @@ int getBlockSize(const std::vector<ValueType*>& dataPtrs, const size_t& chunkLen
 							   const auto* const maxForChunk =
 								   std::max_element(dataPtr,
 													dataPtr + chunkLength,
-													[](const ValueType& lhs, const ValueType& rhs) {
+													[](const ValueType& lhs, const ValueType& rhs)
+													{
 														return (std::ostringstream{} << lhs).str().size() <
 															   (std::ostringstream{} << rhs).str().size();
 													});

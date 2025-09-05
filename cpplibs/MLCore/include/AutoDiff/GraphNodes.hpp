@@ -112,7 +112,7 @@ public:
 	 * @param initValue Initial value of the variable.
 	 */
 	explicit Variable(mlCore::Tensor initValue)
-		: _value(std::move(initValue)){};
+		: _value(std::move(initValue)) {};
 
 	Variable(const Variable&) = delete;
 	Variable(Variable&&) = delete;
@@ -180,7 +180,7 @@ public:
 	 * @param initValue Initial value of the constant.
 	 */
 	explicit Constant(mlCore::Tensor initValue)
-		: _value(std::move(initValue)){};
+		: _value(std::move(initValue)) {};
 
 	Constant(const Constant&) = delete;
 	Constant(Constant&&) = delete;

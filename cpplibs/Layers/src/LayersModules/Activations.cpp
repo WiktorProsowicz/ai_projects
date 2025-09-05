@@ -1,7 +1,10 @@
 #include "LayersModules/Activations.h"
 
+#include <memory>
+
 #include <AutoDiff/Operations.h>
 
+#include "AutoDiff/GraphNodes.hpp"
 #include "LayersModules/SimpleActivation.hpp"
 
 namespace layers::activations

@@ -1,12 +1,22 @@
 #ifndef MLCORE_SRC_INCLUDE_MLCORE_UTILITIESIMPL_H
 #define MLCORE_SRC_INCLUDE_MLCORE_UTILITIESIMPL_H
 
+#include <algorithm>
+#include <iterator>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <fmt/format.h>
+#include <fmt/ranges.h>
+#include <stddef.h>
 
-#include "MLCore/Utilities.h"
+#include "MLCore/BasicTensor.h"
+
+namespace mlCore
+{
+enum class MatrixSpec;
+} // namespace mlCore
 
 namespace mlCore::detail
 {
@@ -49,8 +59,25 @@ std::vector<size_t> trimRowOrColumnVector(const std::vector<size_t>& shape);
 void assertCanMatmulTensors(const std::vector<size_t>& lhsShape, const std::vector<size_t>& rhsShape);
 
 /// @brief Pads two shapes with 1s to have the same number of dimensions.
-std::pair<std::vector<size_t>, std::vector<size_t>> padShapes(const std::vector<size_t>& shape1,
-															  const std::vector<size_t>& shape2);
+/// TODO: Move to .cpp file and find out why IWYU crashes if the function is not inline.
+inline std::pair<mlCore::TensorShape, mlCore::TensorShape> padShapes(const std::vector<size_t>& shape1,
+																	 const std::vector<size_t>& shape2)
+{
+	const auto biggerSize = std::max(shape1.size(), shape2.size());
+
+	std::vector<size_t> paddedShape1(biggerSize, 1);
+	std::vector<size_t> paddedShape2(biggerSize, 1);
+
+	std::copy(shape1.cbegin(),
+			  shape1.cend(),
+			  std::next(paddedShape1.begin(), static_cast<ptrdiff_t>(biggerSize - shape1.size())));
+
+	std::copy(shape2.cbegin(),
+			  shape2.cend(),
+			  std::next(paddedShape2.begin(), static_cast<ptrdiff_t>(biggerSize - shape2.size())));
+
+	return {paddedShape1, paddedShape2};
+}
 
 /// @brief Computes the shape of the result of a matrix multiplication.
 std::vector<size_t> getReturnShapeForMatmul(const std::vector<size_t>& lhsPaddedShape,

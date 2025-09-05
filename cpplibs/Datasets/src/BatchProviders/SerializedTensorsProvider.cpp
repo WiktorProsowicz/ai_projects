@@ -1,6 +1,12 @@
 #include "BatchProviders/SerializedTensorsProvider.h"
 
+#include <algorithm>
+#include <iterator>
+
 #include <MLCore/TensorOperations.h>
+
+#include "LoggingLib/LoggingLib.hpp"
+#include "MLCore/TensorIO/TensorsSerializer.h"
 
 namespace datasets::batchProviders
 {

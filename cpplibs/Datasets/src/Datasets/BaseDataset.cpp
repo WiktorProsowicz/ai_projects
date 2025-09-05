@@ -1,6 +1,9 @@
 #include "Datasets/BaseDataset.h"
 
+#include <algorithm>
+#include <numeric>
 #include <random>
+#include <utility>
 
 #include <LoggingLib/LoggingLib.hpp>
 

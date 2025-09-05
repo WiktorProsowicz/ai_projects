@@ -1,5 +1,7 @@
 #include "AutoDiff/GraphHelpers/GraphInfoExtractor.h"
 
+#include <cmath>
+#include <numeric>
 #include <ranges>
 
 #include <LoggingLib/LoggingLib.hpp>

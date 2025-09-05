@@ -2,19 +2,18 @@
 #define MLCORE_INCLUDE_AUTODIFF_COMPUTATIONGRAPH_H
 
 #include <map>
-#include <mutex>
+#include <memory>
 #include <set>
 #include <string>
-#include <vector>
 
+#include "AutoDiff/GraphHelpers/ForwardPassContext.h"
 #include "AutoDiff/GraphNodes.hpp"
+#include "MLCore/BasicTensor.h"
 
 namespace autoDiff
 {
 namespace detail
 {
-class ForwardPassContext;
-class BackwardPassContext;
 class BackwardPassContextsMap;
 } // namespace detail
 

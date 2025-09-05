@@ -1,23 +1,23 @@
 #include "MLCore/BasicTensor.h"
 
 #include <climits>
-#include <cstddef>
 #include <functional>
 #include <initializer_list>
 #include <iomanip>
 #include <iterator>
-#include <ostream>
-#include <stdexcept>
+#include <numeric>
+#include <sstream>
+#include <string>
 #include <tuple>
+#include <typeinfo>
 #include <utility>
 #include <vector>
 
 #include <LoggingLib/LoggingLib.hpp>
 #include <fmt/format.h>
 
-#include "MLCore/TensorInitializers/ITensorInitializer.hpp"
+#include "MLCore/TensorInitializers/ITensorInitializer.hpp" // IWYU pragma: keep
 #include "MLCore/TensorOperationsImpl.h"
-#include "MLCore/Utilities.h"
 #include "MLCore/UtilitiesImpl.h"
 
 namespace mlCore

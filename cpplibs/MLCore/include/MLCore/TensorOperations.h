@@ -1,7 +1,9 @@
 #ifndef MLCORE_INCLUDE_MLCORE_TENSOROPERATIONS_H
 #define MLCORE_INCLUDE_MLCORE_TENSOROPERATIONS_H
 
-#include <cmath>
+#include <vector> // IWYU pragma: keep
+
+#include <stddef.h>
 
 #include "MLCore/BasicTensor.h"
 #include "MLCore/Utilities.h"

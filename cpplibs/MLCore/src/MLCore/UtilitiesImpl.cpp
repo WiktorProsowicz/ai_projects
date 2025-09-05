@@ -1,7 +1,12 @@
 #include "MLCore/UtilitiesImpl.h"
 
+#include <algorithm>
+#include <iterator>
+
 #include <LoggingLib/LoggingLib.hpp>
 #include <fmt/format.h>
+
+#include "MLCore/Utilities.h"
 
 namespace mlCore::detail
 {
@@ -97,24 +102,24 @@ void assertCanMatmulTensors(const std::vector<size_t>& lhsShape, const std::vect
 	}
 }
 
-std::pair<std::vector<size_t>, std::vector<size_t>> padShapes(const std::vector<size_t>& shape1,
-															  const std::vector<size_t>& shape2)
-{
-	const size_t biggerSize = std::max(shape1.size(), shape2.size());
+// std::pair<mlCore::TensorShape, mlCore::TensorShape> padShapes(const std::vector<size_t>& shape1,
+// 															  const std::vector<size_t>& shape2)
+// {
+// 	const auto biggerSize = std::max(shape1.size(), shape2.size());
 
-	std::vector<size_t> paddedShape1(biggerSize, 1);
-	std::vector<size_t> paddedShape2(biggerSize, 1);
+// 	std::vector<size_t> paddedShape1(biggerSize, 1);
+// 	std::vector<size_t> paddedShape2(biggerSize, 1);
 
-	std::copy(shape1.cbegin(),
-			  shape1.cend(),
-			  std::next(paddedShape1.begin(), static_cast<ptrdiff_t>(biggerSize - shape1.size())));
+// 	std::copy(shape1.cbegin(),
+// 			  shape1.cend(),
+// 			  std::next(paddedShape1.begin(), static_cast<ptrdiff_t>(biggerSize - shape1.size())));
 
-	std::copy(shape2.cbegin(),
-			  shape2.cend(),
-			  std::next(paddedShape2.begin(), static_cast<ptrdiff_t>(biggerSize - shape2.size())));
+// 	std::copy(shape2.cbegin(),
+// 			  shape2.cend(),
+// 			  std::next(paddedShape2.begin(), static_cast<ptrdiff_t>(biggerSize - shape2.size())));
 
-	return {paddedShape1, paddedShape2};
-}
+// 	return {paddedShape1, paddedShape2};
+// }
 
 std::vector<size_t> getReturnShapeForMatmul(const std::vector<size_t>& lhsPaddedShape,
 											const std::vector<size_t>& rhsPaddedShape)

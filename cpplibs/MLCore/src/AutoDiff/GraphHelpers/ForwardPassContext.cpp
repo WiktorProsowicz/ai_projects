@@ -1,5 +1,6 @@
 #include "AutoDiff/GraphHelpers/ForwardPassContext.h"
 
+#include <numeric>
 #include <ranges>
 #include <shared_mutex>
 

@@ -1,9 +1,18 @@
 #include "Layers/SequentialLayer.h"
 
 #include <algorithm>
+#include <cctype>
 #include <filesystem>
+#include <functional>
+#include <memory>
 #include <ranges>
 #include <set>
+#include <utility>
+
+#include <fmt/format.h>
+#include <fmt/ranges.h>
+
+#include "LoggingLib/LoggingLib.hpp"
 
 namespace layers
 {
@@ -173,8 +182,7 @@ std::string sanitizeLayerName(const std::string& name)
 {
 	std::string sanitizedName = name;
 
-	std::replace_if(
-		sanitizedName.begin(), sanitizedName.end(), [](char c) { return !std::isalnum(c); }, '_');
+	std::replace_if(sanitizedName.begin(), sanitizedName.end(), [](char c) { return !std::isalnum(c); }, '_');
 
 	return sanitizedName;
 }

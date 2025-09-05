@@ -1,14 +1,11 @@
 #ifndef MLCORE_UTILITIES_H
 #define MLCORE_UTILITIES_H
 
-#include <iterator>
-#include <limits>
-#include <sstream>
+#include <utility>
 #include <variant>
 #include <vector>
 
-#include <fmt/format.h>
-#include <fmt/ranges.h>
+#include <stddef.h>
 
 namespace mlCore
 {

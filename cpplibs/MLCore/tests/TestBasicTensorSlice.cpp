@@ -6,10 +6,29 @@
  * by Wiktor Prosowicz
  **********************/
 
+#include <array>
+#include <compare>
+#include <initializer_list>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <tuple>
+#include <utility>
+#include <variant>
+#include <vector>
+
 #include <MLCore/BasicTensor.h>
 #include <MLCore/BasicTensorSlice.h>
 #include <MLCore/TensorOperations.h>
+#include <bits/std_abs.h>
+#include <fmt/format.h>
+#include <fmt/ranges.h>
 #include <gtest/gtest.h>
+#include <stddef.h>
+
+#include "MLCore/SlicedTensorIterator.hpp"
+#include "MLCore/TensorIterator.hpp"
+#include "MLCore/Utilities.h"
 
 namespace
 {

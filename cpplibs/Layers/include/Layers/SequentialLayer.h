@@ -1,7 +1,13 @@
 #ifndef LAYERS_INCLUDE_LAYERS_SEQUENTIALLAYER_H
 #define LAYERS_INCLUDE_LAYERS_SEQUENTIALLAYER_H
 
+#include <map>
+#include <string>
+#include <vector>
+
+#include "AutoDiff/GraphNodes.hpp"
 #include "Layers/BaseLayer.h"
+#include "MLCore/BasicTensor.h"
 
 namespace layers
 {

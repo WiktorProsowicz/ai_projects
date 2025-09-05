@@ -1,6 +1,9 @@
 #ifndef DATASETS_INCLUDE_BATCHPROVIDERS_BATCHPROVIDERS_H
 #define DATASETS_INCLUDE_BATCHPROVIDERS_BATCHPROVIDERS_H
 
+#include <string>
+#include <vector>
+
 #include "BatchProviders/IBatchProvider.hpp"
 
 namespace datasets::batchProviders

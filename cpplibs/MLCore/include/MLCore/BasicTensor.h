@@ -2,25 +2,35 @@
 #define MLCORE_BASICTENSOR_H
 
 #include <algorithm>
-#include <functional>
+#include <initializer_list>
+#include <iosfwd>
+#include <iterator>
 #include <memory>
-#include <numeric>
+#include <utility>
 #include <vector>
 
 #include <LoggingLib/LoggingLib.hpp>
+#include <stddef.h>
 
 #include "MLCore/BasicTensorSlice.h"
-#include "MLCore/TensorInitializers/ITensorInitializer.hpp"
 #include "MLCore/TensorIterator.hpp"
-#include "MLCore/Utilities.h"
 
 namespace mlCore
 {
-namespace detail
+namespace tensorInitializers
 {
 template <typename ValueType>
-class TensorOperationsImpl;
-} // namespace detail
+class ITensorInitializer;
+} // namespace tensorInitializers
+
+template <typename ValueType>
+class BasicTensorOperations; // IWYU pragma: keep
+
+namespace detail
+{
+template <typename OperationsImplType>
+class TensorOperationsImpl; // IWYU pragma: keep
+}
 
 /**
  * @brief Type representing tensor's shape.
@@ -54,7 +64,8 @@ public:
 
 	/**
 	 * @brief Constructs a new scalar-type tensor with initial value. Useful as a conversion from ValueType.
-	 * Example:
+	 *
+	 * @example
 	 *
 	 * tensor : BasicTensor<double>
 	 *

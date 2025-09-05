@@ -4,11 +4,15 @@
 // __C++ standard headers__
 #include <cstdio>
 #include <functional>
+#include <memory>
 #include <ostream>
+#include <ranges>
 #include <span>
+#include <utility>
 #include <vector>
 
 #include "MLCore/SlicedTensorIterator.hpp"
+#include "MLCore/Utilities.h"
 
 namespace mlCore
 {

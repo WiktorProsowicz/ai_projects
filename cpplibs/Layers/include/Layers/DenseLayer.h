@@ -1,8 +1,15 @@
 #ifndef LAYER_INCLUDE_LAYER_DENSELAYER_H
 #define LAYER_INCLUDE_LAYER_DENSELAYER_H
 
+#include <string>
+#include <vector>
+
+#include <stddef.h>
+
+#include "AutoDiff/GraphNodes.hpp"
 #include "Layers/BaseLayer.h"
 #include "LayersModules/IActivationFactory.hpp"
+#include "MLCore/BasicTensor.h"
 
 namespace layers
 {

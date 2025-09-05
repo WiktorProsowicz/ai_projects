@@ -1,7 +1,14 @@
 #ifndef LAYERS_INCLUDE_LAYERS_BASELAYER_H
 #define LAYERS_INCLUDE_LAYERS_BASELAYER_H
 
+#include <memory>
+#include <string>
+#include <vector>
+
 #include <Interfaces/ILayer.hpp>
+
+#include "AutoDiff/GraphNodes.hpp"
+#include "MLCore/BasicTensor.h"
 
 namespace layers
 {

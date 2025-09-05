@@ -1,7 +1,15 @@
+#include <filesystem>
+#include <memory>
+#include <vector>
+
 #include <Layers/DenseLayer.h>
 #include <LayersModules/Activations.h>
+#include <gtest/gtest.h>
 
+#include "AutoDiff/GraphNodes.hpp"
+#include "Layers/BaseLayer.h"
 #include "LayersTestFixture.hpp"
+#include "MLCore/BasicTensor.h"
 #include "Utilities.hpp"
 
 namespace

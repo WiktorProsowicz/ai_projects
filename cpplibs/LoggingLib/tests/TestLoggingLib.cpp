@@ -12,7 +12,7 @@
 #include <vector>
 
 #include <LoggingLib/LoggingLib.hpp>
-#include <fmt/core.h>
+#include <fmt/format.h>
 #include <gtest/gtest.h>
 
 namespace

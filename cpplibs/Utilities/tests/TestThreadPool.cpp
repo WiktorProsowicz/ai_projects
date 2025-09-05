@@ -6,12 +6,18 @@
  * by Wiktor Prosowicz
  **********************/
 
-#include <chrono>
+#include <algorithm>
+#include <compare>
+#include <thread>
+#include <utility>
+#include <vector>
 
 #include <LoggingLib/LoggingLib.hpp>
 #include <Utilities/ThreadPool.h>
+#include <bits/chrono.h>
 #include <fmt/format.h>
 #include <gtest/gtest.h>
+#include <stddef.h>
 
 namespace
 {
@@ -122,12 +128,11 @@ protected:
 			[](const auto& task1, const auto& task2)
 			{ return task1.getStart().time_since_epoch() < task2.getStart().time_since_epoch(); });
 
-		auto maxTime =
-			std::max_element(tasks.cbegin(),
-							 tasks.cend(),
-							 [](const auto& task1, const auto& task2) {
-								 return task1.getEnd().time_since_epoch() < task2.getEnd().time_since_epoch();
-							 });
+		auto maxTime = std::max_element(
+			tasks.cbegin(),
+			tasks.cend(),
+			[](const auto& task1, const auto& task2)
+			{ return task1.getEnd().time_since_epoch() < task2.getEnd().time_since_epoch(); });
 
 		return std::chrono::duration_cast<std::chrono::milliseconds>(maxTime->getEnd() - minTime->getStart())
 			.count();

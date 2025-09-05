@@ -6,10 +6,21 @@
  * by Wiktor Prosowicz
  **********************/
 
+#include <concepts>
+#include <iterator>
+#include <memory>
+#include <stdexcept>
+#include <variant>
+#include <vector>
+
+#include <MLCore/BasicTensor.h>
+#include <MLCore/TensorInitializers/ITensorInitializer.hpp>
 #include <MLCore/TensorInitializers/RangeTensorInitializer.hpp>
+#include <MLCore/TensorIterator.hpp>
 #include <MLCore/TensorOperations.h>
 #include <MLCore/Utilities.h>
 #include <gtest/gtest.h>
+#include <stddef.h>
 
 /*****************************
  *
@@ -19,9 +30,7 @@
 
 template <typename OperType>
 concept UnaryTensorOperation = requires(OperType oper, const mlCore::Tensor& tensor) {
-	{
-		oper(tensor)
-	} -> std::same_as<mlCore::Tensor>;
+	{ oper(tensor) } -> std::same_as<mlCore::Tensor>;
 };
 
 struct UnaryTestParams
@@ -32,9 +41,7 @@ struct UnaryTestParams
 
 template <typename OperType>
 concept BinaryTensorOperation = requires(OperType oper, const mlCore::Tensor& tensor) {
-	{
-		oper(tensor, tensor)
-	} -> std::same_as<mlCore::Tensor>;
+	{ oper(tensor, tensor) } -> std::same_as<mlCore::Tensor>;
 };
 
 struct BinaryTestParams
@@ -361,10 +368,8 @@ TEST_F(TestTensorOperations, CorrectlyReduceAddsTensor)
 	const UnaryTestParams params{.tensor = {{3, 2, 2}, {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 11}},
 								 .expectedOutput = {{2, 2}, {15, 18, 21, 23}}};
 
-	_performUnaryOperationAndCompare(params,
-									 [](const auto& tensor) {
-										 return mlCore::TensorOperations::reduceAdd(tensor, {2, 2});
-									 });
+	_performUnaryOperationAndCompare(
+		params, [](const auto& tensor) { return mlCore::TensorOperations::reduceAdd(tensor, {2, 2}); });
 }
 
 TEST_F(TestTensorOperations, CorrectlyStacksTensors)

@@ -1,13 +1,16 @@
 #include "MLCore/TensorOperations.h"
 
 #include <cmath>
-#include <cstddef>
+#include <functional>
 #include <iterator>
 #include <map>
+#include <numeric>
+#include <utility>
+#include <variant>
 #include <vector>
 
 #include <LoggingLib/LoggingLib.hpp>
-#include <fmt/core.h>
+#include <fmt/format.h>
 
 #include "MLCore/TensorOperationsImpl.h"
 #include "MLCore/Utilities.h"

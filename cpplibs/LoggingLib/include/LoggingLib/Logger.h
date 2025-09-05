@@ -1,12 +1,15 @@
 #ifndef LOGGINGLIB_INCLUDE_LOGGINGLIB_LOGGER_H
 #define LOGGINGLIB_INCLUDE_LOGGINGLIB_LOGGER_H
 
-#include <functional>
+#include <stdint.h>
 #include <iostream>
 #include <map>
+#include <memory>
 #include <mutex>
+#include <string>
 
 #include "StreamWrappers/BaseStreamWrapper.hpp"
+#include "StreamWrappers/IStreamWrapper.hpp"
 
 namespace loggingLib
 {

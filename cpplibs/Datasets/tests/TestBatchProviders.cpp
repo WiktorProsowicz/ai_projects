@@ -1,5 +1,14 @@
+#include <algorithm>
+#include <memory>
+#include <string>
+#include <vector>
+
 #include <BatchProviders/SerializedTensorsProvider.h>
+#include <MLCore/BasicTensor.h>
+#include <fmt/format.h>
+#include <fmt/ranges.h>
 #include <gtest/gtest.h>
+#include <stddef.h>
 
 namespace
 {
@@ -8,8 +17,9 @@ namespace
 {
 	if(tensor1.shape() != tensor2.shape())
 	{
-		return ::testing::AssertionFailure() << fmt::format(
-				   "Shapes of the tensors are different: {} vs {}", tensor1.shape(), tensor2.shape());
+		return ::testing::AssertionFailure() << fmt::format("Shapes of the tensors are different: {} vs {}",
+															fmt::join(tensor2.shape(), ","),
+															fmt::join(tensor2.shape(), ","));
 	}
 
 	if(!std::equal(tensor1.begin(), tensor1.end(), tensor2.begin()))

@@ -1,6 +1,9 @@
 #include "BatchProviders/BatchProviders.h"
 
+#include <memory>
+
 #include "BatchProviders/SerializedTensorsProvider.h"
+#include "LoggingLib/LoggingLib.hpp"
 
 namespace datasets::batchProviders
 {

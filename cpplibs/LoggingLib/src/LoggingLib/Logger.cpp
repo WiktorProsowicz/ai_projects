@@ -3,11 +3,10 @@
 #include <iostream>
 #include <memory>
 #include <mutex>
-#include <ostream>
 #include <stdexcept>
 #include <string>
 
-#include <fmt/core.h>
+#include <fmt/format.h>
 
 #include "StreamWrappers/BaseStreamWrapper.hpp"
 

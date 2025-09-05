@@ -1,9 +1,17 @@
 #include "AutoDiff/Operations.h"
 
+#include <algorithm>
+#include <cmath>
 #include <memory>
+#include <stdexcept>
+#include <utility>
+#include <vector>
 
 #include "AutoDiff/Operators/MatMulOp.hpp"
 #include "AutoDiff/Operators/PlainChainRuleOp.hpp"
+#include "LoggingLib/LoggingLib.hpp"
+#include "MLCore/BasicTensor.h"
+#include "MLCore/TensorIterator.hpp"
 #include "MLCore/TensorOperations.h"
 #include "MLCore/UtilitiesImpl.h"
 
@@ -23,9 +31,8 @@ OperatorPtr add(const NodePtr& lhsNode, const NodePtr& rhsNode)
 	const auto fFunc = [](const std::vector<NodePtr>& inputs)
 	{ return inputs.front()->getValue() + inputs.back()->getValue(); };
 
-	const auto bFunc = [](const std::vector<NodePtr>&) {
-		return std::vector{mlCore::Tensor{1.0}, mlCore::Tensor{1.0}};
-	};
+	const auto bFunc = [](const std::vector<NodePtr>&)
+	{ return std::vector{mlCore::Tensor{1.0}, mlCore::Tensor{1.0}}; };
 
 	return updateOp(std::make_shared<detail::PlainChainRuleOp>(std::vector{lhsNode, rhsNode}, fFunc, bFunc));
 }
@@ -35,9 +42,8 @@ OperatorPtr subtract(const NodePtr& lhsNode, const NodePtr& rhsNode)
 	const auto fFunc = [](const std::vector<NodePtr>& inputs)
 	{ return inputs.front()->getValue() - inputs.back()->getValue(); };
 
-	const auto bFunc = [](const std::vector<NodePtr>&) {
-		return std::vector{mlCore::Tensor{1.0}, mlCore::Tensor{-1.0}};
-	};
+	const auto bFunc = [](const std::vector<NodePtr>&)
+	{ return std::vector{mlCore::Tensor{1.0}, mlCore::Tensor{-1.0}}; };
 
 	return updateOp(std::make_shared<detail::PlainChainRuleOp>(std::vector{lhsNode, rhsNode}, fFunc, bFunc));
 }

@@ -5,6 +5,7 @@
 #include <list>
 #include <ostream>
 #include <span>
+#include <sstream>
 #include <string>
 #include <vector>
 

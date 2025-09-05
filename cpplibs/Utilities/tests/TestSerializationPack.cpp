@@ -6,12 +6,14 @@
  * by Wiktor Prosowicz
  **********************/
 
-#include <fstream>
+#include <compare>
 #include <sstream>
+#include <string>
+#include <vector>
 
 #include <Utilities/BinarySerialization.hpp>
-#include <fmt/format.h>
 #include <gtest/gtest.h>
+#include <stdint.h>
 
 /*****************************
  *

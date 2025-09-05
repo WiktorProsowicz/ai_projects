@@ -1,11 +1,16 @@
 #include "Layers/DenseLayer.h"
 
+#include <memory>
+#include <utility>
+
 #include <AutoDiff/Operations.h>
 #include <LoggingLib/LoggingLib.hpp>
 #include <MLCore/TensorIO/TensorsSerializer.h>
 #include <MLCore/TensorInitializers/GaussianInitializer.hpp>
+#include <fmt/format.h>
 
 #include "LayersModules/IActivationFactory.hpp"
+#include "MLCore/Utilities.h"
 
 namespace layers
 {

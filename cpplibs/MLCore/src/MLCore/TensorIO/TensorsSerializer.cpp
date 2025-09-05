@@ -1,8 +1,18 @@
 #include "MLCore/TensorIO/TensorsSerializer.h"
 
+#include <algorithm>
 #include <filesystem>
+#include <functional>
+#include <numeric>
+#include <utility>
 
 #include <Utilities/BinarySerialization.hpp>
+#include <fmt/format.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include "LoggingLib/LoggingLib.hpp"
+#include "MLCore/TensorIterator.hpp"
 
 namespace mlCore::io
 {

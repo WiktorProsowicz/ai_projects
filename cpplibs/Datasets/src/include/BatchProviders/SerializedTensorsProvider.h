@@ -1,11 +1,16 @@
 #ifndef DATASETS_SRC_INCLUDE_BATCHPROVIDERS_SERIALIZEDTENSORSPROVIDER_H
 #define DATASETS_SRC_INCLUDE_BATCHPROVIDERS_SERIALIZEDTENSORSPROVIDER_H
 
+#include <memory>
 #include <optional>
+#include <string>
+#include <vector>
 
 #include <MLCore/TensorIO/TensorsSerializer.h>
+#include <stddef.h>
 
 #include "BatchProviders/IBatchProvider.hpp"
+#include "MLCore/BasicTensor.h"
 
 namespace datasets::batchProviders
 {

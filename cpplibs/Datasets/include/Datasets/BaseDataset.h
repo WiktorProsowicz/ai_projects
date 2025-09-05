@@ -1,9 +1,14 @@
 #ifndef DATASETS_INCLUDE_DATASETS_BASEDATASET_H
 #define DATASETS_INCLUDE_DATASETS_BASEDATASET_H
 
+#include <memory>
+#include <vector>
+
 #include <Interfaces/IDataset.hpp>
+#include <stddef.h>
 
 #include "BatchProviders/IBatchProvider.hpp"
+#include "MLCore/BasicTensor.h"
 
 namespace datasets
 {

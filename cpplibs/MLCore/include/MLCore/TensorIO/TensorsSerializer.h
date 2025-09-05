@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <memory>
+#include <string>
 #include <vector>
 
 #include "MLCore/BasicTensor.h"

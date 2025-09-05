@@ -1,15 +1,9 @@
 #include "AutoDiff/ComputationGraph.h"
 
-#include <algorithm>
-#include <cstddef>
-#include <functional>
-#include <iterator>
 #include <map>
 #include <memory>
 #include <set>
 #include <string>
-#include <utility>
-#include <vector>
 
 #include <LoggingLib/LoggingLib.hpp>
 
