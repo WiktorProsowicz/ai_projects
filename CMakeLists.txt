@@ -73,6 +73,7 @@ endif()
 
 if (ENABLE_IWYU)
     find_program(iwyu_path NAMES "include-what-you-use" REQUIRED)
+    SET(IWYU_MAPPING_FILE "${CMAKE_SOURCE_DIR}/setuputils/iwyu_mapping.imp")
 endif()
 
 # ----------------------------------------------------------------------------

@@ -133,6 +133,7 @@ function(aiprojects_setup_iwyu_for_target TARGET)
 
     set(iwyu_options
         "-Xiwyu" "--quoted_includes_first"
+        "-Xiwyu" "--mapping_file=${IWYU_MAPPING_FILE}"
         "-w"
     )
 
