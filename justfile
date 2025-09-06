@@ -1,5 +1,9 @@
 set positional-arguments
 
+# ---------------------------------------------------------------------------
+# Standard recipes.
+# ---------------------------------------------------------------------------
+
 # Set up an environment for installing dependencies and running scripts.
 setup_venv:
     uv python install 3.12
@@ -9,11 +13,6 @@ setup_venv:
 install_build_tools:
     @echo "Installing project dependencies..."
     uv pip install -r pyproject.toml
-
-# Install development dependencies (e.g. linters, formatters).
-install_dev_tools:
-    @echo "Installing development dependencies..."
-    uv pip install -r pyproject.toml --extra dev
 
 # Install tools for running Python scripts.
 install_py_tools:
@@ -36,21 +35,34 @@ clean_project:
     @echo "Cleaning the project..."
     rm -rf build/
 
+# ---------------------------------------------------------------------------
+# Development recipes.
+# ---------------------------------------------------------------------------
+
+# Install development dependencies (e.g. linters, formatters).
+dev_install_dev_tools:
+    @echo "Installing development dependencies..."
+    uv pip install -r pyproject.toml --extra dev
+
 # Copy .vscode settings template to the main project path.
-setup_vscode_settings:
+dev_setup_vscode_settings:
     @echo "Setting up VSCode settings..."
     cp setuputils/.vscode/settings.json .vscode/settings.json
 
+# ---------------------------------------------------------------------------
+# CI recipes.
+# ---------------------------------------------------------------------------
+
 # Run tests using ctest.
-run_tests:
+ci_run_tests:
     @echo "Running tests..."
     uv run ctest --test-dir build --output-on-failure
 
 # Run static checks for repository, such as pre-commit hooks and clang-tidy.
-run_static_checks file_regex="":
+ci_run_static_checks:
     #!/usr/bin/env bash
 
     echo "Running pre-commit checks..."
 
-    uv run pre-commit run --all-files || exit 1
+    uv run pre-commit run --all-files
 
