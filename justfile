@@ -50,25 +50,7 @@ run_tests:
 run_static_checks file_regex="":
     #!/usr/bin/env bash
 
-    echo "Running static checks..."
+    echo "Running pre-commit checks..."
 
-    uv run pre-commit run --all-files
+    uv run pre-commit run --all-files || exit 1
 
-    files_for_tidy=$(sed -n \
-                    's/.*"file": *"\([^"]*\/cpplibs\/[^"]*\)".*/\1/p' \
-                    build/compile_commands.json)
-
-    if [[ -n "$1" ]]; then
-        files_for_tidy=$(printf '%s\n' $files_for_tidy | grep -E "$1")
-    fi
-
-    echo "Running clang-tidy checks..."
-
-    echo "----------------------------"
-    echo "Files for clang-tidy:"
-    printf '%s\n' $files_for_tidy
-    echo "----------------------------"
-
-    uv run clang-tidy -p build --config-file=setuputils/.clang-tidy \
-        --use-color -extra-arg=-Wno-unknown-warning-option \
-        $files_for_tidy

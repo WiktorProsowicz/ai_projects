@@ -10,6 +10,7 @@ project(ai_projects VERSION 1.0.0 LANGUAGES CXX)
 option(BUILD_TESTS "Build test executables." OFF)
 option(ENABLE_TRACY "Enable Tracy profiler." OFF)
 option(ENABLE_IWYU "Enable include-what-you-use compilation checks" OFF)
+option(ENABLE_CLANG_TIDY "Enable clang-tidy static analysis." OFF)
 
 # ----------------------------------------------------------------------------
 # Set CMake policies.
@@ -74,6 +75,15 @@ endif()
 if (ENABLE_IWYU)
     find_program(iwyu_path NAMES "include-what-you-use" REQUIRED)
     SET(IWYU_MAPPING_FILE "${CMAKE_SOURCE_DIR}/setuputils/iwyu_mapping.imp")
+endif()
+
+# ----------------------------------------------------------------------------
+# Enable include-what-you-use if requested.
+# ----------------------------------------------------------------------------
+
+if (ENABLE_CLANG_TIDY)
+    find_program(clang_tidy_path NAMES "clang-tidy" REQUIRED)
+    set(CLANG_TIDY_CONFIG_FILE "${CMAKE_SOURCE_DIR}/setuputils/.clang-tidy")
 endif()
 
 # ----------------------------------------------------------------------------

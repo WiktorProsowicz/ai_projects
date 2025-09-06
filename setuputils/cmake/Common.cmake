@@ -39,6 +39,10 @@ function(aiprojects_add_library)
         aiprojects_setup_iwyu_for_target(${LIBRARY_NAME})
     endif()
 
+    if(ENABLE_CLANG_TIDY)
+        aiprojects_setup_clang_tidy_for_target(${LIBRARY_NAME})
+    endif()
+
     # adding executable
     add_executable_for_lib()
 
@@ -64,6 +68,10 @@ macro(add_executable_for_lib)
 
         if(ENABLE_IWYU)
             aiprojects_setup_iwyu_for_target(${PROJECT_NAME}Executable)
+        endif()
+
+        if(ENABLE_CLANG_TIDY)
+            aiprojects_setup_clang_tidy_for_target(${PROJECT_NAME}Executable)
         endif()
     endif()
 endmacro()
@@ -140,6 +148,21 @@ function(aiprojects_setup_iwyu_for_target TARGET)
     set_property(TARGET ${TARGET} PROPERTY CXX_INCLUDE_WHAT_YOU_USE "${iwyu_path};${iwyu_options}")
 
 endfunction()
+
+# ********************************************************************
+#  Enables clang-tidy checks for the given target if clang_tidy_path is set.
+# ********************************************************************
+function(aiprojects_setup_clang_tidy_for_target TARGET)
+
+    set(clang_tidy_options
+        "--use-color"
+        "--config-file" "${CLANG_TIDY_CONFIG_FILE}"
+        "-extra-arg" "-Wno-unknown-warning-option"
+    )
+
+    set_property(TARGET ${TARGET} PROPERTY CXX_CLANG_TIDY "${clang_tidy_path};${clang_tidy_options}")
+endfunction()
+
 
 # ***********************************************
 # Used for building libraries and executables
