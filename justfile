@@ -53,6 +53,11 @@ dev_setup_vscode_settings:
 # CI recipes.
 # ---------------------------------------------------------------------------
 
+# Install tools for running CI scripts.
+ci_install_ci_tools:
+    @echo "Installing CI tools..."
+    uv pip install -r pyproject.toml --extra ci
+
 # Run tests using ctest.
 ci_run_tests:
     @echo "Running tests..."
@@ -66,3 +71,10 @@ ci_run_static_checks:
 
     uv run pre-commit run --all-files
 
+ci_run_clang_tidy:
+    just --justfile {{justfile()}} build_project -DENABLE_CLANG_TIDY=ON
+
+ci_run_iwyu_checks:
+    just --justfile {{justfile()}} build_project -DENABLE_IWYU=ON | tee /tmp/ci_iwyu_output
+    grep -E "Warning: include-what-you-use reported diagnostics:" /tmp/ci_iwyu_output && exit 1
+    
