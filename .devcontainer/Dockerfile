@@ -5,18 +5,33 @@
 # environment without installing anything locally on the system.
 # ------------------------------------------------------------------------
 
-FROM mcr.microsoft.com/devcontainers/base:noble
+FROM ubuntu:noble
+SHELL ["/bin/bash", "-c"]
 ARG DEBIAN_FRONTEND=noninteractive
+
+RUN if id ubuntu &>/dev/null; then \
+    userdel -r ubuntu || true; \
+    groupdel ubuntu || true; \
+    fi
+
+RUN groupadd -g 1000 devcontainer \
+    && useradd devcontainer -u 1000 -g 1000 -ms /bin/bash \
+    && echo "devcontainer:devcontainer" | chpasswd \
+    && usermod -a -G sudo devcontainer
 
 # Installing the main packages required for a new project's user
 # They're necessary to correctly use the project's content
 RUN apt update && \
     # Main dependencies
-    apt update && apt install -y \
-        just gcc-14 g++-14 wget ccache
+    apt install -y \
+    just gcc-14 g++-14 wget ccache sudo
 
 RUN apt-get update && \
-    apt-get install -y iwyu
+    apt-get install -y iwyu cppcheck
 
-USER vscode
+RUN chown -R devcontainer:devcontainer /home/devcontainer
+
+USER devcontainer
+WORKDIR /home/devcontainer/workspace
+
 RUN wget -qO- https://astral.sh/uv/install.sh | sh
