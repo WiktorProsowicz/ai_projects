@@ -13,6 +13,7 @@
   { include: [ "<signal.h>", public, "<csignal>", public ] },
   { include: [ "<stdarg.h>", public, "<cstdarg>", public ] },
   { include: [ "<stddef.h>", public, "<cstddef>", public ] },
+  { include: [ "<stdint.h>", public, "<cstdint>", public ] },
   { include: [ "<stdio.h>", public, "<cstdio>", public ] },
   { include: [ "<stdlib.h>", public, "<cstdlib>", public ] },
   { include: [ "<string.h>", public, "<cstring>", public ] },
@@ -22,4 +23,3 @@
 
   { symbol: [ "std::vector", private, "<vector>", public ]},
 ]
-

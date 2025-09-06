@@ -55,6 +55,8 @@ cmake_print_variables(
     BUILD_SHARED_LIBS
     BUILD_TESTS
     ENABLE_TRACY
+    ENABLE_IWYU
+    ENABLE_CLANG_TIDY
 )
 
 # ----------------------------------------------------------------------------
