@@ -1,6 +1,7 @@
 #ifndef MLCORE_UTILITIES_H
 #define MLCORE_UTILITIES_H
 
+#include <cstdint>
 #include <utility>
 #include <variant>
 #include <vector>
@@ -64,21 +65,21 @@ std::vector<size_t> getOutputShapeForMatmul(const std::vector<size_t>& lhsShape,
  * const mlCore::Tensor tensor(mlCore::TensorShape{10});
  *
  * // Although the tensor is only one-dimensional, a (1, 10) matrix is created.
- * const auto transposed = mlCore::TensorOperations::transpose(tensor, mlCore::MatrixSpec::ColumnVector);
+ * const auto transposed = mlCore::TensorOperations::transpose(tensor, mlCore::MatrixSpec::COLUMN_VECTOR);
  *
  * // The same applies for tensors having more than one dimension.
  * // e.g. a (batch_size, 10) tensor may be treated as a batch_size * (1, 10) row vectors.
  */
-enum class MatrixSpec
+enum class MatrixSpec : uint8_t
 {
 	/// Treat the last dimension as a column vector. (As if there was a '1' at the end of the
 	/// shape.)
-	ColumnVector,
+	COLUMN_VECTOR,
 	/// Treat the last dimension as a row vector. (As if there was a '1' before the last
 	/// dimension.)
-	RowVector,
+	ROW_VECTOR,
 	/// Leave the tensor as it is.
-	Default
+	DEFAULT
 };
 
 /// @brief Represents an element or a slice of a tensor that is being created e.g. via a tensor literal.

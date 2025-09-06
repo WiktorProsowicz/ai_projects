@@ -1,7 +1,6 @@
 #include "Datasets/BaseDataset.h"
 
 #include <algorithm>
-#include <numeric>
 #include <random>
 #include <utility>
 
@@ -14,7 +13,7 @@ namespace
 std::vector<size_t> generateIndices(size_t size)
 {
 	std::vector<size_t> indices(size);
-	std::iota(indices.begin(), indices.end(), 0);
+	std::ranges::iota(indices.begin(), indices.end(), 0);
 	return indices;
 }
 } // namespace
@@ -38,7 +37,8 @@ std::vector<mlCore::Tensor> BaseDataset::getNextBatch()
 
 	const auto firstIndex = _currentBatchIndex * _batchSize;
 	const auto lastIndex = firstIndex + _batchSize;
-	std::vector<size_t> indices(_samplesIndices.cbegin() + firstIndex, _samplesIndices.cbegin() + lastIndex);
+	const std::vector<size_t> indices(_samplesIndices.cbegin() + static_cast<ptrdiff_t>(firstIndex),
+									  _samplesIndices.cbegin() + static_cast<ptrdiff_t>(lastIndex));
 
 	++_currentBatchIndex;
 

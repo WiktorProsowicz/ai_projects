@@ -30,7 +30,8 @@ SequentialLayer::SequentialLayer(std::string name, std::vector<BaseLayerPtr> lay
 		LOG_ERROR("Layers::SequentialLayer", "Sequential layer must have unique layers.");
 	}
 
-	if(std::any_of(_layers.cbegin(), _layers.cend(), [](const auto& layer) { return layer == nullptr; }))
+	if(std::ranges::any_of(
+		   _layers.cbegin(), _layers.cend(), [](const auto& layer) { return layer == nullptr; }))
 	{
 		LOG_ERROR("Layers::SequentialLayer", "Sequential layer must not have null layers.");
 	}
@@ -88,10 +89,10 @@ std::string SequentialLayer::getDescription() const
 {
 	constexpr const char* descriptionTemplate = R"({} (SequentialLayer) Layers: [{}])";
 
-	auto layersDescription = fmt::join(
+	const auto layersDescription = fmt::join(
 		_layers | std::views::transform([](const auto& layer) { return layer->getDescription(); }), ", ");
 
-	return fmt::format(descriptionTemplate, getName(), std::move(layersDescription));
+	return fmt::format(descriptionTemplate, getName(), layersDescription);
 }
 
 void SequentialLayer::build(const std::vector<mlCore::TensorShape>& inputShapes)
@@ -182,7 +183,8 @@ std::string sanitizeLayerName(const std::string& name)
 {
 	std::string sanitizedName = name;
 
-	std::replace_if(sanitizedName.begin(), sanitizedName.end(), [](char c) { return !std::isalnum(c); }, '_');
+	std::ranges::replace_if(
+		sanitizedName.begin(), sanitizedName.end(), [](char c) { return !std::isalnum(c); }, '_');
 
 	return sanitizedName;
 }

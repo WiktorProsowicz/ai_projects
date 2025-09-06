@@ -33,7 +33,7 @@ autoDiff::OperatorPtr DenseLayer::call(const std::vector<autoDiff::NodePtr>& inp
 	}
 
 	const auto output = autoDiff::ops::matmul(
-		_weights, inputs[0], mlCore::MatrixSpec::Default, mlCore::MatrixSpec::ColumnVector, true);
+		_weights, inputs[0], mlCore::MatrixSpec::DEFAULT, mlCore::MatrixSpec::COLUMN_VECTOR, true);
 
 	const auto biased = autoDiff::ops::add(output, _bias);
 
@@ -79,7 +79,7 @@ void DenseLayer::build(const std::vector<mlCore::TensorShape>& inputShapes)
 
 	const auto& inputShape = inputShapes[0];
 
-	if(inputShape.size() < 1)
+	if(inputShape.empty())
 	{
 		LOG_ERROR("Layers::DenseLayer", "The input shape must have at least one dimension.");
 	}

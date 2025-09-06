@@ -48,21 +48,22 @@ void GraphSerializer::_determineNodesLevels()
 	determineNodeDepth(_root, 0);
 
 	std::map<NodePtr, size_t> finalDepths;
-	std::transform(collectedDepths.cbegin(),
-				   collectedDepths.cend(),
-				   std::inserter(finalDepths, finalDepths.begin()),
-				   [](const auto& pair) { return std::make_pair(pair.first, *pair.second.rbegin()); });
+	std::ranges::transform(collectedDepths.cbegin(),
+						   collectedDepths.cend(),
+						   std::inserter(finalDepths, finalDepths.begin()),
+						   [](const auto& pair)
+						   { return std::make_pair(pair.first, *pair.second.rbegin()); });
 
 	const auto maximalDepth =
-		std::max_element(finalDepths.cbegin(),
-						 finalDepths.cend(),
-						 [](const auto& lhs, const auto& rhs) { return lhs.second < rhs.second; })
+		std::ranges::max_element(finalDepths.cbegin(),
+								 finalDepths.cend(),
+								 [](const auto& lhs, const auto& rhs) { return lhs.second < rhs.second; })
 			->second;
 
-	std::for_each(finalDepths.cbegin(),
-				  finalDepths.cend(),
-				  [this, &maximalDepth](const auto& pair)
-				  { _nodesLevels[pair.first] = maximalDepth - pair.second; });
+	std::ranges::for_each(finalDepths.cbegin(),
+						  finalDepths.cend(),
+						  [this, &maximalDepth](const auto& pair)
+						  { _nodesLevels[pair.first] = maximalDepth - pair.second; });
 }
 
 void GraphSerializer::_determineNodesConnections()
@@ -201,9 +202,9 @@ size_t GraphSerializer::_getMaxNodeLevel() const
 		return 0;
 	}
 
-	return std::max_element(_nodesLevels.cbegin(),
-							_nodesLevels.cend(),
-							[](const auto& lhs, const auto& rhs) { return lhs.second < rhs.second; })
+	return std::ranges::max_element(_nodesLevels.cbegin(),
+									_nodesLevels.cend(),
+									[](const auto& lhs, const auto& rhs) { return lhs.second < rhs.second; })
 		->second;
 }
 } // namespace autoDiff::detail

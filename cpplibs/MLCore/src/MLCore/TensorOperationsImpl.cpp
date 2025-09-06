@@ -3,13 +3,13 @@
 #include <algorithm>
 #include <cmath>
 #include <compare>
+#include <cstddef>
 #include <iterator>
 #include <string>
 #include <tuple>
 #include <vector>
 
 #include <fmt/format.h>
-#include <stddef.h>
 
 #include "LoggingLib/LoggingLib.hpp"
 #include "MLCore/BasicTensor.h"

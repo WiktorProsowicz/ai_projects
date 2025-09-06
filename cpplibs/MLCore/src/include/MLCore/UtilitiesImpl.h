@@ -2,6 +2,8 @@
 #define MLCORE_SRC_INCLUDE_MLCORE_UTILITIESIMPL_H
 
 #include <algorithm>
+#include <cstddef>
+#include <cstdint>
 #include <iterator>
 #include <string>
 #include <utility>
@@ -9,13 +11,12 @@
 
 #include <fmt/format.h>
 #include <fmt/ranges.h>
-#include <stddef.h>
 
 #include "MLCore/BasicTensor.h"
 
 namespace mlCore
 {
-enum class MatrixSpec;
+enum class MatrixSpec : std::uint8_t;
 } // namespace mlCore
 
 namespace mlCore::detail
@@ -42,7 +43,7 @@ std::string stringifyVector(const std::vector<T>& vector,
 }
 
 /// @brief Extends a given shape according to provided matrix specification.
-std::vector<size_t> applyMatSpecToShape(const std::vector<size_t>& shape, const MatrixSpec spec);
+std::vector<size_t> applyMatSpecToShape(const std::vector<size_t>& shape, MatrixSpec spec);
 
 /// @brief Checks if the input shape is a row or a column vector, i.e. has has the shape in the form (..., 1,
 /// n) or (..., n, 1).
@@ -68,13 +69,13 @@ inline std::pair<mlCore::TensorShape, mlCore::TensorShape> padShapes(const std::
 	std::vector<size_t> paddedShape1(biggerSize, 1);
 	std::vector<size_t> paddedShape2(biggerSize, 1);
 
-	std::copy(shape1.cbegin(),
-			  shape1.cend(),
-			  std::next(paddedShape1.begin(), static_cast<ptrdiff_t>(biggerSize - shape1.size())));
+	std::ranges::copy(shape1.cbegin(),
+					  shape1.cend(),
+					  std::next(paddedShape1.begin(), static_cast<ptrdiff_t>(biggerSize - shape1.size())));
 
-	std::copy(shape2.cbegin(),
-			  shape2.cend(),
-			  std::next(paddedShape2.begin(), static_cast<ptrdiff_t>(biggerSize - shape2.size())));
+	std::ranges::copy(shape2.cbegin(),
+					  shape2.cend(),
+					  std::next(paddedShape2.begin(), static_cast<ptrdiff_t>(biggerSize - shape2.size())));
 
 	return {paddedShape1, paddedShape2};
 }

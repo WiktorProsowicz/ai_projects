@@ -30,7 +30,7 @@ namespace detail
 {
 template <typename OperationsImplType>
 class TensorOperationsImpl; // IWYU pragma: keep
-}
+} // namespace detail
 
 /**
  * @brief Type representing tensor's shape.
@@ -94,7 +94,7 @@ public:
 	 *
 	 * @param shape Tensor's initial shape.
 	 */
-	BasicTensor(const TensorShape& shape);
+	BasicTensor(TensorShape shape);
 
 	/**
 	 * @brief Constructs tensor from shape and fills it with initial value.

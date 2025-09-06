@@ -29,14 +29,14 @@ public:
 	 *
 	 * @param name Name of the layer.
 	 */
-	BaseLayer(std::string name);
+	explicit BaseLayer(std::string name);
 
 	BaseLayer(const BaseLayer&) = delete;
 	BaseLayer(BaseLayer&&) = delete;
 	BaseLayer& operator=(const BaseLayer&) = delete;
 	BaseLayer& operator=(BaseLayer&&) = delete;
 
-	virtual ~BaseLayer() override = default;
+	~BaseLayer() override = default;
 
 	/**
 	 * @brief Initializes the layer's internal state.
@@ -68,14 +68,14 @@ public:
 	const std::string& getName() const;
 
 protected:
+	/// Sets the vlaue of the given weight and checks whether the shapes are compatible.
+	static void _setWeight(const autoDiff::VariablePtr& weight, mlCore::Tensor value);
+
 	/// Tells whether the layer has been built.
 	bool _isBuilt() const;
 
 	/// Sets the layer as built. This method should be used once the `build` method is called.
 	void _setBuilt();
-
-	/// Sets the vlaue of the given weight and checks whether the shapes are compatible.
-	void _setWeight(const autoDiff::VariablePtr& weight, mlCore::Tensor value);
 
 private:
 	std::string _name;

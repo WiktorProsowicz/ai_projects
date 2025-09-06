@@ -28,8 +28,8 @@ public:
 	 * dimension shall be trimmed.
 	 */
 	explicit MatMulOp(const std::vector<NodePtr>& inputs,
-					  mlCore::MatrixSpec lhsSpec = mlCore::MatrixSpec::Default,
-					  mlCore::MatrixSpec rhsSpec = mlCore::MatrixSpec::Default,
+					  mlCore::MatrixSpec lhsSpec = mlCore::MatrixSpec::DEFAULT,
+					  mlCore::MatrixSpec rhsSpec = mlCore::MatrixSpec::DEFAULT,
 					  bool avoidMatrixOutput = false)
 		: Operator(inputs)
 		, _lhsSpec(lhsSpec)
@@ -81,13 +81,13 @@ public:
 
 	std::vector<mlCore::Tensor> computeDerivative(const mlCore::Tensor& outerDerivative) const override
 	{
-		return computeDerivativeUniversal(outerDerivative, _getOuterDerivativeSpec());
+		return _computeDerivativeUniversal(outerDerivative, _getOuterDerivativeSpec());
 	}
 
 	std::vector<mlCore::Tensor> computeDirectDerivative() const override
 	{
-		return computeDerivativeUniversal(mlCore::Tensor(_originalOutputShape, 1.0),
-										  mlCore::MatrixSpec::Default);
+		return _computeDerivativeUniversal(mlCore::Tensor(_originalOutputShape, 1.0),
+										   mlCore::MatrixSpec::DEFAULT);
 	}
 
 private:
@@ -124,19 +124,20 @@ private:
 		{
 			if(_originalOutputShape[_originalOutputShape.size() - 1] == 1)
 			{
-				return mlCore::MatrixSpec::ColumnVector;
+				return mlCore::MatrixSpec::COLUMN_VECTOR;
 			}
 
-			return mlCore::MatrixSpec::RowVector;
+			return mlCore::MatrixSpec::ROW_VECTOR;
 		}
 
-		return mlCore::MatrixSpec::Default;
+		return mlCore::MatrixSpec::DEFAULT;
 	}
 
 	/// @brief Computes derivative in universal case where the `outerDerivative` is either the real outer
 	/// derivative or a '1's tensor.
-	std::vector<mlCore::Tensor> computeDerivativeUniversal(const mlCore::Tensor& outerDerivative,
-														   const mlCore::MatrixSpec outerDerivativeSpec) const
+	std::vector<mlCore::Tensor>
+	_computeDerivativeUniversal(const mlCore::Tensor& outerDerivative,
+								const mlCore::MatrixSpec outerDerivativeSpec) const
 	{
 		using TensorOps = mlCore::TensorOperations;
 		using MatSpec = mlCore::MatrixSpec;
@@ -147,21 +148,21 @@ private:
 		auto lhsDerivative = TensorOps::matmul(outerDerivative,
 											   TensorOps::transpose(rhs->getValue(), _rhsSpec),
 											   outerDerivativeSpec,
-											   MatSpec::Default);
+											   MatSpec::DEFAULT);
 
 		auto rhsDerivative = TensorOps::matmul(TensorOps::transpose(lhs->getValue(), _lhsSpec),
 											   outerDerivative,
-											   MatSpec::Default,
+											   MatSpec::DEFAULT,
 											   outerDerivativeSpec);
 
 		// Adjusting the shape of the derivatives to match the inputs' shapes.
 		{
-			if(_lhsSpec != mlCore::MatrixSpec::Default)
+			if(_lhsSpec != mlCore::MatrixSpec::DEFAULT)
 			{
 				lhsDerivative.reshape(lhs->getOutputShape());
 			}
 
-			if(_rhsSpec != mlCore::MatrixSpec::Default)
+			if(_rhsSpec != mlCore::MatrixSpec::DEFAULT)
 			{
 				rhsDerivative.reshape(rhs->getOutputShape());
 			}

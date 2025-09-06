@@ -95,7 +95,7 @@ void BackwardPassContext::_tryStoreDerivative(const NodePtr& node, const mlCore:
 	if(_params.differentiableNodes.contains(node))
 	{
 		const auto nodeShape = node->getOutputShape();
-		const auto derivativeShape = derivative.shape();
+		const auto& derivativeShape = derivative.shape();
 
 		if(!isShapeExtendableToAnother(nodeShape, derivativeShape) &&
 		   !isShapeExtendableToAnother(derivativeShape, nodeShape))
@@ -112,7 +112,7 @@ void BackwardPassContext::_tryStoreDerivative(const NodePtr& node, const mlCore:
 											   ? derivative
 											   : mlCore::TensorOperations::reduceAdd(derivative, nodeShape);
 
-		if(_params.gradients.find(node) == _params.gradients.end())
+		if(!_params.gradients.contains(node))
 		{
 			_params.gradients.emplace(node, std::move(derivativeToStore));
 		}
@@ -139,9 +139,9 @@ void BackwardPassContext::_processFromEntryPoint(const PropagationEntryPoint& en
 					  "Encountered number of derivatives different than number of inputs.");
 		}
 
-		if(std::find(_nodesForMultithreadedProcessing.cbegin(),
-					 _nodesForMultithreadedProcessing.cend(),
-					 castedOp) != _nodesForMultithreadedProcessing.cend())
+		if(std::ranges::find(_nodesForMultithreadedProcessing.cbegin(),
+							 _nodesForMultithreadedProcessing.cend(),
+							 castedOp) != _nodesForMultithreadedProcessing.cend())
 		{
 
 			for(size_t inputIdx = 0; inputIdx < castedOp->getInputs().size(); ++inputIdx)
@@ -153,7 +153,8 @@ void BackwardPassContext::_processFromEntryPoint(const PropagationEntryPoint& en
 		{
 			for(size_t inputIdx = 0; inputIdx < castedOp->getInputs().size(); ++inputIdx)
 			{
-				_processFromEntryPoint({std::ref(derivatives[inputIdx]), castedOp->getInputs()[inputIdx]});
+				_processFromEntryPoint({.outerDerivative = std::ref(derivatives[inputIdx]),
+										.rootNode = castedOp->getInputs()[inputIdx]});
 			}
 		}
 	}

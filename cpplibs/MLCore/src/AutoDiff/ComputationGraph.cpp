@@ -38,7 +38,7 @@ ComputationGraph::~ComputationGraph() {}
 
 bool ComputationGraph::hasGradient(const NodePtr& node) const
 {
-	return _gradients.find(node) != _gradients.end();
+	return _gradients.contains(node);
 }
 
 const mlCore::Tensor& ComputationGraph::getGradient(const NodePtr& node) const

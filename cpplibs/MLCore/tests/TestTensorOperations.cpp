@@ -187,7 +187,7 @@ TEST_F(TestTensorOperations, CorrectlyTransposesColumnVector)
 	_performUnaryOperationAndCompare(
 		params,
 		[](const auto& tensor)
-		{ return mlCore::TensorOperations::transpose(tensor, mlCore::MatrixSpec::ColumnVector); });
+		{ return mlCore::TensorOperations::transpose(tensor, mlCore::MatrixSpec::COLUMN_VECTOR); });
 }
 
 TEST_F(TestTensorOperations, CorrectlyTransposesRowVector)
@@ -206,7 +206,7 @@ TEST_F(TestTensorOperations, CorrectlyTransposesRowVector)
 	_performUnaryOperationAndCompare(
 		params,
 		[](const auto& tensor)
-		{ return mlCore::TensorOperations::transpose(tensor, mlCore::MatrixSpec::RowVector); });
+		{ return mlCore::TensorOperations::transpose(tensor, mlCore::MatrixSpec::ROW_VECTOR); });
 }
 
 TEST_F(TestTensorOperations, testPower)
@@ -268,7 +268,7 @@ TEST_F(TestTensorOperations, testMatrixMultiplicationWithColumnVector)
 		[](const auto& lhs, const auto& rhs)
 		{
 			return mlCore::TensorOperations::matmul(
-				lhs, rhs, mlCore::MatrixSpec::Default, mlCore::MatrixSpec::ColumnVector);
+				lhs, rhs, mlCore::MatrixSpec::DEFAULT, mlCore::MatrixSpec::COLUMN_VECTOR);
 		});
 }
 
@@ -286,7 +286,7 @@ TEST_F(TestTensorOperations, testMatrixMultiplicationWithRowVector)
 		[](const auto& lhs, const auto& rhs)
 		{
 			return mlCore::TensorOperations::matmul(
-				lhs, rhs, mlCore::MatrixSpec::RowVector, mlCore::MatrixSpec::Default);
+				lhs, rhs, mlCore::MatrixSpec::ROW_VECTOR, mlCore::MatrixSpec::DEFAULT);
 		});
 }
 

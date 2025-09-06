@@ -1,6 +1,7 @@
 #include "BatchProviders/SerializedTensorsProvider.h"
 
 #include <algorithm>
+#include <functional>
 #include <iterator>
 
 #include <MLCore/TensorOperations.h>
@@ -14,17 +15,18 @@ SerializedTensorsProvider::SerializedTensorsProvider(const std::vector<std::stri
 													 const bool storeInRam)
 {
 	_serializers.reserve(paths.size());
-	std::transform(paths.begin(),
-				   paths.end(),
-				   std::back_inserter(_serializers),
-				   [](const std::string& path) { return mlCore::io::TensorsSerializer::open(path); });
+	std::ranges::transform(paths.begin(),
+						   paths.end(),
+						   std::back_inserter(_serializers),
+						   [](const std::string& path) { return mlCore::io::TensorsSerializer::open(path); });
 
 	_validateSerializers();
 
-	std::transform(_serializers.begin(),
-				   _serializers.end(),
-				   std::back_inserter(_batchSpec),
-				   [](const auto& serializer) { return serializer->getTensorHandles()[0]->getShape(); });
+	std::ranges::transform(_serializers.begin(),
+						   _serializers.end(),
+						   std::back_inserter(_batchSpec),
+						   [](const auto& serializer)
+						   { return serializer->getTensorHandles()[0]->getShape(); });
 
 	if(storeInRam)
 	{
@@ -55,10 +57,10 @@ SerializedTensorsProvider::_retrieveTensors(size_t serializerIdx, const std::vec
 	if(_cache.has_value())
 	{
 		const auto& cache = _cache.value()[serializerIdx];
-		std::transform(samplesIndices.begin(),
-					   samplesIndices.end(),
-					   std::back_inserter(tensors),
-					   [&cache](size_t idx) { return cache.tensors[idx]; });
+		std::ranges::transform(samplesIndices.begin(),
+							   samplesIndices.end(),
+							   std::back_inserter(tensors),
+							   [&cache](size_t idx) { return cache.tensors[idx]; });
 	}
 	else
 	{
@@ -67,12 +69,12 @@ SerializedTensorsProvider::_retrieveTensors(size_t serializerIdx, const std::vec
 
 		const auto handles = _serializers[serializerIdx]->getTensorHandles();
 
-		std::transform(samplesIndices.begin(),
-					   samplesIndices.end(),
-					   std::back_inserter(tensors),
-					   [&handles](size_t idx) { return handles[idx]->get(); });
+		std::ranges::transform(samplesIndices.begin(),
+							   samplesIndices.end(),
+							   std::back_inserter(tensors),
+							   [&handles](size_t idx) { return handles[idx]->get(); });
 
-		std::for_each(
+		std::ranges::for_each(
 			tensors.begin(), tensors.end(), [&finalShape](auto& tensor) { tensor.reshape(finalShape); });
 	}
 
@@ -126,15 +128,15 @@ void SerializedTensorsProvider::_fillCache()
 		finalShape.insert(finalShape.begin(), 1);
 
 		cache.tensors.reserve(handles.size());
-		std::transform(handles.begin(),
-					   handles.end(),
-					   std::back_inserter(cache.tensors),
-					   [&finalShape](const auto& handle)
-					   {
-						   auto tensor = handle->get();
-						   tensor.reshape(finalShape);
-						   return tensor;
-					   });
+		std::ranges::transform(handles.begin(),
+							   handles.end(),
+							   std::back_inserter(cache.tensors),
+							   [&finalShape](const auto& handle)
+							   {
+								   auto tensor = handle->get();
+								   tensor.reshape(finalShape);
+								   return tensor;
+							   });
 	}
 }
 } // namespace datasets::batchProviders

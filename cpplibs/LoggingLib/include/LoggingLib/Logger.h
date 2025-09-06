@@ -1,12 +1,13 @@
 #ifndef LOGGINGLIB_INCLUDE_LOGGINGLIB_LOGGER_H
 #define LOGGINGLIB_INCLUDE_LOGGINGLIB_LOGGER_H
 
-#include <stdint.h>
 #include <iostream>
 #include <map>
 #include <memory>
 #include <mutex>
 #include <string>
+
+#include <stdint.h>
 
 #include "StreamWrappers/BaseStreamWrapper.hpp"
 #include "StreamWrappers/IStreamWrapper.hpp"

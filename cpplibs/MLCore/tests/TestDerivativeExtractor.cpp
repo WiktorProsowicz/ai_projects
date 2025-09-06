@@ -6,15 +6,6 @@
  * by Wiktor Prosowicz
  **********************/
 
-#include <AutoDiff/GraphNodes.hpp>
-#include <AutoDiff/Operations.h>
-#include <MLCore/BasicTensor.h>
-#include <MLCore/TensorInitializers/RangeTensorInitializer.hpp>
-#include <MLCore/TensorIterator.hpp>
-#include <fmt/format.h>
-#include <fmt/ranges.h>
-#include <gtest/gtest.h>
-#include <stddef.h>
 #include <algorithm>
 #include <functional>
 #include <iterator>
@@ -24,11 +15,24 @@
 #include <utility>
 #include <vector>
 
-namespace mlCore {
-namespace tensorInitializers {
-template <typename ValueType> class ITensorInitializer;
-}  // namespace tensorInitializers
-}  // namespace mlCore
+#include <AutoDiff/GraphNodes.hpp>
+#include <AutoDiff/Operations.h>
+#include <MLCore/BasicTensor.h>
+#include <MLCore/TensorInitializers/RangeTensorInitializer.hpp>
+#include <MLCore/TensorIterator.hpp>
+#include <fmt/format.h>
+#include <fmt/ranges.h>
+#include <gtest/gtest.h>
+#include <stddef.h>
+
+namespace mlCore
+{
+namespace tensorInitializers
+{
+template <typename ValueType>
+class ITensorInitializer;
+} // namespace tensorInitializers
+} // namespace mlCore
 
 namespace
 {

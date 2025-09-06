@@ -43,9 +43,9 @@ BasicTensor<ValueType>::BasicTensor(ValueType initVal)
 }
 
 template <typename ValueType>
-BasicTensor<ValueType>::BasicTensor(const TensorShape& shape)
+BasicTensor<ValueType>::BasicTensor(TensorShape shape)
 	: _length()
-	, _shape(shape)
+	, _shape(std::move(shape))
 	, _data()
 {
 	_checkShapeElementsPositive(_shape);
@@ -57,6 +57,7 @@ BasicTensor<ValueType>::BasicTensor(const TensorShape& shape)
 							  size_t{1},
 							  [](const auto current, const auto dim) { return current * dim; });
 
+	// NOLINTNEXTLINE(cppcoreguidelines-prefer-member-initializer)
 	_data = new ValueType[_length];
 }
 

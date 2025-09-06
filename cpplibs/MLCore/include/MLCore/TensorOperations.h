@@ -34,15 +34,15 @@ public:
 	 * @brief Performs matrix transposition on `arg`.
 	 */
 	static BasicTensor<ValueType> transpose(const BasicTensor<ValueType>& arg,
-											MatrixSpec spec = MatrixSpec::Default);
+											MatrixSpec spec = MatrixSpec::DEFAULT);
 
 	/**
 	 * @brief Performs matrix multiplication between `lhs` and `rhs`.
 	 */
 	static BasicTensor<ValueType> matmul(const BasicTensor<ValueType>& lhs,
 										 const BasicTensor<ValueType>& rhs,
-										 MatrixSpec lhsSpec = MatrixSpec::Default,
-										 MatrixSpec rhsSpec = MatrixSpec::Default);
+										 MatrixSpec lhsSpec = MatrixSpec::DEFAULT,
+										 MatrixSpec rhsSpec = MatrixSpec::DEFAULT);
 
 	/**
 	 * @brief Creates tensor from compile-time nested initializer list form.

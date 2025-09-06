@@ -9,6 +9,6 @@
 namespace datasets::batchProviders
 {
 IBatchProviderPtr getFromSerializedPaths(const std::vector<std::string>& paths, bool storeInRam);
-}
+} // namespace datasets::batchProviders
 
 #endif

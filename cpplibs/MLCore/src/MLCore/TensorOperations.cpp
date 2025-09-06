@@ -79,7 +79,7 @@ public:
 	std::vector<TensorDataType> operator()(const RawTensorInitList<TensorDataType>& containerValue)
 	{
 
-		if(_collectedShapeIndices.find(_currentLevel) == _collectedShapeIndices.end())
+		if(!_collectedShapeIndices.contains(_currentLevel))
 		{
 			_collectedShapeIndices.emplace(_currentLevel, containerValue.size());
 		}
@@ -185,7 +185,7 @@ BasicTensor<ValueType> BasicTensorOperations<ValueType>::transpose(const BasicTe
 		for(size_t posInFrame = 0; posInFrame < frameLength; posInFrame++)
 		{
 			ret._data[frameOffset + posInFrame] =
-				arg._data[frameOffset + (posInFrame % frameShapeFirst) * frameShapeSecond +
+				arg._data[frameOffset + ((posInFrame % frameShapeFirst) * frameShapeSecond) +
 						  (posInFrame / frameShapeFirst)];
 		}
 	}
@@ -222,8 +222,8 @@ void performSingleMatmul(const ValueType* const lhsData,
 		{
 			for(size_t mulIter = 0; mulIter < lhsCols; mulIter++)
 			{
-				resData[rowIter * rhsCols + colIter] +=
-					lhsData[rowIter * lhsCols + mulIter] * rhsData[mulIter * rhsCols + colIter];
+				resData[(rowIter * rhsCols) + colIter] +=
+					lhsData[(rowIter * lhsCols) + mulIter] * rhsData[(mulIter * rhsCols) + colIter];
 			}
 		}
 	}
@@ -459,8 +459,8 @@ BasicTensorOperations<ValueType>::stack(const std::vector<BasicTensor<ValueType>
 											  std::multiplies<>());
 				   });
 
-	const size_t stackingIterations =
-		std::accumulate(retShape.cbegin(), retShape.cbegin() + axis, size_t{1}, std::multiplies<>());
+	const size_t stackingIterations = std::accumulate(
+		retShape.cbegin(), retShape.cbegin() + static_cast<ptrdiff_t>(axis), size_t{1}, std::multiplies<>());
 
 	ValueType* retData = ret._data;
 	for(size_t i = 0; i < stackingIterations; i++)
@@ -470,7 +470,7 @@ BasicTensorOperations<ValueType>::stack(const std::vector<BasicTensor<ValueType>
 			const auto& tensor = tensors[j];
 			const auto& frameSize = frameSizes[j];
 
-			std::copy(tensor._data + i * frameSize, tensor._data + (i + 1) * frameSize, retData);
+			std::copy(tensor._data + (i * frameSize), tensor._data + ((i + 1) * frameSize), retData);
 
 			retData += frameSize;
 		}

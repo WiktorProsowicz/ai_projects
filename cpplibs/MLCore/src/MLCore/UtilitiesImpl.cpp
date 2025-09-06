@@ -12,7 +12,7 @@ namespace mlCore::detail
 {
 std::vector<size_t> applyMatSpecToShape(const std::vector<size_t>& shape, const MatrixSpec spec)
 {
-	if(shape.size() < 1)
+	if(shape.empty())
 	{
 		LOG_ERROR("MLCore", "Cannot apply matrix specification to a shape with less than 1 dimension.");
 	}
@@ -21,15 +21,15 @@ std::vector<size_t> applyMatSpecToShape(const std::vector<size_t>& shape, const 
 
 	switch(spec)
 	{
-	case MatrixSpec::ColumnVector:
+	case MatrixSpec::COLUMN_VECTOR:
 		newShape.emplace_back(1);
 		break;
 
-	case MatrixSpec::RowVector:
+	case MatrixSpec::ROW_VECTOR:
 		newShape.insert(std::prev(newShape.cend()), 1);
 		break;
 
-	case MatrixSpec::Default:
+	case MatrixSpec::DEFAULT:
 		break;
 	}
 

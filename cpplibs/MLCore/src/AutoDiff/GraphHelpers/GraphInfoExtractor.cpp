@@ -19,7 +19,7 @@ double GraphInfoExtractor::getEntropyScore(const NodePtr& node) const
 						   {
 							   const auto classProbability = static_cast<double>(subtreeSize) / classesSum;
 
-							   return curr - classProbability * std::log2(classProbability);
+							   return curr - (classProbability * std::log2(classProbability));
 						   });
 }
 
@@ -56,10 +56,10 @@ std::map<NodePtr, std::vector<uint16_t>> GraphInfoExtractor::_composeSubtreeClas
 
 size_t GraphInfoExtractor::getMaximalNumberOfSubtrees() const
 {
-	const auto elementWithMaxSubtrees = std::max_element(_subtreeClasses.cbegin(),
-														 _subtreeClasses.cend(),
-														 [](const auto& lhs, const auto& rhs)
-														 { return lhs.second.size() < rhs.second.size(); });
+	const auto elementWithMaxSubtrees = std::ranges::max_element(
+		_subtreeClasses.cbegin(),
+		_subtreeClasses.cend(),
+		[](const auto& lhs, const auto& rhs) { return lhs.second.size() < rhs.second.size(); });
 
 	return elementWithMaxSubtrees->second.size();
 }

@@ -63,7 +63,7 @@ public:
 	void addNewTensor(const mlCore::Tensor& tensor);
 
 private:
-	TensorsSerializer(std::unique_ptr<std::fstream> fileStream);
+	explicit TensorsSerializer(std::unique_ptr<std::fstream> fileStream);
 
 	/// Checks if the given file is a valid weights file.
 	static void _validateFile(const std::string& path);
@@ -90,10 +90,10 @@ public:
 
 	TensorHandle() = delete;
 
-	TensorHandle(const TensorHandle&) = default;
+	TensorHandle(const TensorHandle&) = delete;
 	TensorHandle(TensorHandle&&) = delete;
 
-	TensorHandle& operator=(const TensorHandle&) = default;
+	TensorHandle& operator=(const TensorHandle&) = delete;
 	TensorHandle& operator=(TensorHandle&&) = delete;
 
 	~TensorHandle() = default;

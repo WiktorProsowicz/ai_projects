@@ -159,7 +159,7 @@ std::vector<ValueType*> BasicTensorSlice<ValueType>::_computeDataPointers() cons
 			nextSpanIndex++)
 		{
 			const auto collectedPointers =
-				recurseGetPointers(data + nextSpanIndex * nextSpan, shapeIdx + 1, nextSpan);
+				recurseGetPointers(data + (nextSpanIndex * nextSpan), shapeIdx + 1, nextSpan);
 
 			std::copy(collectedPointers.cbegin(), collectedPointers.cend(), std::back_inserter(pointers));
 		}
@@ -343,6 +343,7 @@ mergeShape(const std::vector<size_t>& shape, const size_t pivotElement, const si
 	}
 
 	std::vector<size_t> mergedShape;
+	mergedShape.reserve(pivotElement + 1);
 
 	for(size_t shapeIdx = 0; shapeIdx < pivotElement; shapeIdx++)
 	{
@@ -357,6 +358,7 @@ mergeShape(const std::vector<size_t>& shape, const size_t pivotElement, const si
 std::vector<size_t> truncateShape(const std::vector<size_t>& shape, const size_t pivotElement)
 {
 	std::vector<size_t> truncatedShape;
+	truncatedShape.reserve(pivotElement);
 
 	for(size_t shapeIdx = 0; shapeIdx < pivotElement; shapeIdx++)
 	{
@@ -377,7 +379,7 @@ size_t getFlattenedIndex(const std::vector<size_t>& shape, const std::vector<siz
 						   indices.cend(),
 						   size_t{0},
 						   [&offset, &shapeIt](const auto& curr, const auto& index)
-						   { return curr + (offset /= *(shapeIt++)) * index; });
+						   { return curr + ((offset /= *(shapeIt++)) * index); });
 }
 
 size_t computeNElementsInShape(const std::span<const size_t>& shape)

@@ -41,7 +41,7 @@ void Logger::setDefaultStream(std::ostream& stream)
 
 void Logger::setDefaultStream(const streamWrappers::IStreamWrapperPtr& stream)
 {
-	const std::lock_guard lock(_streamingMutex);
+	const std::scoped_lock lock(_streamingMutex);
 
 	_defaultStream = stream;
 }
@@ -53,7 +53,7 @@ void Logger::setNamedChannelStream(const std::string& name, std::ostream& stream
 
 void Logger::setNamedChannelStream(const std::string& name, streamWrappers::IStreamWrapperPtr stream)
 {
-	const std::lock_guard lock(_streamingMutex);
+	const std::scoped_lock lock(_streamingMutex);
 
 	if(_namedStreamsMap.contains(name))
 	{
@@ -68,7 +68,7 @@ void Logger::setNamedChannelStream(const std::string& name, streamWrappers::IStr
 void Logger::_logOnChannel(const LogType logType, const char* channelName, const char* logContent)
 {
 	{
-		const std::lock_guard lock(_streamingMutex);
+		const std::scoped_lock lock(_streamingMutex);
 
 		const streamWrappers::IStreamWrapperPtr chosenStream =
 			_namedStreamsMap.contains(channelName) ? _namedStreamsMap.at(channelName) : _defaultStream;

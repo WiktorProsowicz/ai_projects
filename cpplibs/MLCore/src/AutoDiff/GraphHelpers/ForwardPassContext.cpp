@@ -13,10 +13,11 @@ ForwardPassContext::ForwardPassContext(bool useMultithreading, NodePtr root)
 {
 	_nodesToProcess = _graphInfoExtractor.getNodesAboveEntropyThreshold(_entropyThreshold);
 
-	std::sort(_nodesToProcess.begin(),
-			  _nodesToProcess.end(),
-			  [this](const auto& lhs, const auto& rhs)
-			  { return _graphInfoExtractor.getTreeSize(lhs) < _graphInfoExtractor.getTreeSize(rhs); });
+	std::ranges::sort(
+		_nodesToProcess.begin(),
+		_nodesToProcess.end(),
+		[this](const auto& lhs, const auto& rhs)
+		{ return _graphInfoExtractor.getTreeSize(lhs) < _graphInfoExtractor.getTreeSize(rhs); });
 }
 
 void ForwardPassContext::run()
@@ -31,9 +32,9 @@ void ForwardPassContext::run()
 
 	_initThreadPool();
 
-	std::for_each(_nodesToProcess.cbegin(),
-				  _nodesToProcess.cend(),
-				  [this](const auto& node) { _runInParallelFromNode(node); });
+	std::ranges::for_each(_nodesToProcess.cbegin(),
+						  _nodesToProcess.cend(),
+						  [this](const auto& node) { _runInParallelFromNode(node); });
 
 	_updateSubtree(_root);
 
@@ -84,7 +85,7 @@ void ForwardPassContext::_markVisited(const NodePtr& node)
 
 bool ForwardPassContext::_isVisited(const NodePtr& node) const
 {
-	return _visitedNodes.find(node) != _visitedNodes.end();
+	return _visitedNodes.contains(node);
 }
 
 void ForwardPassContext::_updateSubtree(const NodePtr& node)

@@ -75,7 +75,7 @@ public:
 	SlicedTensorIterator operator--(int)
 	{
 		auto tmp = *this;
-		--(this);
+		--(*this);
 		return tmp;
 	}
 

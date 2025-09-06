@@ -16,9 +16,9 @@ class SimpleActivation : public IActivationFactory
 public:
 	SimpleActivation() = delete;
 
-	SimpleActivation(const ActivationFunction& activationFunc, const std::string& description)
-		: _description(description)
-		, _activationFunc(activationFunc)
+	SimpleActivation(ActivationFunction activationFunc, std::string description)
+		: _description(std::move(description))
+		, _activationFunc(std::move(activationFunc))
 	{}
 
 	SimpleActivation(const SimpleActivation&) = default;

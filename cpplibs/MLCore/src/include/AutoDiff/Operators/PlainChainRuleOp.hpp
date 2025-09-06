@@ -44,9 +44,9 @@ public:
 
 		auto derivatives = computeDirectDerivative();
 
-		std::for_each(derivatives.begin(),
-					  derivatives.end(),
-					  [&outerDerivative](auto& deriv) { deriv *= outerDerivative; });
+		std::ranges::for_each(derivatives.begin(),
+							  derivatives.end(),
+							  [&outerDerivative](auto& deriv) { deriv *= outerDerivative; });
 
 		return derivatives;
 	}

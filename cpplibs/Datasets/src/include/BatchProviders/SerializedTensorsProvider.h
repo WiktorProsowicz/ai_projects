@@ -44,7 +44,7 @@ public:
 	 * time.
 	 *
 	 */
-	SerializedTensorsProvider(const std::vector<std::string>& paths, const bool storeInRam);
+	SerializedTensorsProvider(const std::vector<std::string>& paths, bool storeInRam);
 
 	size_t getNumberOfSamples() const override
 	{

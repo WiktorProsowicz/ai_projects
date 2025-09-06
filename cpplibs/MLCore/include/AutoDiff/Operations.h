@@ -31,8 +31,8 @@ OperatorPtr divide(const NodePtr& lhsNode, const NodePtr& rhsNode);
  */
 OperatorPtr matmul(const NodePtr& lhsNode,
 				   const NodePtr& rhsNode,
-				   mlCore::MatrixSpec lhsSpec = mlCore::MatrixSpec::Default,
-				   mlCore::MatrixSpec rhsSpec = mlCore::MatrixSpec::Default,
+				   mlCore::MatrixSpec lhsSpec = mlCore::MatrixSpec::DEFAULT,
+				   mlCore::MatrixSpec rhsSpec = mlCore::MatrixSpec::DEFAULT,
 				   bool avoidMatrixOutput = false);
 
 /**
