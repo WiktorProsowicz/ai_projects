@@ -12,12 +12,16 @@ dependencies = [
 ]
 
 [package.optional-dependencies]
-dev = [
-    { name = "autopep8" },
-    { name = "clang-format" },
+ci = [
     { name = "clang-tidy" },
     { name = "mypy" },
     { name = "pre-commit" },
+    { name = "pylint" },
+]
+dev = [
+    { name = "autopep8" },
+    { name = "clang-format" },
+    { name = "mypy" },
     { name = "pylint" },
 ]
 py-scripts = [
@@ -30,17 +34,19 @@ py-scripts = [
 requires-dist = [
     { name = "autopep8", marker = "extra == 'dev'", specifier = ">=2.3.2" },
     { name = "clang-format", marker = "extra == 'dev'", specifier = ">=21.1.0" },
-    { name = "clang-tidy", marker = "extra == 'dev'", specifier = ">=21.1.0" },
+    { name = "clang-tidy", marker = "extra == 'ci'", specifier = ">=21.1.0" },
     { name = "cmake", specifier = ">=3.28.4" },
+    { name = "mypy", marker = "extra == 'ci'", specifier = ">=1.17.1" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.17.1" },
     { name = "ninja", specifier = ">=1.13.0" },
     { name = "numpy", marker = "extra == 'py-scripts'", specifier = ">=2.1.2" },
     { name = "pandas", marker = "extra == 'py-scripts'", specifier = ">=2.2.3" },
     { name = "pandas-stubs", marker = "extra == 'py-scripts'", specifier = ">=2.3.2.250827" },
-    { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=3.4.0" },
+    { name = "pre-commit", marker = "extra == 'ci'", specifier = ">=3.4.0" },
+    { name = "pylint", marker = "extra == 'ci'", specifier = ">=3.1.0" },
     { name = "pylint", marker = "extra == 'dev'", specifier = ">=3.1.0" },
 ]
-provides-extras = ["dev", "py-scripts"]
+provides-extras = ["dev", "py-scripts", "ci"]
 
 [[package]]
 name = "astroid"
