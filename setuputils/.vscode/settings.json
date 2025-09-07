@@ -31,8 +31,8 @@
         "${workspaceFolder}/.venv/bin/pylint"
     ],
     "cmake.cmakePath": "${workspaceFolder}/.venv/bin/cmake",
-    "clang-format.executable": "/workspaces/ai_projects/.venv/bin/clang-format",
-    "clang-format.style": "file:/workspaces/ai_projects/setuputils/.clang-format",
+    "clang-format.executable": "/home/devcontainer/workspace/.venv/bin/clang-format",
+    "clang-format.style": "file:/home/devcontainer/workspace/setuputils/.clang-format",
     "mypy.dmypyExecutable": "${workspaceFolder}/.venv/bin/dmypy",
     "mypy.mypyExecutable": "${workspaceFolder}/.venv/bin/mypy",
     "mypy.targets": [

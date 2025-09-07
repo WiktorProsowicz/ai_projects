@@ -12,7 +12,6 @@
 				"ms-python.debugpy",
 				"ms-python.python",
 				"ms-python.vscode-pylance",
-				"ms-azuretools.vscode-docker",
 				"donjayamanne.python-environment-manager",
 				"VisualStudioExptTeam.intellicode-api-usage-examples",
 				"VisualStudioExptTeam.vscodeintellicode",
