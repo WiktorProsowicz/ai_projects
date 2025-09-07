@@ -71,9 +71,15 @@ ci_run_static_checks:
 
     uv run pre-commit run --all-files
 
+# Run clang tidy static checks.
 ci_run_clang_tidy:
     just --justfile {{justfile()}} build_project -DENABLE_CLANG_TIDY=ON
 
+# Run include-what-you-use static checks.
 ci_run_iwyu_checks:
     just --justfile {{justfile()}} build_project -DENABLE_IWYU=ON | tee /tmp/ci_iwyu_output
     grep -E "Warning: include-what-you-use reported diagnostics:" /tmp/ci_iwyu_output && exit 1
+
+# Run cppcheck static checks.
+ci_run_cppcheck:
+    just --justfile {{justfile()}} build_project -DENABLE_CPPCHECK=ON

@@ -43,6 +43,10 @@ function(aiprojects_add_library)
         aiprojects_setup_clang_tidy_for_target(${LIBRARY_NAME})
     endif()
 
+    if(ENABLE_CPPCHECK)
+        aiprojects_setup_cppcheck_for_target(${LIBRARY_NAME})
+    endif()
+
     # adding executable
     add_executable_for_lib()
 
@@ -72,6 +76,10 @@ macro(add_executable_for_lib)
 
         if(ENABLE_CLANG_TIDY)
             aiprojects_setup_clang_tidy_for_target(${PROJECT_NAME}Executable)
+        endif()
+
+        if(ENABLE_CPPCHECK)
+            aiprojects_setup_cppcheck_for_target(${PROJECT_NAME}Executable)
         endif()
     endif()
 endmacro()
@@ -135,7 +143,7 @@ endmacro()
 
 
 # ********************************************************************
-#  Sets up include-what-you-use for the given target if iwyu_path is set.
+#  Sets up include-what-you-use for the given target if enabled.
 # ********************************************************************
 function(aiprojects_setup_iwyu_for_target TARGET)
 
@@ -150,7 +158,7 @@ function(aiprojects_setup_iwyu_for_target TARGET)
 endfunction()
 
 # ********************************************************************
-#  Enables clang-tidy checks for the given target if clang_tidy_path is set.
+#  Enables clang-tidy checks for the given target if enabled.
 # ********************************************************************
 function(aiprojects_setup_clang_tidy_for_target TARGET)
 
@@ -161,6 +169,26 @@ function(aiprojects_setup_clang_tidy_for_target TARGET)
     )
 
     set_property(TARGET ${TARGET} PROPERTY CXX_CLANG_TIDY "${clang_tidy_path};${clang_tidy_options}")
+endfunction()
+
+# ********************************************************************
+#  Enables cppcheck checks for the given target if enabled.
+# ********************************************************************
+function(aiprojects_setup_cppcheck_for_target TARGET)
+
+    set(cppcheck_options
+        "--quiet"
+        "--enable=all"
+        "--inline-suppr"
+        "--std=c++23"
+        "--check-level=exhaustive"
+        "--suppress=unusedFunction"
+        "--suppress=missingIncludeSystem"
+        "--suppress=checkersReport"
+        "--suppress=unmatchedSuppression"
+    )
+
+    set_property(TARGET ${TARGET} PROPERTY CXX_CPPCHECK "${cppcheck_path};${cppcheck_options}")
 endfunction()
 
 
