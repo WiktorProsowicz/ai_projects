@@ -77,4 +77,3 @@ ci_run_clang_tidy:
 ci_run_iwyu_checks:
     just --justfile {{justfile()}} build_project -DENABLE_IWYU=ON | tee /tmp/ci_iwyu_output
     grep -E "Warning: include-what-you-use reported diagnostics:" /tmp/ci_iwyu_output && exit 1
-    
