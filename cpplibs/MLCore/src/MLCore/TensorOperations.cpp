@@ -106,9 +106,9 @@ public:
 
 		const auto nElementsInSubValue = collectedValueSets.cbegin()->size();
 
-		if(!std::ranges::any_of(collectedValueSets,
-								[nElementsInSubValue](const auto& valueSet)
-								{ return valueSet.size() != nElementsInSubValue; }))
+		if(std::ranges::any_of(collectedValueSets,
+							   [nElementsInSubValue](const auto& valueSet)
+							   { return valueSet.size() != nElementsInSubValue; }))
 		{
 			LOG_ERROR(
 				"TensorOperations",
