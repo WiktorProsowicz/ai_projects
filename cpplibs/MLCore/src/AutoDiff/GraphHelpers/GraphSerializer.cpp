@@ -112,11 +112,13 @@ std::vector<std::string> GraphSerializer::_serializeNodesClusters() const
 
 	for(size_t level = 0; level <= _getMaxNodeLevel(); ++level)
 	{
-		const auto nodesDefinitionsFromLevel =
+		std::vector<std::string> nodesDefinitionsFromLevel;
+
+		std::ranges::copy(
 			_nodesLevels |
-			std::ranges::views::filter([level](const auto& pair) { return pair.second == level; }) |
-			std::ranges::views::keys | std::ranges::views::transform(_getNodeDefinition) |
-			std::ranges::to<std::vector>();
+				std::ranges::views::filter([level](const auto& pair) { return pair.second == level; }) |
+				std::ranges::views::keys | std::ranges::views::transform(_getNodeDefinition),
+			std::back_inserter(nodesDefinitionsFromLevel));
 
 		stringifiedClusters.emplace_back(fmt::format(
 			clusterFormat,

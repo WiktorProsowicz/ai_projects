@@ -79,9 +79,15 @@ std::vector<NodePtr> GraphInfoExtractor::getNodesAboveEntropyThreshold(double th
 		return {};
 	}
 
-	return _subtreeClasses |
-		   std::views::filter([this, &threshold](const auto& item)
-							  { return getEntropyScore(item.first) > threshold; }) |
-		   std::views::keys | std::ranges::to<std::vector>();
+	std::vector<NodePtr> chosenNodes;
+
+	std::ranges::copy(_subtreeClasses |
+						  std::views::filter([this, &threshold](const auto& item)
+											 { return getEntropyScore(item.first) > threshold; }) |
+						  std::views::keys,
+					  std::back_inserter(chosenNodes));
+
+	return chosenNodes;
 }
+
 } // namespace autoDiff::detail
