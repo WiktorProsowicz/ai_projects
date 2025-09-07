@@ -62,7 +62,6 @@ public:
 
 	/**
 	 * @brief Streams the given error message in on the channel specified by `channelName`.
-	 * Also this kind of log throws an std::runtime_error and, if not caught, terminates the program.
 	 *
 	 * @param channelName Name of the channel to log on.
 	 * @param logContent Message content,

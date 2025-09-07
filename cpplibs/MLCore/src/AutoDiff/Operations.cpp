@@ -145,7 +145,7 @@ OperatorPtr relu(const NodePtr& node)
 
 		for(auto& val : inputCopy)
 		{
-			val = val > 0.0 ? 1.0 : 0.0;
+			val = val > 0.0 ? 1.0 : 0.0; // cppcheck-suppress useStlAlgorithm
 		}
 
 		std::vector<mlCore::Tensor> derivatives;

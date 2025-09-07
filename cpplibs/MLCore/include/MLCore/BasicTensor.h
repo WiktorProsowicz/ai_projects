@@ -73,7 +73,7 @@ public:
 	 *
 	 * @param initVal
 	 */
-	BasicTensor(ValueType initVal);
+	BasicTensor(ValueType initVal); // cppcheck-suppress noExplicitConstructor
 
 	/**
 	 * @brief Copy constructor.
@@ -94,7 +94,7 @@ public:
 	 *
 	 * @param shape Tensor's initial shape.
 	 */
-	BasicTensor(TensorShape shape);
+	explicit BasicTensor(TensorShape shape);
 
 	/**
 	 * @brief Constructs tensor from shape and fills it with initial value.

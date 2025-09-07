@@ -111,38 +111,4 @@ void ForwardPassContext::_updateSubtree(const NodePtr& node)
 		castedOp->updateValue();
 	}
 }
-
-std::map<NodePtr, std::vector<uint16_t>> ForwardPassContext::_composeSubtreeClasses() const
-{
-	std::map<NodePtr, std::vector<uint16_t>> collectedClasses;
-
-	// Fills the classes map and returns the size of a subtree starting from a given node.
-	std::function<uint16_t(const NodePtr&)> getClassesForNode;
-	getClassesForNode = [&collectedClasses, &getClassesForNode](const NodePtr& node) -> uint16_t
-	{
-		if(const auto castedOp = std::dynamic_pointer_cast<Operator>(node))
-		{
-			std::vector<uint16_t> classSizes;
-			classSizes.reserve(castedOp->getInputs().size());
-
-			for(const auto& input : castedOp->getInputs())
-			{
-				classSizes.push_back(getClassesForNode(input));
-			}
-
-			if(castedOp->getInputs().size() > 1)
-			{
-				collectedClasses[node] = classSizes;
-			}
-
-			return std::accumulate(classSizes.cbegin(), classSizes.cend(), uint16_t{0});
-		}
-
-		return 0;
-	};
-
-	getClassesForNode(_root);
-
-	return collectedClasses;
-}
 } // namespace autoDiff::detail

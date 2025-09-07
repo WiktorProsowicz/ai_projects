@@ -87,11 +87,6 @@ void Logger::_logOnChannel(const LogType logType, const char* channelName, const
 
 		chosenStream->putCharString("\033[0m\n");
 	}
-
-	if(logType == LogType::ERROR)
-	{
-		throw std::runtime_error(logContent);
-	}
 }
 
 void Logger::reset()

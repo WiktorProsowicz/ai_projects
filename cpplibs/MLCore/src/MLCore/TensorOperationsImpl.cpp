@@ -62,12 +62,14 @@
 // Stretches a tensor and applies an operation.
 #define STRETCH_TENSOR_TO_ANOTHER(dst, src, srcPaddedShape, oper)                                            \
                                                                                                              \
-	if(dst.nDimensions() > MAX_DIMENSIONS_FOR_BROADCASTING)                                                  \
+	if(dst.nDimensions() < 1)                                                                                \
 	{                                                                                                        \
-		LOG_ERROR("TensorOperations",                                                                        \
-				  fmt::format("Broadcasting operation supports up to {} dimensions, but got {}.",            \
-							  MAX_DIMENSIONS_FOR_BROADCASTING,                                               \
-							  dst.nDimensions()));                                                           \
+		LOG_ERROR(                                                                                           \
+			"TensorOperations",                                                                              \
+			fmt::format(                                                                                     \
+				"Broadcasting operation requires the destination tensor to have at least one dimension.",    \
+				MAX_DIMENSIONS_FOR_BROADCASTING,                                                             \
+				dst.nDimensions()));                                                                         \
 	}                                                                                                        \
                                                                                                              \
 	std::vector<size_t> dstTreePath(dst.nDimensions(), 0);                                                   \

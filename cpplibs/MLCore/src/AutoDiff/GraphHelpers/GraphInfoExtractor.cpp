@@ -36,14 +36,16 @@ std::map<NodePtr, std::vector<uint16_t>> GraphInfoExtractor::_composeSubtreeClas
 			std::vector<uint16_t> classSizes;
 			classSizes.reserve(castedOp->getInputs().size());
 
-			for(const auto& input : castedOp->getInputs())
-			{
-				classSizes.push_back(getClassesForNode(input));
-			}
+			std::ranges::transform(castedOp->getInputs(),
+								   std::back_inserter(classSizes),
+								   [&getClassesForNode](const NodePtr& opInput)
+								   { return getClassesForNode(opInput); });
 
-			collectedClasses[node] = classSizes;
+			const auto subtreeSize = std::accumulate(classSizes.cbegin(), classSizes.cend(), uint16_t{0});
 
-			return std::accumulate(classSizes.cbegin(), classSizes.cend(), uint16_t{0});
+			collectedClasses.emplace(node, std::move(classSizes));
+
+			return subtreeSize;
 		}
 
 		return 0;
@@ -77,16 +79,9 @@ std::vector<NodePtr> GraphInfoExtractor::getNodesAboveEntropyThreshold(double th
 		return {};
 	}
 
-	std::vector<NodePtr> nodesToProcess;
-
-	for(const auto& node : _subtreeClasses |
-							   std::views::filter([this, &threshold](const auto& item)
-												  { return getEntropyScore(item.first) > threshold; }) |
-							   std::views::keys)
-	{
-		nodesToProcess.emplace_back(node);
-	}
-
-	return nodesToProcess;
+	return _subtreeClasses |
+		   std::views::filter([this, &threshold](const auto& item)
+							  { return getEntropyScore(item.first) > threshold; }) |
+		   std::views::keys | std::ranges::to<std::vector>();
 }
 } // namespace autoDiff::detail

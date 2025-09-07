@@ -112,18 +112,16 @@ std::vector<std::string> GraphSerializer::_serializeNodesClusters() const
 
 	for(size_t level = 0; level <= _getMaxNodeLevel(); ++level)
 	{
-		std::vector<std::string> nodesDefinitions;
-
-		for(const auto& node :
+		const auto nodesDefinitionsFromLevel =
 			_nodesLevels |
-				std::ranges::views::filter([level](const auto& pair) { return pair.second == level; }) |
-				std::ranges::views::keys)
-		{
-			nodesDefinitions.emplace_back(_getNodeDefinition(node));
-		}
+			std::ranges::views::filter([level](const auto& pair) { return pair.second == level; }) |
+			std::ranges::views::keys | std::ranges::views::transform(_getNodeDefinition) |
+			std::ranges::to<std::vector>();
 
-		stringifiedClusters.emplace_back(
-			fmt::format(clusterFormat, fmt::arg("nodes_definitions", fmt::join(nodesDefinitions, " "))));
+		stringifiedClusters.emplace_back(fmt::format(
+			clusterFormat,
+			fmt::arg("nodes_definitions",
+					 fmt::join(nodesDefinitionsFromLevel, " ")))); // cppcheck-suppress useStlAlgorithm
 	}
 
 	return stringifiedClusters;
@@ -137,12 +135,14 @@ std::vector<std::string> GraphSerializer::_serializeNodesConnections() const
 
 	for(const auto& [parent, children] : _nodesConnections)
 	{
-		for(const auto& child : children)
-		{
-			stringifiedConnections.emplace_back(fmt::format(connectionFormat,
-															fmt::arg("parent", _getNodeIdentifier(parent)),
-															fmt::arg("child", _getNodeIdentifier(child))));
-		}
+		std::ranges::transform(children,
+							   std::back_inserter(stringifiedConnections),
+							   [&parent, &connectionFormat](const auto& child)
+							   {
+								   return fmt::format(connectionFormat,
+													  fmt::arg("parent", _getNodeIdentifier(parent)),
+													  fmt::arg("child", _getNodeIdentifier(child)));
+							   });
 	}
 
 	return stringifiedConnections;

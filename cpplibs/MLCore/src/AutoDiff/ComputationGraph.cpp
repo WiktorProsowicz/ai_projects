@@ -51,7 +51,6 @@ void ComputationGraph::forwardPass()
 	if(!_root)
 	{
 		LOG_ERROR("AutoDiff::ComputationGraph", "Root node is not set!");
-		return;
 	}
 
 	_forwardPassContext->run();
@@ -62,7 +61,6 @@ void ComputationGraph::computeGradients(const NodePtr& backPropRoot)
 	if(!_root)
 	{
 		LOG_ERROR("AutoDiff::ComputationGraph", "Root node is not set!");
-		return;
 	}
 
 	if(!_backwardPassContexts->contains(backPropRoot))

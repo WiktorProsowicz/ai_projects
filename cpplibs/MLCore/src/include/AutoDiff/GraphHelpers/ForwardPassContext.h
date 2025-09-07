@@ -68,10 +68,6 @@ private:
 	/// Assigns the internal thread pool according to provided configuration.
 	void _initThreadPool();
 
-	/// Creates a map containing nodes and sizes of their subtrees. The size is a number
-	/// operators present in the subtree. Only the nodes having at least two subtrees are taken into account.
-	std::map<NodePtr, std::vector<uint16_t>> _composeSubtreeClasses() const;
-
 	bool _useMultithreading;
 	NodePtr _root;
 	/// Used to run the forward-pass tasks in parallel.

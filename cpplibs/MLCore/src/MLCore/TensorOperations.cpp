@@ -35,7 +35,7 @@ BasicTensor<ValueType> BasicTensorOperations<ValueType>::ln(const BasicTensor<Va
 	auto ret = arg;
 	for(auto& val : ret)
 	{
-		val = std::log(val);
+		val = std::log(val); // cppcheck-suppress useStlAlgorithm
 	}
 	return ret;
 }
@@ -46,7 +46,7 @@ BasicTensor<ValueType> BasicTensorOperations<ValueType>::relu(const BasicTensor<
 	auto ret = arg;
 	for(auto& val : ret)
 	{
-		val = val > 0 ? val : 0;
+		val = val > 0 ? val : 0; // cppcheck-suppress useStlAlgorithm
 	}
 	return ret;
 }
@@ -57,7 +57,7 @@ BasicTensor<ValueType> BasicTensorOperations<ValueType>::sigmoid(const BasicTens
 	auto ret = arg;
 	for(auto& val : ret)
 	{
-		val = 1.0 / (1.0 + std::pow(M_E, -val));
+		val = 1.0 / (1.0 + std::pow(M_E, -val)); // cppcheck-suppress useStlAlgorithm
 	}
 	return ret;
 }
@@ -78,7 +78,6 @@ public:
 
 	std::vector<TensorDataType> operator()(const RawTensorInitList<TensorDataType>& containerValue)
 	{
-
 		if(!_collectedShapeIndices.contains(_currentLevel))
 		{
 			_collectedShapeIndices.emplace(_currentLevel, containerValue.size());
@@ -89,15 +88,13 @@ public:
 					  fmt::format("Inconsistent elements number at axis {}.", _currentLevel));
 		}
 
-		std::vector<std::vector<TensorDataType>> collectedValueSets;
-		collectedValueSets.reserve(containerValue.size());
-
 		_currentLevel++;
 
-		for(const auto& valueSet : containerValue)
-		{
-			collectedValueSets.emplace_back(std::visit(*this, valueSet));
-		}
+		auto collectedValueSets =
+			containerValue |
+			std::ranges::views::transform([this](const auto containerSubValue)
+										  { return std::visit(*this, containerSubValue); }) |
+			std::ranges::to<std::vector>();
 
 		_currentLevel--;
 
@@ -109,25 +106,16 @@ public:
 
 		const auto nElementsInSubValue = collectedValueSets.cbegin()->size();
 
-		std::vector<TensorDataType> collectedValues;
-		collectedValues.reserve(collectedValueSets.size() * nElementsInSubValue);
-
-		for(const auto& valueSet : collectedValueSets)
+		if(!std::ranges::any_of(collectedValueSets,
+								[nElementsInSubValue](const auto& valueSet)
+								{ return valueSet.size() != nElementsInSubValue; }))
 		{
-			if(valueSet.size() != nElementsInSubValue)
-			{
-				LOG_ERROR(
-					"TensorOperations",
-					"Encountered not-constant number of subelements at a certain level of raw tensor form.");
-			}
-
-			for(const auto& value : valueSet)
-			{
-				collectedValues.push_back(value);
-			}
+			LOG_ERROR(
+				"TensorOperations",
+				"Encountered not-constant number of subelements at a certain level of raw tensor form.");
 		}
 
-		return collectedValues;
+		return collectedValueSets | std::ranges::views::join | std::ranges::to<std::vector>();
 	}
 
 	std::vector<size_t> getShape() const

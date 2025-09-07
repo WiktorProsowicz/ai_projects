@@ -24,10 +24,14 @@
 /**
  * @brief Logs a message and stop program with runtime exception.
  *
+ * @note The error has been moved from the function to this macro so that static analysis tools know that the
+ * program flow is being interrupted.
+ *
  */
 #define LOG_ERROR(preamble, content)                                                                         \
 	loggingLib::Logger::getInstance().logErrorOnChannel(preamble,                                            \
-														(std::stringstream{} << content).str().c_str());
+														(std::stringstream{} << content).str().c_str());     \
+	throw std::runtime_error((std::stringstream{} << content).str().c_str());
 
 /**
  * @brief Resets the logger.
