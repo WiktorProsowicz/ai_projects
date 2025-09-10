@@ -25,6 +25,7 @@ ci = [
     "pre-commit>=3.4.0",
     "pylint>=3.1.0",
     "mypy>=1.17.1",
+    "gcovr>=8.3"
 ]
 
 

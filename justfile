@@ -58,10 +58,16 @@ ci_install_ci_tools:
     @echo "Installing CI tools..."
     uv pip install -r pyproject.toml --extra ci
 
-# Run tests using ctest.
+# Run tests using ctest and collects coverage stats.
 ci_run_tests:
     @echo "Running tests..."
-    uv run ctest --test-dir build --output-on-failure
+    rm -rf test_results/ && mkdir -p test_results/coverage
+    uv run ctest -T Test --test-dir build --output-on-failure
+    uv run gcovr -r . --gcov-executable gcov-14 \
+        -o test_results/coverage/coverage.html \
+        --fail-under-line 80 --html-details \
+        --filter "cpplibs/.*" \
+        --exclude ".*/tests/.*"
 
 # Run static checks for repository, such as pre-commit hooks and clang-tidy.
 ci_run_static_checks:
