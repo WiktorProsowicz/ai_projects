@@ -27,7 +27,7 @@ RUN apt update && \
     just gcc-14 g++-14 wget ccache sudo
 
 RUN apt-get update && \
-    apt-get install -y iwyu cppcheck
+    apt-get install -y iwyu cppcheck gdb
 
 RUN chown -R devcontainer:devcontainer /home/devcontainer
 
