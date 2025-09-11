@@ -1,5 +1,5 @@
 ---
-name: pre-commit
+name: static-checks
 
 on:
   pull_request:
