@@ -22,5 +22,5 @@ runs:
       shell: bash
 
     - name: Build CPP libraries
-      run: just build_project -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DBUILD_TESTS=${{ inputs.build_tests }}
+      run: just build_project -DTRY_UPDATE_SUBMODULES=OFF -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DBUILD_TESTS=${{ inputs.build_tests }}
       shell: bash

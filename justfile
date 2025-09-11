@@ -79,12 +79,13 @@ ci_run_precommit:
 
 # Run clang tidy static checks.
 ci_run_clang_tidy:
-    just --justfile {{justfile()}} build_project -DENABLE_CLANG_TIDY=ON
+    just --justfile {{justfile()}} build_project -DENABLE_CLANG_TIDY=ON -DTRY_UPDATE_SUBMODULES=OFF
 
 # Run include-what-you-use static checks.
 ci_run_iwyu_checks:
     #!/usr/bin/env bash
-    just --justfile {{justfile()}} build_project -DENABLE_IWYU=ON -DBUILD_TESTS=ON | tee /tmp/ci_iwyu_output
+    just --justfile {{justfile()}} build_project \
+        -DENABLE_IWYU=ON -DBUILD_TESTS=ON -DTRY_UPDATE_SUBMODULES=OFF | tee /tmp/ci_iwyu_output
     found_warnings=$(grep -E "Warning: include-what-you-use reported diagnostics:" /tmp/ci_iwyu_output)
 
     if [[ $found_warnings ]]; then
@@ -94,4 +95,4 @@ ci_run_iwyu_checks:
 
 # Run cppcheck static checks.
 ci_run_cppcheck:
-    just --justfile {{justfile()}} build_project -DENABLE_CPPCHECK=ON
+    just --justfile {{justfile()}} build_project -DENABLE_CPPCHECK=ON -DTRY_UPDATE_SUBMODULES=OFF
