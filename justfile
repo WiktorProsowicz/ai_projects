@@ -70,7 +70,7 @@ ci_run_tests:
         --exclude ".*/tests/.*"
 
 # Run static checks for repository, such as pre-commit hooks and clang-tidy.
-ci_run_static_checks:
+ci_run_precommit:
     #!/usr/bin/env bash
 
     echo "Running pre-commit checks..."

@@ -1,0 +1,45 @@
+# ---------------------------------------------------------------
+# Runs unit tests for C++ libraries.
+# ---------------------------------------------------------------
+---
+name: unit-tests
+
+
+on:
+  pull_request:
+    branches: ["main", "develop"]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  testing:
+    runs-on: ubuntu-24.04
+
+    strategy:
+      matrix:
+        build_type: [Release, Debug]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup packages
+        uses: ./.github/actions/setup
+
+      - name: Build libraries
+        uses: ./.github/actions/build_cpplibs
+        with:
+          build_type: ${{ matrix.build_type }}
+          build_tests: ON
+
+      - name: Run unit tests
+        run: just ci_run_tests
+        timeout-minutes: 5
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: test_results
+          path: test_results/

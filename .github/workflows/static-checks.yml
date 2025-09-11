@@ -1,0 +1,58 @@
+# -------------------------------------------------------------------------
+# Runs code static checks:
+# - pre-commit hooks, mostly for Python code linting, files formatting etc.
+# - C++ code static analysis tools: clang-tidy, include-what-you-use, cppcheck 
+# -------------------------------------------------------------------------
+---
+name: pre-commit
+
+on:
+  pull_request:
+    branches: ["main", "develop"]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pre-commit:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup packages
+        uses: ./.github/actions/setup
+
+      - name: Install Python dependencies
+        run: just install_py_tools
+        shell: bash
+
+      - name: Install ci dependencies
+        run: just ci_install_ci_tools
+        shell: bash
+
+      - name: Run pre-commit checks
+        run: just ci_run_precommit
+
+  cpp-libs-checkers:
+    runs-on: ubuntu-24.04
+    needs: pre-commit
+
+    strategy:
+      matrix:
+        tested-command: [ci_run_clang_tidy, ci_run_iwyu_checks, ci_run_cppcheck]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup packages
+        uses: ./.github/actions/setup
+
+      - name: Run cpp static checks
+        run: just ${{ matrix.tested-command }}
+        shell: bash
+
+      
