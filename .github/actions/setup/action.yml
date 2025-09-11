@@ -17,9 +17,10 @@ runs:
       uses: extractions/setup-just@v2
 
     - name: Install container-level dependencies
-      run: sudo apt update && \
-        sudo apt install just gcc-14 g++-14 wget sudo && \
-        sudo apt-get update && \
+      run: |
+        sudo apt update
+        sudo apt install just gcc-14 g++-14 wget
+        sudo apt-get update
         sudo apt-get install -y iwyu cppcheck
       shell: bash
 
