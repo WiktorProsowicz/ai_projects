@@ -1,10 +1,12 @@
 #include "MLCore/TensorOperations.h"
 
+#include <algorithm>
 #include <cmath>
 #include <functional>
 #include <iterator>
 #include <map>
 #include <numeric>
+#include <ranges>
 #include <utility>
 #include <variant>
 #include <vector>
