@@ -52,6 +52,10 @@ jobs:
       - name: Setup packages
         uses: ./.github/actions/setup
 
+      - name: Install ci dependencies
+        run: just ci_install_ci_tools
+        shell: bash
+
       - name: Run cpp static checks
         run: just ${{ matrix.tested-command }}
         shell: bash
