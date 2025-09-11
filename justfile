@@ -83,8 +83,14 @@ ci_run_clang_tidy:
 
 # Run include-what-you-use static checks.
 ci_run_iwyu_checks:
+    #!/usr/bin/env bash
     just --justfile {{justfile()}} build_project -DENABLE_IWYU=ON | tee /tmp/ci_iwyu_output
-    grep -E "Warning: include-what-you-use reported diagnostics:" /tmp/ci_iwyu_output && exit 1
+    found_warnings=$(grep -E "Warning: include-what-you-use reported diagnostics:" /tmp/ci_iwyu_output)
+
+    if [[ $found_warnings ]]; then
+        exit 1
+    fi
+
 
 # Run cppcheck static checks.
 ci_run_cppcheck:
