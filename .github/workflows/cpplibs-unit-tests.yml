@@ -1,13 +1,10 @@
-# ---------------------------------------------------------------
-# Runs unit tests for C++ libraries.
-# ---------------------------------------------------------------
 ---
 name: unit-tests
 
 
 on:
   pull_request:
-    branches: ["main", "develop"]
+    branches: [main, develop]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

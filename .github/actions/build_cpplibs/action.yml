@@ -4,14 +4,14 @@ description: Builds CPP libraries.
 
 inputs:
   build_type:
-    description: 'Build type of the CPP libs (Release/Debug)'
+    description: Build type of the CPP libs (Release/Debug)
     required: true
-    default: 'Release'
+    default: Release
 
   build_tests:
-    description: 'Whether to build unit tests for CPP libs (ON/OFF)'
+    description: Whether to build unit tests for CPP libs (ON/OFF)
     required: false
-    default: 'OFF'
+    default: OFF
 
 runs:
   using: composite
@@ -21,7 +21,5 @@ runs:
       uses: just install_build_tools
 
     - name: Build CPP libraries
-      run: just build_project \
-        -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} \
-        -DBUILD_TESTS=${{ inputs.build_tests }}
+      run: just build_project \ -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} \ -DBUILD_TESTS=${{ inputs.build_tests }}
       shell: bash

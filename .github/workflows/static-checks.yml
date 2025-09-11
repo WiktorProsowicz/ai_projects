@@ -1,14 +1,9 @@
-# -------------------------------------------------------------------------
-# Runs code static checks:
-# - pre-commit hooks, mostly for Python code linting, files formatting etc.
-# - C++ code static analysis tools: clang-tidy, include-what-you-use, cppcheck 
-# -------------------------------------------------------------------------
 ---
 name: pre-commit
 
 on:
   pull_request:
-    branches: ["main", "develop"]
+    branches: [main, develop]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -55,4 +50,4 @@ jobs:
         run: just ${{ matrix.tested-command }}
         shell: bash
 
-      
+
