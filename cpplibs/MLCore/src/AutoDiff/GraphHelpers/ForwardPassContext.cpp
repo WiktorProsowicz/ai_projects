@@ -1,8 +1,14 @@
 #include "AutoDiff/GraphHelpers/ForwardPassContext.h"
 
-#include <numeric>
-#include <ranges>
+#include <algorithm>
+#include <cstddef>
+#include <functional>
+#include <mutex>
 #include <shared_mutex>
+#include <thread>
+#include <utility>
+
+#include <Utilities/ThreadPool.h>
 
 namespace autoDiff::detail
 {

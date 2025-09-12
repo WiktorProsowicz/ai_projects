@@ -47,6 +47,16 @@ function(aiprojects_add_library)
         aiprojects_setup_cppcheck_for_target(${LIBRARY_NAME})
     endif()
 
+    if(BUILD_TESTS)
+        target_compile_options(${LIBRARY_NAME} PRIVATE ${COVERAGE_COMPILE_FLAGS})
+        target_link_options(${LIBRARY_NAME} PRIVATE ${COVERAGE_LINK_FLAGS})
+    endif()
+
+    if(NOT ENABLE_SANITIZER_TYPE STREQUAL "NONE")
+        target_compile_options(${LIBRARY_NAME} PRIVATE "-fsanitize=${ENABLE_SANITIZER_TYPE}")
+        target_link_options(${LIBRARY_NAME} PRIVATE "-fsanitize=${ENABLE_SANITIZER_TYPE}")
+    endif()
+
     # adding executable
     add_executable_for_lib()
 
@@ -108,17 +118,34 @@ function(add_tests)
                 target_include_directories("${TEST_NAME}" PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/include)
             endif()
 
+            # Link test executable to the requested libraries and gtest.
+
             target_link_libraries("${TEST_NAME}" PUBLIC ${PROJECT_NAME} GTest::gtest GTest::gmock GTest::gtest_main)
 
             if(${ARGC} GREATER 0)
                 target_link_libraries("${TEST_NAME}" PUBLIC ${PARSED_ARGS_LINKED_LIBRARIES})
             endif()
 
-            set_target_properties("${TEST_NAME}" PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/test/${PROJECT_NAME}/)
+            set_target_properties("${TEST_NAME}" PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/test/${PROJECT_NAME}/")
 
-            target_compile_options("${TEST_NAME}" PRIVATE ${COMMON_COMPILE_OPTIONS_PERMISSIVE})
+            # Set compile/linker options for test executables.
 
-            target_compile_definitions("${TEST_NAME}" PRIVATE TEST_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/tests/res")
+            target_compile_options("${TEST_NAME}" PRIVATE ${COMMON_COMPILE_OPTIONS_PERMISSIVE} ${COVERAGE_COMPILE_FLAGS})
+            target_link_options("${TEST_NAME}" PRIVATE ${COVERAGE_LINK_FLAGS})
+
+            if(NOT ENABLE_SANITIZER_TYPE STREQUAL "NONE")
+                target_compile_options("${TEST_NAME}" PRIVATE "-fsanitize=${ENABLE_SANITIZER_TYPE}")
+                target_link_options("${TEST_NAME}" PRIVATE "-fsanitize=${ENABLE_SANITIZER_TYPE}")
+            endif()
+
+            # Copy test resources to build directory if needed.
+
+            if(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/tests/res")
+                file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/tests/res" DESTINATION "${CMAKE_BINARY_DIR}/bin/test/${PROJECT_NAME}/")
+                target_compile_definitions("${TEST_NAME}" PRIVATE TEST_DATA_DIR="${CMAKE_BINARY_DIR}/bin/test/${PROJECT_NAME}/res")
+            endif()
+
+            # Enable static analysis of imported headers.
 
             if(ENABLE_IWYU)
                 aiprojects_setup_iwyu_for_target("${TEST_NAME}")
@@ -263,3 +290,6 @@ set(COMMON_COMPILE_OPTIONS_PERMISSIVE
     -Wno-misleading-indentation
     -Wno-missing-format-attribute
 )
+
+set(COVERAGE_COMPILE_FLAGS -fprofile-arcs -ftest-coverage -g -O0  -fno-inline -fno-inline-functions -fno-default-inline -fno-lto)
+set(COVERAGE_LINK_FLAGS --coverage)

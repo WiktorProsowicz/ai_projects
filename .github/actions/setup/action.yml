@@ -1,0 +1,32 @@
+---
+name: setup
+description: Sets up the environment before running main workflows' steps.
+
+runs:
+  using: composite
+
+  steps:
+    - name: Install the latest version of UV
+      uses: astral-sh/setup-uv@v6
+      with:
+        version: latest
+        enable-cache: true
+        cache-dependency-glob: '**/uv.lock'
+
+    - name: Setup Just
+      uses: extractions/setup-just@v2
+
+    - name: Install container-level dependencies
+      run: |
+        sudo apt update
+        sudo apt install just gcc-14 g++-14 wget
+        sudo apt-get update
+        sudo apt-get install -y iwyu cppcheck
+      shell: bash
+
+    - name: ccache
+      uses: hendrikmuhs/ccache-action@v1.2
+
+    - name: Set up virtual environment
+      run: just setup_venv
+      shell: bash

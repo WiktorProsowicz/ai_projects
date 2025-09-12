@@ -2,7 +2,10 @@
 #define MLCORE_SRC_INCLUDE_AUTODIFF_GRAPHHELPERS_FORWARDPASSCONTEXT_H
 
 #include <condition_variable>
+#include <memory>
 #include <set>
+#include <shared_mutex>
+#include <vector>
 
 #include <Utilities/ThreadPool.h>
 

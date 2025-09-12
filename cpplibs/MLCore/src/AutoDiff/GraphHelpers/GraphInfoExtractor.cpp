@@ -1,6 +1,10 @@
 #include "AutoDiff/GraphHelpers/GraphInfoExtractor.h"
 
+#include <algorithm>
 #include <cmath>
+#include <functional>
+#include <iterator>
+#include <memory>
 #include <numeric>
 #include <ranges>
 

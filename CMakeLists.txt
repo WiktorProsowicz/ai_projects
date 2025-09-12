@@ -27,12 +27,21 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(MAIN_PROJECT_VERSION ${PROJECT_VERSION})
 
+set(ENABLE_SANITIZER_TYPE "NONE" CACHE STRING "Type of sanitizer to use. Options are: NONE, address, undefined")
+
+# Validate variable value
+set(SANITIZER_TYPES "NONE;address;undefined")
+if(NOT ENABLE_SANITIZER_TYPE IN_LIST "SANITIZER_TYPES")
+    message(FATAL_ERROR "Invalid value for ENABLE_SANITIZER_TYPE: ${ENABLE_SANITIZER_TYPE}. Valid options are: ${SANITIZER_TYPES}")
+endif()
+
 # ----------------------------------------------------------------------------
 # Set default properties.
 # ----------------------------------------------------------------------------
 
 set(DEFAULT_BUILD_TYPE "Release")
 set(DEFAULT_SHARED_LIBS ON)
+# set(DEFAULT_SANITIZERS "None") # None, Address, Thread, Undefined
 
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   message(STATUS "Setting build type to default '${DEFAULT_BUILD_TYPE}'.")
@@ -59,6 +68,7 @@ cmake_print_variables(
     ENABLE_IWYU
     ENABLE_CLANG_TIDY
     ENABLE_CPPCHECK
+    ENABLE_SANITIZER_TYPE
 )
 
 # ----------------------------------------------------------------------------

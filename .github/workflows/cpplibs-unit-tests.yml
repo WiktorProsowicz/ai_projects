@@ -1,0 +1,51 @@
+---
+name: unit-tests
+
+
+on:
+  pull_request:
+    branches: [main, develop]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  testing:
+    runs-on: ubuntu-24.04
+
+    strategy:
+      matrix:
+        build_type: [Release, Debug]
+        enable_sanitizer_type: [NONE, address, undefined]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.PAT }}
+
+      - name: Setup packages
+        uses: ./.github/actions/setup
+
+      - name: Install ci dependencies
+        run: just ci_install_ci_tools
+        shell: bash
+
+      - name: Build libraries
+        uses: ./.github/actions/build_cpplibs
+        with:
+          build_type: ${{ matrix.build_type }}
+          build_tests: ON
+          enable_sanitizer_type: ${{ matrix.enable_sanitizer_type }}
+
+      - name: Run unit tests
+        run: just ci_run_tests
+        timeout-minutes: 5
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: test_results-${{ matrix.build_type }}-${{ matrix.enable_sanitizer_type }}
+          path: test_results/

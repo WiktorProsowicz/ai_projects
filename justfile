@@ -58,13 +58,19 @@ ci_install_ci_tools:
     @echo "Installing CI tools..."
     uv pip install -r pyproject.toml --extra ci
 
-# Run tests using ctest.
+# Run tests using ctest and collects coverage stats.
 ci_run_tests:
     @echo "Running tests..."
-    uv run ctest --test-dir build --output-on-failure
+    rm -rf test_results/ && mkdir -p test_results/coverage
+    uv run ctest -T Test --test-dir build --output-on-failure
+    uv run gcovr -r . --gcov-executable gcov-14 \
+        -o test_results/coverage/coverage.html \
+        --fail-under-line 80 --html-details \
+        --filter "cpplibs/.*" \
+        --exclude ".*/tests/.*"
 
 # Run static checks for repository, such as pre-commit hooks and clang-tidy.
-ci_run_static_checks:
+ci_run_precommit:
     #!/usr/bin/env bash
 
     echo "Running pre-commit checks..."
@@ -73,13 +79,20 @@ ci_run_static_checks:
 
 # Run clang tidy static checks.
 ci_run_clang_tidy:
-    just --justfile {{justfile()}} build_project -DENABLE_CLANG_TIDY=ON
+    just --justfile {{justfile()}} build_project -DENABLE_CLANG_TIDY=ON -DTRY_UPDATE_SUBMODULES=OFF
 
 # Run include-what-you-use static checks.
 ci_run_iwyu_checks:
-    just --justfile {{justfile()}} build_project -DENABLE_IWYU=ON | tee /tmp/ci_iwyu_output
-    grep -E "Warning: include-what-you-use reported diagnostics:" /tmp/ci_iwyu_output && exit 1
+    #!/usr/bin/env bash
+    just --justfile {{justfile()}} build_project \
+        -DENABLE_IWYU=ON -DBUILD_TESTS=ON -DTRY_UPDATE_SUBMODULES=OFF | tee /tmp/ci_iwyu_output
+    found_warnings=$(grep -E "Warning: include-what-you-use reported diagnostics:" /tmp/ci_iwyu_output)
+
+    if [[ $found_warnings ]]; then
+        exit 1
+    fi
+
 
 # Run cppcheck static checks.
 ci_run_cppcheck:
-    just --justfile {{justfile()}} build_project -DENABLE_CPPCHECK=ON
+    just --justfile {{justfile()}} build_project -DENABLE_CPPCHECK=ON -DTRY_UPDATE_SUBMODULES=OFF

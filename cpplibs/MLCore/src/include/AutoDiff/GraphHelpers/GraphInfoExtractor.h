@@ -1,7 +1,11 @@
 #ifndef MLCORE_INCLUDE_AUTODIFF_GRAPHHELPERS_GRAPHINFOEXTRACTOR_H
 #define MLCORE_INCLUDE_AUTODIFF_GRAPHHELPERS_GRAPHINFOEXTRACTOR_H
 
+#include <cstddef>
+#include <cstdint>
 #include <map>
+#include <utility>
+#include <vector>
 
 #include "AutoDiff/GraphNodes.hpp"
 

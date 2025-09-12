@@ -3,7 +3,6 @@
 #include <iostream>
 #include <memory>
 #include <mutex>
-#include <stdexcept>
 #include <string>
 
 #include <fmt/format.h>

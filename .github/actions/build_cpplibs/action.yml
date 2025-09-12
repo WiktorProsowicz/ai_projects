@@ -1,0 +1,36 @@
+---
+name: build_cpplibs
+description: Builds CPP libraries.
+
+inputs:
+  build_type:
+    description: Build type of the CPP libs (Release/Debug)
+    required: false
+    default: Release
+
+  build_tests:
+    description: Whether to build unit tests for CPP libs (ON/OFF)
+    required: false
+    default: OFF
+
+  enable_sanitizer_type:
+    description: Type of sanitizer to enable (address/undefined)
+    required: false
+    default: NONE
+
+runs:
+  using: composite
+
+  steps:
+    - name: Install build tools
+      run: just install_build_tools
+      shell: bash
+
+    - name: Build CPP libraries
+      run: |
+        just build_project \
+          -DTRY_UPDATE_SUBMODULES=OFF \
+          -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} \
+          -DBUILD_TESTS=${{ inputs.build_tests }} \
+          -DENABLE_SANITIZER_TYPE=${{ inputs.enable_sanitizer_type }}
+      shell: bash
