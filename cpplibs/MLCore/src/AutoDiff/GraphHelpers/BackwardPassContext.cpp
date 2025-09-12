@@ -47,6 +47,8 @@ void BackwardPassContext::run()
 		_finishedTaskCv.wait(lock, [this] { return _entryPointsQueue.empty(); });
 	}
 
+	_threadPool->terminate();
+
 	_outerDerivatives.clear();
 	_threadPool.reset();
 }

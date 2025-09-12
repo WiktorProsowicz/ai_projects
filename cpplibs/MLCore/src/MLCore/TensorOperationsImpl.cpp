@@ -143,8 +143,8 @@ void checkShapesForBroadcasting(const std::vector<size_t>& shape1, const std::ve
 {
 	// checking if the rules of broadcasting are not breached
 	for(auto [leftShapeIter, rightShapeIter] = std::tuple{shape1.crbegin(), shape2.crbegin()};
-		(leftShapeIter > shape1.crend()) && (rightShapeIter > shape2.crend());
-		leftShapeIter--, rightShapeIter--)
+		(leftShapeIter < shape1.crend()) && (rightShapeIter < shape2.crend());
+		leftShapeIter++, rightShapeIter++)
 	{
 		if((*leftShapeIter != 1) && (*rightShapeIter != 1) && (*leftShapeIter != *rightShapeIter))
 		{

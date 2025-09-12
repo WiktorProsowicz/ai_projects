@@ -83,12 +83,12 @@ protected:
 
 	void _testCalling() override
 	{
-		const auto input = std::make_shared<autoDiff::Constant>(mlCore::Tensor{mlCore::TensorShape{32, 100}});
+		const auto input = std::make_shared<autoDiff::Constant>(mlCore::Tensor{mlCore::TensorShape{32, 10}});
 
 		_layer->build({input->getOutputShape()});
 		const auto output = _layer->call({input});
 
-		const mlCore::TensorShape expectedOutputShape{32, 100};
+		const mlCore::TensorShape expectedOutputShape{32, 10};
 		ASSERT_EQ(output->getOutputShape(), expectedOutputShape);
 	}
 };
