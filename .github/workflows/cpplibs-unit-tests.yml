@@ -47,5 +47,5 @@ jobs:
       - name: Upload test results
         uses: actions/upload-artifact@v4
         with:
-          name: test_results-${{ matrix.build_type }}
+          name: test_results-${{ matrix.build_type }}-${{ matrix.enable_sanitizer_type }}
           path: test_results/
