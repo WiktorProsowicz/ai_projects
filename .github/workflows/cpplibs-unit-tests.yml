@@ -17,6 +17,7 @@ jobs:
     strategy:
       matrix:
         build_type: [Release, Debug]
+        enable_sanitizer_type: [NONE, address, undefined]
 
     steps:
       - name: Checkout repository
@@ -37,6 +38,7 @@ jobs:
         with:
           build_type: ${{ matrix.build_type }}
           build_tests: ON
+          enable_sanitizer_type: ${{ matrix.enable_sanitizer_type }}
 
       - name: Run unit tests
         run: just ci_run_tests
